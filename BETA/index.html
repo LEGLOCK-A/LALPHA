@@ -310,6 +310,16 @@ footer{margin-top:28px}
 .site-footer-links a:hover{color:var(--text)}
 .info-inline-link{color:var(--accent-ink);font-weight:700}
 
+
+/* --- video player (blank page) --- */
+.video-wrap{margin-top:14px}
+.video-player{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.video-player video,.video-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#000}
+.video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:20px;color:#eef2f9;background:#0b1220}
+.video-placeholder .play-icon{font-size:34px;line-height:1;color:var(--accent)}
+.video-placeholder strong{font-family:"Sofia Sans Condensed","Sofia Sans",sans-serif;font-size:20px;letter-spacing:.02em}
+.video-placeholder small{color:#94a3b8;font-size:12.5px;max-width:420px}
+
 </style>
 </head>
 <body>
@@ -339,7 +349,25 @@ footer{margin-top:28px}
     <a href="injuries/">Injuries</a>
   </nav>
 
-  <div id="view" aria-live="polite" style="min-height:45vh"></div>
+  <div id="view" aria-live="polite" style="min-height:45vh">
+    <!-- ================= VIDEO PLAYER =================
+         To add your video, find VIDEO_URL near the bottom of this file
+         (in the last <script> block) and paste your link between the quotes.
+         That one spot works for a direct .mp4 / .webm file, a YouTube
+         link (watch, youtu.be, Shorts or embed), or a Vimeo link.
+         ================================================== -->
+    <section class="video-wrap" aria-label="Video player">
+      <div class="video-player" id="videoPlayer">
+        <video id="videoEl" controls playsinline preload="metadata" src=""></video>
+        <iframe id="videoFrame" title="Video player" loading="lazy" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen hidden></iframe>
+        <div class="video-placeholder" id="videoPlaceholder">
+          <span class="play-icon" aria-hidden="true">&#9654;</span>
+          <strong>No video yet</strong>
+          <small>Paste your video URL in the VIDEO_URL line in the script at the bottom of this file.</small>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <footer>
     <div class="site-footer">
@@ -361,6 +389,38 @@ footer{margin-top:28px}
   paint();
   var sw=document.getElementById('leagueSwitch');
   sw.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;sw.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed','false');});b.setAttribute('aria-pressed','true');});
+})();
+</script>
+
+<script>
+/* ================= ADD YOUR VIDEO HERE =================
+   Paste your video URL between the quotes below — that's the only
+   edit you need to make. Leave it blank ("") for no video.
+   Works with:
+     - a direct video file:  https://example.com/my-video.mp4
+     - YouTube:              https://www.youtube.com/watch?v=...
+                             https://youtu.be/...  (Shorts work too)
+     - Vimeo:                https://vimeo.com/...
+   ======================================================= */
+var VIDEO_URL = "https://youtu.be/y56D2WIeKxg?si=usKuSi-ZAljXieyr";
+(function(){
+  var url=(VIDEO_URL||"").trim();
+  if(!url) return; /* blank: placeholder stays, nothing loads */
+  var video=document.getElementById('videoEl');
+  var frame=document.getElementById('videoFrame');
+  var ph=document.getElementById('videoPlaceholder');
+  var yt=url.match(/(?:youtube\.com\/(?:watch\?[^#]*v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  var vm=url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if(yt){
+    frame.src="https://www.youtube.com/embed/"+yt[1];
+    frame.hidden=false; video.hidden=true;
+  } else if(vm){
+    frame.src="https://player.vimeo.com/video/"+vm[1];
+    frame.hidden=false; video.hidden=true;
+  } else {
+    video.src=url;
+  }
+  if(ph) ph.style.display="none";
 })();
 </script>
 </body>
