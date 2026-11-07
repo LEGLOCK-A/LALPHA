@@ -1,0 +1,1 @@
+Upload the CONTENTS of this folder to the domain root of leglock.online (index.html, the section folders, assets/ and ads.txt all sit at the root), replacing the old single index.html; keep ads.txt at the root.
