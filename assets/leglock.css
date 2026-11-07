@@ -19,8 +19,8 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--text);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45}
-.display{font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;letter-spacing:.02em}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Sofia Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45}
+.display{font-family:"Sofia Sans Condensed","Sofia Sans",system-ui,sans-serif;letter-spacing:.02em}
 .tnum{font-variant-numeric:tabular-nums}
 button{font:inherit;cursor:pointer;color:inherit}
 /* No double-tap zoom on controls: rapid taps on the +/− line steppers
@@ -151,7 +151,7 @@ button.tg-row{text-align:left}
 .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transform:scale(1.75);transform-origin:50% 18%}
 .ldimg{width:18px;height:18px;border-radius:50%;object-fit:cover;object-position:top center;vertical-align:-4px;margin-right:5px;background:var(--surface2)}
 .rate{font-size:30px;font-weight:700;line-height:1;color:var(--accent-ink)}
-.rate small{display:block;font-size:10px;color:var(--dim);font-family:"Barlow",sans-serif;font-weight:700;letter-spacing:.06em;margin-top:3px}
+.rate small{display:block;font-size:10px;color:var(--dim);font-family:"Sofia Sans",sans-serif;font-weight:700;letter-spacing:.06em;margin-top:3px}
 .winrow{display:flex;align-items:center;gap:8px;margin-top:5px}
 .winrow .lab{width:26px;font-size:12px;font-weight:700;color:var(--dim);flex-shrink:0}
 .winrow .cells{display:flex;gap:3px;flex:1}
@@ -179,7 +179,7 @@ input[type="range"]{width:100%;accent-color:var(--accent-strong)}
 .namebtn{background:none;border:0;padding:0;text-align:left;font-weight:800;font-size:15px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .sub{font-size:12px;color:var(--dim)}
 .note{font-size:12px;color:var(--dim);line-height:1.55}
-.section-h{font-size:15px;font-weight:700;letter-spacing:.07em;color:var(--dim);margin:20px 0 2px;text-transform:uppercase;font-family:"Barlow Condensed",sans-serif;font-size:18px}
+.section-h{font-size:15px;font-weight:700;letter-spacing:.07em;color:var(--dim);margin:20px 0 2px;text-transform:uppercase;font-family:"Sofia Sans Condensed",sans-serif;font-size:18px}
 /* modal */
 .modalwrap{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
 /* player & team game-log detail always layers above the game popups it is opened from */
