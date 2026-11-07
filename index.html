@@ -16,7 +16,8 @@
 <script>
 try{var _t=window.localStorage.getItem("lm-theme");document.documentElement.setAttribute("data-theme",_t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light");}
 </script>
-<title>LEGLOCK</title>
+<title>LEGLOCK — Player Prop Research for NBA, NFL, NHL & MLB</title>
+<meta name="description" content="LEGLOCK tracks player and team props across the NBA, NFL, NHL and MLB, with L5, L10 and L20 hit rates calculated from real ESPN game logs. Free prop research, live scores and game logs." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Sofia+Sans+Condensed:wght@600;700&family=Sofia+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
@@ -40,13 +41,48 @@ try{var _t=window.localStorage.getItem("lm-theme");document.documentElement.setA
 
   <div id="view" aria-live="polite"></div>
 
+  <section class="content-body" id="about-leglock" aria-label="About LEGLOCK">
+    <h2>What is LEGLOCK?</h2>
+    <p>LEGLOCK is a free player prop research tool for the NBA, NFL, NHL and MLB. Instead of opinions or picks, it shows you the receipts: for hundreds of tracked players, it works out how often each of their props would have gone over or under a line in their recent games, using their real game logs. Every number on the board is calculated the same way, from the same data, so a point guard in the NBA and a winger in the NHL are measured with the same ruler.</p>
+    <p>Props are one of the most popular ways to follow a game, but the research behind them is usually scattered across box scores, game logs and stat sites. LEGLOCK pulls that work into one place: pick a league, scan the board, open any player to see the game-by-game log behind their number, step the line up or down, and watch the hit rate change. What used to take twenty minutes of tab-hopping takes about thirty seconds.</p>
+
+    <h2>How the hit rates work</h2>
+    <p>Each prop on LEGLOCK carries three hit rates, labelled L5, L10 and L20. They answer a simple question: in this player&rsquo;s last 5, 10 or 20 games, how often did they finish over (or under) this line? A player who scored more than 24.5 points in 8 of his last 10 games shows an 80% L10 hit rate for that over. The windows matter because they tell different stories. L5 is the hot hand &mdash; current form, current role, current minutes. L20 is the bigger picture &mdash; what a player reliably does over a month or more. When the short window and the long window agree, a trend is probably real. When they disagree, something changed: a trade, an injury to a teammate, a new role, and that is usually the more interesting research story.</p>
+    <p>Our full explainer, <a href="/guides/how-hit-rates-work/">How Hit Rates Work: L5, L10 and L20 Explained</a>, walks through the maths with examples, including why a 100% hit rate over five games is weaker evidence than an 80% rate over twenty.</p>
+
+    <h2>Research lines, not sportsbook odds</h2>
+    <p>This is the most important thing to understand about LEGLOCK, so we put it on the home page: the lines on this site are <strong>research lines</strong>. Each one is set from the player&rsquo;s own recent average &mdash; the nearest half point to their last-10 average for that stat &mdash; because there is no free live feed of sportsbook odds to display. Sportsbooks set their lines from their own models, injury news and betting action, so the line at your book will often differ from the one here. That is exactly why every line on LEGLOCK can be stepped up or down by half a point: match the line to the one you are actually looking at, and the hit rates recompute instantly from the real game log. Read <a href="/guides/research-lines-vs-real-odds/">Research Lines vs. Real Sportsbook Odds</a> for the full breakdown of how the two differ and how to use both.</p>
+    <p>LEGLOCK does not accept bets, does not link to sportsbooks, and is not affiliated with any sportsbook, league or ESPN. Nothing on this site is a tip, a pick or betting advice. Hit rates describe what already happened; they cannot guarantee what happens next, and we say so on the board itself.</p>
+
+    <h2>A tour of the tools</h2>
+    <p><strong>Discover</strong> is the front page of the board: today&rsquo;s games, the single strongest trend of the day, team props and the players to watch in each game. <strong>Live</strong> follows games in progress with live scores and in-game player stats, refreshing about every minute while games are on. <strong>Prop Watch</strong> tracks the props you care about against live pace and minutes. The <strong>Workstation</strong> is the full board &mdash; every tracked prop, filterable by league, stat and hit rate. The <strong>Cheatsheet</strong> condenses the day into one scannable page you can export. <strong>Logs</strong> opens any player&rsquo;s game-by-game history, with home/away and opponent splits. <strong>Make Me a Lay</strong> deals a random parlay card from the day&rsquo;s highest hit-rate props at the leg count and minimum hit rate you choose. <strong>Injuries</strong> collects ESPN availability statuses, plus a minutes watch that flags players whose recent playing time has dropped sharply &mdash; a quiet warning sign that a role is changing before the averages catch up.</p>
+    <p>New to the site? <a href="/guides/getting-started/">Getting Started with LEGLOCK</a> walks through each tool in order, and <a href="/guides/how-to-read-a-prop-board/">How to Read a Prop Board</a> turns it into a short daily routine.</p>
+
+    <h2>Where the data comes from</h2>
+    <p>All statistics on LEGLOCK come from ESPN&rsquo;s public game logs, box scores and injury feeds. The site opens on a recent snapshot, then re-pulls fresh logs, scores and live stats whenever you open it or tap Refresh, so the board reflects the latest completed games. Team props &mdash; team totals, totals allowed and game totals for every team in all four leagues &mdash; are built from the same logs, with the same L5, L10 and L20 windows as player props.</p>
+
+    <h2>Please play responsibly</h2>
+    <p>Research can make following sports more interesting, but it does not remove risk. Any bet can lose, past performance does not predict future results, and no hit rate &mdash; not even a perfect one over twenty games &mdash; makes an outcome a lock, whatever our name might suggest. Only ever stake money you can afford to lose, set a budget before you start, and treat it as entertainment, never as income. If betting stops being fun, free and confidential help is available; our <a href="/guides/responsible-play/">Responsible Play guide</a> lists support organisations in Canada and the United States. LEGLOCK is intended for adults of legal gambling age in their jurisdiction.</p>
+
+    <h2>Common questions</h2>
+    <h3>Is LEGLOCK free?</h3>
+    <p>Yes. Every tool on the site is free, with no account and no sign-up. Your watchlists and settings are stored only in your own browser.</p>
+    <h3>Are the lines on LEGLOCK the same as at my sportsbook?</h3>
+    <p>Usually close, rarely identical. Our lines are research lines built from recent averages; your book&rsquo;s lines are theirs. Step the line on any prop to match your book and the hit rates update from the game log.</p>
+    <h3>Does a high hit rate mean a prop will hit?</h3>
+    <p>No. A hit rate is history, not a prediction. It tells you how a player has performed against a number recently &mdash; useful research context, never a guarantee. Matchups, minutes, injuries and simple randomness all play a part every night.</p>
+    <h3>How often is the data updated?</h3>
+    <p>The board rebuilds from fresh ESPN game logs whenever you open the site or tap Refresh, and live scores and stats refresh about every minute during games. MLB follows the same pattern in season; in the off-season it carries the completed season&rsquo;s logs.</p>
+  </section>
+
+
   <footer>
     <p class="note">Data: real ESPN game logs — baked-in snapshot taken <span id="footDate"></span>, and the board re-pulls current logs, scores and live stats from ESPN whenever you open it online or tap Refresh; live scores also re-check on their own about every minute while games are in progress. Each line is a <b>research line</b> set from the player's own last-10 average — there is no free live sportsbook line feed, so step any line up or down to match your book and the hit rates recompute from the real game log. MLB is in its off-season: it carries the completed 2026 season's logs with no live slate until spring. Hit-rate estimates are research context, not a guarantee — bet responsibly.</p>
     <div class="site-footer">
       <span class="site-footer-brand">LEGLOCK</span>
       <nav class="site-footer-links" aria-label="Site information">
         <a href="/privacy/">Privacy Policy</a>
-        <a href="/about/">About</a>
+        <a href="/about/">About</a><a href="/guides/">Guides</a><a href="/guides/responsible-play/">Responsible Play</a>
         <a href="/contact/">Contact</a>
       </nav>
     </div>
