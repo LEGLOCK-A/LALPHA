@@ -195,10 +195,10 @@ function gamesStrip(games){
       if(hs!=null)homeScore=hs;
       if(lg.detail)when=lg.detail;
     }
-    var inner='<div class="t"><span>'+esc(g.awayAbbr)+'</span><span class="tnum" style="color:var(--dim)">'+esc(awayScore==null?"":awayScore)+'</span></div>'
-      +'<div class="t" style="margin-top:1px"><span>'+esc(g.homeAbbr)+'</span><span class="tnum" style="color:var(--dim)">'+esc(homeScore==null?"":homeScore)+'</span></div>';
+    var inner='<div class="t"><span>'+esc(g.awayAbbr)+'</span><span class="tnum" data-score-for="'+esc(g.id)+':'+esc(g.awayAbbr)+'" style="color:var(--dim)">'+esc(awayScore==null?"":awayScore)+'</span></div>'
+      +'<div class="t" style="margin-top:1px"><span>'+esc(g.homeAbbr)+'</span><span class="tnum" data-score-for="'+esc(g.id)+':'+esc(g.homeAbbr)+'" style="color:var(--dim)">'+esc(homeScore==null?"":homeScore)+'</span></div>';
     var whenHtml=isLive
-      ? '<p class="when"><span class="livedot" aria-hidden="true"></span><span>'+esc(when||"Live")+'</span></p>'
+      ? '<p class="when"><span class="livedot" aria-hidden="true"></span><span data-clock-for="'+esc(g.id)+'">'+esc(when||"Live")+'</span></p>'
       : '<p class="when">'+esc(when)+'</p>';
     var effState=(lg&&lg.state)?lg.state:g.state;
     var effOdds=(lg&&lg.odds)||g.odds||null;
@@ -504,7 +504,7 @@ function propWatch(g){
   return h;
 }
 function liveGameCard(g){
-  var status=g.state==="in"?('<span class="livedot" aria-hidden="true"></span> '+esc(g.detail||"In progress")):esc(g.detail||"Final");
+  var status=g.state==="in"?('<span class="livedot" aria-hidden="true"></span> <span data-clock-for="'+esc(g.id)+'">'+esc(g.detail||"In progress")+'</span>'):esc(g.detail||"Final");
   var h='<article class="card prop"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center">'
     +'<h3 class="display" style="margin:0;font-size:19px;font-weight:700">'+esc(g.short)+'</h3>'
     +'<span style="font-size:12px;font-weight:800;color:'+(g.state==="in"?"#dc2626":"var(--dim)")+'">'+status+'</span></div>'
@@ -604,7 +604,7 @@ function renderWatchPopup(){
   var matchup=g.short||((teamAbbrs[0]||"")+" @ "+(teamAbbrs[1]||""));
   var statusHtml;
   if(g.state==="in"){
-    statusHtml='<span class="livedot" aria-hidden="true"></span><span>LIVE'+(g.detail?" \u00B7 "+esc(g.detail):"")+'</span>';
+    statusHtml='<span class="livedot" aria-hidden="true"></span><span data-clock-for="'+esc(g.id)+'">LIVE'+(g.detail?" \u00B7 "+esc(g.detail):"")+'</span>';
   }else if(g.state==="post"){
     statusHtml='<span>FINAL</span>';
   }else{
@@ -707,7 +707,7 @@ function viewLive(){
         +leadersHtml(g,4)+'</article>';
     });
   }
-  h+='<p class="note" style="margin-top:14px">Tap <b>Refresh live stats</b> above (or Refresh at the top of the page) to pull the latest ESPN data for this league when you&rsquo;re online: scores, period lines, game leaders, full box-score lines, team stats and Prop Watch all update from ESPN&rsquo;s game summaries, and the props board rebuilds from fresh game logs. While games are in progress this tab also re-checks on its own about every minute. If ESPN can&rsquo;t be reached, the last stats you see stay in place. Prop Watch compares each tracked player&rsquo;s in-game total so far with the same research line used across this board.</p>';
+  h+='<p class="note" style="margin-top:14px">Tap <b>Refresh live stats</b> above (or Refresh at the top of the page) to pull the latest ESPN data for this league when you&rsquo;re online: scores, period lines, game leaders, full box-score lines, team stats and Prop Watch all update from ESPN&rsquo;s game summaries, and the props board rebuilds from fresh game logs. While games are in progress this tab also re-checks on its own about every 20 seconds, and the game clock ticks down every second between checks. If ESPN can&rsquo;t be reached, the last stats you see stay in place. Prop Watch compares each tracked player&rsquo;s in-game total so far with the same research line used across this board.</p>';
   return h;
 }
 
@@ -834,7 +834,7 @@ function viewPropWatch(){
   }
   games.forEach(function(g){
     var status, statusColor;
-    if(g.state==="in"){status='<span class="livedot" aria-hidden="true"></span> '+esc(g.detail||"In progress"); statusColor="#dc2626";}
+    if(g.state==="in"){status='<span class="livedot" aria-hidden="true"></span> <span data-clock-for="'+esc(g.id)+'">'+esc(g.detail||"In progress")+'</span>'; statusColor="#dc2626";}
     else if(g.state==="post"){status="FINAL"; statusColor="var(--dim)";}
     else{status=esc(fmtGameTime(g.date)); statusColor="var(--dim)";}
     h+='<article class="card prop"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center">'
@@ -1399,6 +1399,32 @@ function firstOddsProvider(items){
   for(var i=0;i<items.length;i++){var it=items[i]; if(it.state==="pre"&&it.odds&&it.odds.provider)return it.odds.provider;}
   return null;
 }
+function clockSecondsFrom(statusObj){
+  if(!statusObj)return null;
+  if(typeof statusObj.clock==="number"&&isFinite(statusObj.clock))return statusObj.clock;
+  var dc=String(statusObj.displayClock||"");
+  var m=dc.match(/^(\d{1,3}):(\d{2})(?:\.(\d+))?$/);
+  if(!m)return null;
+  var sec=parseInt(m[1],10)*60+parseInt(m[2],10);
+  if(m[3])sec+=parseFloat("0."+m[3]);
+  return sec;
+}
+function clockShouldRun(type,statusObj){
+  if(!type||type.state!=="in")return false;
+  var sec=clockSecondsFrom(statusObj);
+  if(sec==null||sec<=0)return false;
+  var txt=((type.detail||"")+" "+(type.shortDetail||"")).toLowerCase();
+  if(/half|end of|intermission|delay|break|shootout|warmup|pregame/.test(txt))return false;
+  return true;
+}
+function fmtTickClock(remain){
+  if(remain<60){
+    var whole=Math.floor(remain), tenth=Math.floor((remain-whole)*10);
+    return "0:"+String(whole).padStart(2,"0")+"."+tenth;
+  }
+  var m2=Math.floor(remain/60), s2=Math.floor(remain-m2*60);
+  return m2+":"+String(s2).padStart(2,"0");
+}
 function parseScoreboard(json,prevGames){
   var prevById={};
   (prevGames||[]).forEach(function(g){prevById[g.id]=g;});
@@ -1418,7 +1444,7 @@ function parseScoreboard(json,prevGames){
     var leaders=leadersFromCompetitors(competitors);
     var prev=prevById[ev.id];
     if(!leaders.length&&prev&&prev.leaders)leaders=prev.leaders;
-    games.push({id:ev.id,date:ev.date||comp.date||"",short:ev.shortName||"",state:type.state||"pre",detail:type.detail||type.shortDetail||"",clock:statusObj.displayClock||"",period:statusObj.period||0,teams:teams,leaders:leaders,box:prev?(prev.box||[]):[],teamStats:prev?(prev.teamStats||null):null,odds:parseOdds(comp)||(prev?(prev.odds||null):null)});
+    games.push({id:ev.id,date:ev.date||comp.date||"",short:ev.shortName||"",state:type.state||"pre",detail:type.detail||type.shortDetail||"",clock:statusObj.displayClock||"",clockSec:clockSecondsFrom(statusObj),clockAt:Date.now(),clockRun:clockShouldRun(type,statusObj),period:statusObj.period||0,teams:teams,leaders:leaders,box:prev?(prev.box||[]):[],teamStats:prev?(prev.teamStats||null):null,odds:parseOdds(comp)||(prev?(prev.odds||null):null)});
   });
   return games;
 }
@@ -1951,8 +1977,8 @@ function parseSummaryTeamStats(json,game){
   game.teams.forEach(function(gt){if(gt.home)hAbbr=gt.abbr; else aAbbr=gt.abbr;});
   return {homeAbbr:hAbbr,awayAbbr:aAbbr,rows:rows};
 }
-function refreshLiveBoxes(league,games){
-  var targets=games.filter(function(g){return g.state==="in"||g.state==="post";});
+function refreshLiveBoxes(league,games,onlyIn){
+  var targets=games.filter(function(g){return g.state==="in"||(!onlyIn&&g.state==="post");});
   if(!targets.length)return Promise.resolve(0);
   return mapLimit(targets,4,function(g){
     return fetchJson("https://site.api.espn.com/apis/site/v2/sports/"+ESPN_SPORT[league]+"/summary?event="+g.id).then(function(json){
@@ -2072,10 +2098,11 @@ function refreshLiveOnly(){
   var league=state.league;
   state.liveRefreshing=true;
   refreshScores(league).then(function(r){
-    return refreshLiveBoxes(league,r.games);
+    return refreshLiveBoxes(league,r.games,true);
   }).then(function(){
     state.liveRefreshing=false;
     renderTabs();
+    syncLiveDom();
     if(league===state.league&&(state.tab==="live"||state.tab==="propwatch"))render();
     if(league===state.league&&state.liveGameId)renderLivePopup();
   },function(){
@@ -2098,17 +2125,69 @@ function maybeAutoRefresh(){
   autoTried[lg]=true;
   refreshLiveScores(false);
 }
-/* Live scoreboard re-checks (refreshLiveOnly — one scoreboard request,
-   no game logs) also run on their own about every minute on the Live /
-   Prop Watch tabs while games are in progress, and the player popup
-   fetches its full current/previous-season logs on demand. */
+/* Live scoreboard re-checks (refreshLiveOnly — one scoreboard request
+   plus box scores for in-progress games, no game logs) run on their own
+   about every 20 seconds on the Discover / Live / Prop Watch tabs while
+   games are in progress, and the player popup fetches its full
+   current/previous-season logs on demand. */
 setInterval(function(){
   try{
     if(document.hidden)return;
-    if(state.tab!=="live"&&state.tab!=="propwatch"&&!state.liveGameId)return;
+    if(state.tab!=="live"&&state.tab!=="propwatch"&&state.tab!=="discover"&&!state.liveGameId)return;
     if(liveCount(state.league)>0)refreshLiveOnly();
   }catch(e){}
-},60000);
+},20000);
+
+/* ----- the ticking game clock -----
+   ESPN's feed only moves when it is re-polled (~20s above), so between
+   polls the displayed clock counts down locally, one second at a time,
+   from the last clock ESPN reported. Each new poll re-anchors the clock,
+   which also corrects any drift from stoppages (timeouts, reviews) where
+   the real clock was stopped. The same pass keeps the Discover strip's
+   score numbers in step with the latest polled data. When a ticking
+   clock reaches zero it stops and one re-check is triggered so the next
+   period's clock arrives promptly. */
+function syncLiveDom(){
+  try{
+    if(typeof LIVE==="undefined"||!LIVE[state.league])return;
+    (LIVE[state.league].games||[]).forEach(function(g){
+      if(g.state!=="in")return;
+      (g.teams||[]).forEach(function(t){
+        if(t.score==null)return;
+        var els=document.querySelectorAll('[data-score-for="'+g.id+':'+t.abbr+'"]');
+        els.forEach(function(el){ if(el.textContent!==String(t.score))el.textContent=String(t.score); });
+      });
+    });
+  }catch(e){}
+}
+var tickResyncFor={};
+setInterval(function(){
+  try{
+    if(document.hidden)return;
+    if(typeof LIVE==="undefined")return;
+    var now=Date.now();
+    Object.keys(LIVE).forEach(function(lg){
+      var board=LIVE[lg]; if(!board||!board.games)return;
+      board.games.forEach(function(g){
+        if(g.state!=="in"||!g.clockRun||g.clockSec==null||g._tickStop)return;
+        var remain=g.clockSec-(now-(g.clockAt||now))/1000;
+        if(remain<=0){
+          remain=0; g._tickStop=true;
+          var key=g.id+":"+g.period;
+          if(!tickResyncFor[key]){ tickResyncFor[key]=true; if(lg===state.league)refreshLiveOnly(); }
+        }
+        var txt=fmtTickClock(remain);
+        var spans=document.querySelectorAll('[data-clock-for="'+g.id+'"]');
+        spans.forEach(function(el){
+          if(/\d{1,2}:\d{2}(\.\d+)?/.test(el.textContent)){
+            var next=el.textContent.replace(/\d{1,2}:\d{2}(\.\d+)?/,txt);
+            if(next!==el.textContent)el.textContent=next;
+          }
+        });
+      });
+    });
+  }catch(e){}
+},1000);
 
 /* ---------- Make me a Lay: random parlay generator (ported from the online app) ----------
    Fresh Fisher-Yates shuffle on EVERY Generate press. Pool = player props +

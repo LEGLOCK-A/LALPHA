@@ -34,7 +34,7 @@ try{var _t=window.localStorage.getItem("lm-theme");document.documentElement.setA
     </button>
     <button type="button" class="btn" id="themeToggle" style="flex:0 0 auto;white-space:nowrap;align-self:stretch" aria-pressed="false" aria-label="Switch to dark mode">☀ Light</button>
   </div>
-  <p class="note refresh-status" id="refreshStatus" role="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="refreshStatusText">This file opens on the snapshot baked into it, then pulls fresh ESPN scores, live player stats and game logs when you&rsquo;re online &mdash; the props board rebuilds in your browser &mdash; and Live / Prop Watch re-check about every minute while games are in progress. Offline, the snapshot stays.</span></p>
+  <p class="note refresh-status" id="refreshStatus" role="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="refreshStatusText">This file opens on the snapshot baked into it, then pulls fresh ESPN scores, live player stats and game logs when you&rsquo;re online &mdash; the props board rebuilds in your browser &mdash; and Live / Prop Watch re-check about every 20 seconds while games are in progress. Offline, the snapshot stays.</span></p>
 
 
   <nav class="tabs" aria-label="Main views" id="tabBar"></nav>
@@ -72,7 +72,7 @@ try{var _t=window.localStorage.getItem("lm-theme");document.documentElement.setA
     <h3>Does a high hit rate mean a prop will hit?</h3>
     <p>No. A hit rate is history, not a prediction. It tells you how a player has performed against a number recently &mdash; useful research context, never a guarantee. Matchups, minutes, injuries and simple randomness all play a part every night.</p>
     <h3>How often is the data updated?</h3>
-    <p>The board rebuilds from fresh ESPN game logs whenever you open the site or tap Refresh, and live scores and stats refresh about every minute during games. MLB follows the same pattern in season; in the off-season it carries the completed season&rsquo;s logs.</p>
+    <p>The board rebuilds from fresh ESPN game logs whenever you open the site or tap Refresh, and live scores and stats refresh about every 20 seconds during games, and the game clock on a live game ticks down every second between checks. MLB follows the same pattern in season; in the off-season it carries the completed season&rsquo;s logs.</p>
   </section>
 
 
