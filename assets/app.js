@@ -2064,11 +2064,26 @@ var fBtn = $("#filterBtn"), fPanel = $("#filtersPanel");
 fBtn.addEventListener("click", function(){
   var open = fPanel.classList.toggle("open");
   fBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  $$(".filters-dup").forEach(function(b){ b.setAttribute("aria-expanded", open ? "true" : "false"); });
   /* No scroll lock here on purpose (see the lockScroll note above):
      Filters stays open over a fully scrollable page, filter changes
      already re-render the board live, and the Filters button itself
      remains the open/close control. Other popups opened on top take
      and release their own lock counts without disturbing this panel. */
+});
+/* Duplicate Filters buttons beside each view's heading — a second, more
+   reachable copy Jay asked for; the top-right original stays. Each dup
+   clicks the original button, so the panel toggle and aria state can
+   never drift apart. */
+$$("#view-discover .sechead, #view-live .sechead, #view-underdogs .sechead, #view-randomizer .sechead, #view-logs .sechead, #view-injuries .sechead").forEach(function(head){
+  if (!head || head.querySelector(".filters-dup")) return;
+  var dup = document.createElement("button");
+  dup.type = "button";
+  dup.className = "toolbtn filters-dup";
+  dup.setAttribute("aria-expanded", "false");
+  dup.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg> Filters';
+  dup.addEventListener("click", function(){ fBtn.click(); });
+  head.appendChild(dup);
 });
 $$(".sortXgfBtn").forEach(function(b){ b.addEventListener("click", function(){ state.sortXgf = !state.sortXgf; syncXgfUI(); renderDiscover(); }); });
 /* the eFG% toggle is the stat-row chip built by renderStatChips, which
@@ -2735,6 +2750,106 @@ function gameCard(lg, g){
    sport has games in progress; once the user taps a header, their choice is
    stored here and renderLive never overrides it on the ~20s re-renders */
 var liveOpen = {}, liveOpenTouched = {};
+
+/* ---------- Live props tracker (inside the Live view) ----------
+   A sportsbook-style tracker for the games in progress in a league's
+   Live section: one row per tracked prop whose player appears in the
+   live box score, ranked by the prop's featured-direction L10 hit rate
+   (50% floor, max 10 per game, never padded with weaker props). Values,
+   player matching and outcomes reuse the Players to Watch machinery
+   (pwStatVal / pwOutcome), so the tracker can never disagree with the
+   game popup. The block exists only while the league has a game in
+   progress, and a game with no qualifying props gets no block. Lines
+   are the board's research lines, as everywhere else on the site. */
+function lptRate(p){
+  var r = (p.rates || {}).L10;
+  if (!r) return null;
+  var v = p.dir === "Over" ? r.o : r.u;
+  return (v == null || isNaN(v)) ? null : +v;
+}
+function lptDisc(oc){
+  if (oc.cls === "hi") return '<span class="lpt-disc hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l5 5L19.5 7"/></svg></span>';
+  if (oc.cls === "lo") return '<span class="lpt-disc lo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>';
+  return '<span class="lpt-disc mid"><span class="lpt-dot"></span></span>';
+}
+function lptFillCls(p, v, oc){
+  if (oc.cls === "lo") return "lo";
+  if (oc.cls === "hi") return "hi";
+  /* live and undecided: an Over fills green; an Under stays green while
+     safely under and turns amber inside the last ~20% before the line */
+  if (p.dir === "Under" && p.line > 0 && v >= 0.8 * p.line) return "mid";
+  return "hi";
+}
+function lptRowHtml(lg, p, v, oc){
+  /* the line tick sits at ~82% of the bar: the scale's full value is
+     line / 0.82 — except a 0.5 line, where line + 1 is the reference so
+     the bar does not saturate on the first make */
+  var ref = p.line <= 0.5 ? p.line + 1 : p.line / 0.82;
+  var tickPct = Math.min(100, Math.round(1000 * p.line / ref) / 10);
+  var fillPct = Math.max(0, Math.min(100, Math.round(1000 * v / ref) / 10));
+  var pillPct = Math.max(5, fillPct);
+  var fillCls = lptFillCls(p, v, oc);
+  var pinfo = (DATA.leagues[lg].players || {})[p.pid] || {};
+  var name = p.name || pinfo.name || "";
+  var avatar = pinfo.img ? '<div class="avatar"><img src="' + esc(pinfo.img) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + esc((name || "P").charAt(0)) + '\'"></div>'
+                         : '<div class="avatar">' + esc((name || "P").charAt(0)) + '</div>';
+  return '<div class="lpt-row">'
+    + lptDisc(oc)
+    + avatar
+    + '<div class="lpt-main">'
+    +   '<div class="lpt-top"><span class="lpt-name">' + esc(name) + ' <b>' + p.dir + ' ' + fmtVal(p.line) + '</b></span>' + (oc.badge ? ' ' + oc.badge : '') + '</div>'
+    +   '<div class="lpt-sub">' + esc(p.stat) + '</div>'
+    +   '<div class="lpt-barzone"><div class="lpt-track">'
+    +     '<i class="lpt-fill ' + fillCls + '" style="width:' + fillPct + '%"></i>'
+    +     '<span class="lpt-tick" style="left:' + tickPct + '%"></span>'
+    +     '<span class="lpt-pill ' + fillCls + '" style="left:' + pillPct + '%">' + fmtVal(v) + '</span>'
+    +     '<span class="lpt-lineval" style="left:' + tickPct + '%">' + fmtVal(p.line) + '</span>'
+    +   '</div></div>'
+    + '</div></div>';
+}
+function lptGameHtml(lg, g){
+  var box = BOX[g.id];
+  if (!box) return "";
+  var seen = {}, cands = [];
+  (DATA.leagues[lg].props || []).forEach(function(p){
+    var a = box.athletes[p.pid];
+    if (!a) return;
+    var dedupe = p.pid + "|" + p.key;
+    if (seen[dedupe]) return;
+    var v = pwStatVal(a.stats, p.key);
+    if (v == null) return;
+    var rate = lptRate(p);
+    if (rate == null || rate < 50) return;
+    seen[dedupe] = 1;
+    cands.push({ p: p, v: v, rate: rate });
+  });
+  if (!cands.length) return "";
+  /* rank by featured-direction L10 rate, then cap — no padding */
+  cands.sort(function(a, b){ return b.rate - a.rate; });
+  cands = cands.slice(0, 10);
+  /* display order: cashed first, then live rows by progress toward the
+     line (highest value/line ratio first), then busted or missed */
+  cands.forEach(function(c){
+    c.oc = pwOutcome(c.p, c.v, g.state === "post");
+    c.grp = c.oc.cls === "hi" ? 0 : (c.oc.cls === "lo" ? 2 : 1);
+    c.ratio = c.p.line > 0 ? c.v / c.p.line : 0;
+  });
+  cands.sort(function(a, b){
+    if (a.grp !== b.grp) return a.grp - b.grp;
+    if (a.grp === 1 && a.ratio !== b.ratio) return b.ratio - a.ratio;
+    return 0;
+  });
+  var status = window.__LL.gameStatusHtml ? window.__LL.gameStatusHtml(g) : esc(g.detail || "");
+  var head = '<div class="lpt-ghead"><span class="lpt-match">' + esc(g.away.abbr) + ' ' + esc(g.away.score || "0") + ' at ' + esc(g.home.abbr) + ' ' + esc(g.home.score || "0") + '</span><span class="lpt-clock">' + status + '</span></div>';
+  return '<div class="lpt-game">' + head + cands.map(function(c){ return lptRowHtml(lg, c.p, c.v, c.oc); }).join("") + '</div>';
+}
+function lptSectionHtml(lg, games){
+  var live = (games || []).filter(function(g){ return g.state === "in"; });
+  if (!live.length) return "";
+  var blocks = live.map(function(g){ return lptGameHtml(lg, g); }).join("");
+  if (!blocks) return "";
+  return '<div class="lpt"><div class="lpt-title">Live props</div>' + blocks + '</div>';
+}
 function renderLive(){
   var html = "", totalLive = 0;
   LEAGUES.forEach(function(lg){
@@ -2753,6 +2868,7 @@ function renderLive(){
       + '<div class="livesec-body">'
       + (games.length ? '<div class="lgrid">' + games.map(function(g){ return gameCard(lg, g); }).join("") + '</div>'
                       : '<div class="emptybox">No games today.</div>')
+      + lptSectionHtml(lg, games)
       + '</div></div>';
   });
   $("#liveWrap").innerHTML = html;

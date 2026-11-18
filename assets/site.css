@@ -134,6 +134,7 @@
   .sechead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:3px 0 5px}
   .sechead h2{margin:0;font-size:20px;font-weight:700}
   .sechead .sub{color:var(--ink3);font-size:13px}
+.sechead .filters-dup{margin-left:auto;align-self:center}
   .countline{color:var(--ink3);font-size:12.5px;margin:2px 0 7px}
 
   /* ---------- Discover cards ---------- */
@@ -332,6 +333,42 @@
   @media (prefers-reduced-motion: reduce){.livesec-head .ls-chev{transition:none}}
   .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
   @media (max-width:760px){.lgrid{grid-template-columns:repeat(3,1fr)}}
+  /* Live props tracker: sportsbook-style live rows under the game grid,
+     shown only while the league has a game in progress */
+  .lpt{margin-top:12px;border-top:1px solid var(--line);padding-top:9px}
+  .lpt-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
+  .lpt-game{margin-top:6px}
+  .lpt-ghead{display:flex;align-items:baseline;gap:8px;padding:3px 0 1px}
+  .lpt-match{font-weight:700;font-size:13.5px}
+  .lpt-clock{margin-left:auto;color:var(--ink3);font-size:12px;white-space:nowrap}
+  .lpt-row{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+  .lpt-game .lpt-row:first-of-type{border-top:0}
+  .lpt-disc{width:22px;height:22px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;margin-top:3px;background:var(--surface3);color:#fff}
+  .lpt-disc svg{width:13px;height:13px}
+  .lpt-disc.hi{background:var(--accent)}
+  .lpt-disc.lo{background:var(--red)}
+  .lpt-dot{width:8px;height:8px;border-radius:50%;background:var(--ink3)}
+  .lpt-row .avatar{width:38px;height:38px;font-size:14px;margin-top:1px}
+  .lpt-main{flex:1;min-width:0;padding-right:16px}
+  .lpt-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .lpt-name{font-size:14.5px;font-weight:600}
+  .lpt-sub{color:var(--namesub);font-size:12.5px;margin-top:1px}
+  .lpt-barzone{height:31px;margin-top:6px}
+  .lpt-track{position:relative;height:12px;border-radius:99px;background:var(--skel)}
+  .lpt-fill{display:block;height:100%;border-radius:99px;background:var(--accent)}
+  .lpt-fill.mid{background:var(--amber)}
+  .lpt-fill.lo{background:var(--red)}
+  .lpt-tick{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--ink2);border-radius:2px}
+  .lpt-pill{position:absolute;top:6px;transform:translate(-50%,-50%);background:var(--surface);border:1.5px solid var(--accent);color:var(--ink);border-radius:999px;font-size:12.5px;font-weight:700;line-height:1.35;padding:1px 8px;white-space:nowrap}
+  .lpt-pill.mid{border-color:var(--amber)}
+  .lpt-pill.lo{border-color:var(--red)}
+  .lpt-lineval{position:absolute;top:17px;transform:translateX(-50%);font-size:10.5px;color:var(--ink3);white-space:nowrap}
+  @media (max-width:760px){
+    .lpt-row{gap:7px;padding:7px 0}
+    .lpt-row .avatar{width:32px;height:32px;font-size:12px}
+    .lpt-name{font-size:13.5px}
+    .lpt-disc{width:20px;height:20px}
+  }
   .lcard{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px 9px;box-shadow:var(--shadow);color:var(--ink)}
   .lcard.live{border-color:var(--red);box-shadow:0 0 0 1px var(--red),var(--shadow)}
   .lrow{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px}
