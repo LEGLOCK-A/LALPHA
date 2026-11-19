@@ -658,6 +658,7 @@ function renderDSeg(){
 }
 $$("#dsegChips .chip").forEach(function(c){ c.addEventListener("click", function(){ state.dseg = c.getAttribute("data-dseg"); renderDSeg(); }); });
 var _boardList = null; /* the board's last computed list — the collapsed Player Props preview reads the same array */
+var _teamList = null; /* renderTeamProps' last ranked list — the collapsed Team Props preview reads the same array */
 function renderDiscover(){
   var list = filteredProps(state.league);
   _boardList = list;
@@ -2398,6 +2399,31 @@ syncStatFold();
    featured direction (higher L10 rate, ties to Over), and one
    research sub-line carrying the venue split, the opponent's
    defensive rank, a rest flag and any top-scorer injury note. */
+/* "Show More / Show Less" label beside each section head's chevron:
+   injected from JS (the pages' markup is untouched), seated on the
+   header's right side as part of the same tap target, and worded
+   from the section's open state on every syncSec — so the persisted
+   state on load and every header tap keep it correct. The head's
+   aria-expanded already carries the state for assistive tech, so
+   the label itself is aria-hidden. */
+function ensureSecLabel(which){
+  var cap = which === "player" ? "Player" : "Team";
+  var head = $("#sec" + cap + "Head");
+  if (!head) return null;
+  var el = head.querySelector(".sec-more");
+  if (!el){
+    el = document.createElement("span");
+    el.className = "sec-more";
+    el.setAttribute("aria-hidden", "true");
+    var chev = head.querySelector(".gf-chev");
+    if (chev) head.insertBefore(el, chev); else head.appendChild(el);
+  }
+  return el;
+}
+function syncSecLabel(which, open){
+  var el = ensureSecLabel(which);
+  if (el) el.textContent = open ? "Show Less" : "Show More";
+}
 function syncSec(which){
   var cap = which === "player" ? "Player" : "Team";
   var sec = $("#sec" + cap), body = $("#sec" + cap + "Body"), head = $("#sec" + cap + "Head");
@@ -2406,7 +2432,9 @@ function syncSec(which){
   sec.classList.toggle("open", open);
   body.hidden = !open;
   head.setAttribute("aria-expanded", open ? "true" : "false");
+  syncSecLabel(which, open);
   if (which === "player") renderSecPreview();
+  else renderTeamSecPreview();
 }
 function bindSec(which, key){
   var cap = which === "player" ? "Player" : "Team";
@@ -2463,6 +2491,42 @@ function renderSecPreview(){
   el.hidden = false;
 }
 
+/* ---------- Team Props collapsed preview ----------
+   The Team Props section gets the identical treatment: while it is
+   collapsed, a preview of its top 2 team props sits between the
+   section header and the hidden body. It renders the first two
+   entries of the SAME ranked list renderTeamProps() computed
+   (stashed in _teamList, already sorted by featured-direction L10
+   rate for the current league) through the same teamPropCard()
+   renderer the grid uses — no forked card markup — and
+   renderTeamProps() calls this on every team rebuild, so league
+   switches match the grid exactly. Expanding the section hides the
+   preview; an empty slate shows no preview at all. */
+function ensureTeamSecPreview(){
+  var head = $("#secTeamHead");
+  if (!head) return null;
+  var el = document.getElementById("secTeamPreview");
+  if (!el){
+    el = document.createElement("div");
+    el.id = "secTeamPreview";
+    el.className = "grid secpreview";
+    el.setAttribute("aria-label", "Top 2 team props preview");
+    head.insertAdjacentElement("afterend", el);
+  }
+  return el;
+}
+function renderTeamSecPreview(){
+  var el = ensureTeamSecPreview();
+  if (!el) return;
+  if (state.secTeam || !_teamList || !_teamList.length){
+    el.hidden = true;
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = _teamList.slice(0, 2).map(teamPropCard).join("");
+  el.hidden = false;
+}
+
 function teamFeatured(p){
   var c = (p.counts || {}).L10 || { o:0, u:0, n:0 };
   if (c.o >= c.u) return { dir:"Over", hits:c.o, n:c.n, rate: c.n ? Math.round(100 * c.o / c.n) : 0 };
@@ -2503,12 +2567,14 @@ function renderTeamProps(){
   var td = window.TEAMS_DATA;
   var list = (td && td.leagues && td.leagues[state.league]) || [];
   var sorted = list.slice().sort(function(a, b){ return teamFeatured(b).rate - teamFeatured(a).rate; });
+  _teamList = sorted;
   count.textContent = sorted.length
     ? sorted.length + " team props · " + state.league + " · sorted by L10 hit rate at the research line"
     : "";
   grid.innerHTML = sorted.length
     ? sorted.slice(0, 30).map(teamPropCard).join("")
     : '<div class="emptybox" style="grid-column:1/-1">No team props for the current slate.</div>';
+  renderTeamSecPreview();
 }
 window.__LL.renderTeamProps = renderTeamProps;
 

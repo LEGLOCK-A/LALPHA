@@ -167,6 +167,12 @@
   .propsec-body[hidden]{display:none}
   .secpreview{margin:8px 0 2px}
   .secpreview[hidden]{display:none}
+  /* "Show More / Show Less" label injected beside each propsec head's
+     chevron: the label takes the chevron's auto left margin so the
+     pair rides together on the header's right side, in the theme
+     accent green (--accent: #1d9e4b light / #4ade80 dark) */
+  .propsec-head .sec-more{margin-left:auto;flex:none;font-size:14px;font-weight:600;color:var(--accent);white-space:nowrap}
+  .propsec-head .sec-more + .gf-chev{margin-left:0}
   @media (prefers-reduced-motion: reduce){.propsec-head .gf-chev{transition:none}}
   /* team prop cards: the research layers ride on one sub-line */
   .tmeta{font-size:12px;color:var(--ink3);line-height:1.45}
