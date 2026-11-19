@@ -1737,7 +1737,7 @@ function randSlateGames(lg){
   var days = lg === "NFL" ? nflWeekDayStrs() : [etDayStr(new Date().toISOString())];
   var inDays = {};
   days.forEach(function(x){ inDays[x] = 1; });
-  return stripGames(all.filter(function(g){ return inDays[etDayStr(g.date)]; }));
+  return stripGames(all.filter(function(g){ return g.state === "pre" && inDays[etDayStr(g.date)]; }));
 }
 function randSelectedGames(){
   var out = [];
@@ -1775,7 +1775,7 @@ function renderRandGames(){
         + esc(g.away.abbr) + ' @ ' + esc(g.home.abbr) + ' · ' + esc(gameStatusLine(g)) + '</button>';
     });
   });
-  wrap.innerHTML = html || '<span style="color:var(--ink3);font-size:12px">No games on the slate for the selected leagues.</span>';
+  wrap.innerHTML = html || '<span style="color:var(--ink3);font-size:12px">No upcoming games on the slate for the selected leagues.</span>';
   $$("#randGames .chip").forEach(function(c){
     c.addEventListener("click", function(){
       var id = c.getAttribute("data-rg");
