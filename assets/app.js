@@ -173,10 +173,21 @@ function isInjured(lg, p){
    L10 rate and average exactly as before. The other windows (5 / 15 / 50)
    are computed from the merged game logs — this season first, then last
    season, the same rows the game-log popup windows use — over however
-   many of the player's most recent games exist. The research line never
-   changes: it stays set from the L10 average. Results are cached per
-   prop + window for the life of the page's data. */
+   many of the player's most recent games exist. The Season window is
+   the odd one out: it reads this season's logs only (never last
+   season's) with no slice — every current-season game counts, however
+   many or few there are. The research line never changes: it stays set
+   from the L10 average. Results are cached per prop + window for the
+   life of the page's data. */
 var WIN_OPTS = [5, 10, 15, 50];
+/* state.win holds a game count for the Last-N windows and this string
+   for the Season window, so every slice site must branch on it. */
+var WIN_SEASON = "season";
+function winIsSeason(){ return (state.win || 10) === WIN_SEASON; }
+/* the window's display name where a label names it: "Last 10" / "Season" */
+function winName(){ return winIsSeason() ? "Season" : "Last " + (state.win || 10); }
+/* the same name inside "(last 10)"-style phrases: "last 10" / "season" */
+function winNameIn(){ return winIsSeason() ? "season" : "last " + (state.win || 10); }
 function winVal(row, key){
   var s = row.s || {};
   if (key === "combo"){
@@ -186,11 +197,32 @@ function winVal(row, key){
   var v = s[key];
   return (v == null || isNaN(v)) ? null : v;
 }
+/* The stat values behind one prop over the player's CURRENT season
+   only: rows from this season's logs (never logsPrev), in log order,
+   a game counting only when the stat was recorded in it (winVal
+   rules, so combos need all three parts). This is the one season-log
+   selection every season-based number shares — seasonRate's Shuffle
+   qualifying rate and the Season Games window both read it, so the
+   two can never disagree about what "season" means. */
+function seasonVals(lg, p){
+  var lgData = DATA.leagues[lg] || {};
+  var rows = (lgData.logs || {})[p.pid] || [];
+  var vals = [];
+  rows.forEach(function(row){ var v = winVal(row, p.key); if (v != null) vals.push(v); });
+  return vals;
+}
 function winStat(lg, p){
   var w = state.win || 10;
   if (p._wc && p._wc.w === w) return p._wc.v;
   var out = null;
-  if (w === 10){
+  if (w === WIN_SEASON){
+    var svals = seasonVals(lg, p);
+    if (svals.length){
+      var shits = 0, ssum = 0;
+      svals.forEach(function(v){ ssum += v; if (p.dir === "Over" ? v > p.line : v < p.line) shits++; });
+      out = { rate: Math.round(100 * shits / svals.length), avg: ssum / svals.length, n: svals.length, hits: shits };
+    }
+  } else if (w === 10){
     var r = dirRate(p, "L10");
     if (r != null){
       var rr = (p.rates || {})["L10"] || {};
@@ -223,10 +255,7 @@ function winStat(lg, p){
    qualifying, exactly like a window with no games. Cached per prop. */
 function seasonRate(lg, p){
   if (p._sr !== undefined) return p._sr;
-  var lgData = DATA.leagues[lg] || {};
-  var rows = (lgData.logs || {})[p.pid] || [];
-  var vals = [];
-  rows.forEach(function(row){ var v = winVal(row, p.key); if (v != null) vals.push(v); });
+  var vals = seasonVals(lg, p);
   var out = null;
   if (vals.length){
     var hits = 0;
@@ -248,11 +277,16 @@ window.__LL.seasonRate = seasonRate;
 function winVals(lg, p){
   var w = state.win || 10;
   if (p._wv && p._wv.w === w) return p._wv.v;
-  var lgData = DATA.leagues[lg] || {};
-  var rows = ((lgData.logs || {})[p.pid] || []).concat((lgData.logsPrev || {})[p.pid] || []);
-  var vals = [];
-  rows.forEach(function(row){ var v = winVal(row, p.key); if (v != null) vals.push(v); });
-  vals = vals.slice(0, w);
+  var vals;
+  if (w === WIN_SEASON){
+    vals = seasonVals(lg, p);
+  } else {
+    var lgData = DATA.leagues[lg] || {};
+    var rows = ((lgData.logs || {})[p.pid] || []).concat((lgData.logsPrev || {})[p.pid] || []);
+    vals = [];
+    rows.forEach(function(row){ var v = winVal(row, p.key); if (v != null) vals.push(v); });
+    vals = vals.slice(0, w);
+  }
   p._wv = { w: w, v: vals };
   return vals;
 }
@@ -467,7 +501,7 @@ function winRowHtml(p, lg){
   if (l20 != null && ((ws.rate >= 90 && ws.rate - l20 >= 25) || (p.streak >= 8 && l20 < 60)))
     tags += '<span class="regtag" data-regtag="1" data-no-log role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-controls="regPop" aria-label="Regression risk — show definition">Regression risk</span>';
   var med = medianOf(winVals(lg, p));
-  return '<div class="winrow"><span>Last ' + ws.n + ' games</span><b>' + ws.rate + '%</b><span>hit · avg <b>' + fmtVal(ws.avg) + '</b>' + (med != null ? ' · med <b>' + fmtVal(med) + '</b>' : '') + '</span>' + tags + '</div>';
+  return '<div class="winrow"><span>' + (winIsSeason() ? 'Season · ' + ws.n + ' games' : 'Last ' + ws.n + ' games') + '</span><b>' + ws.rate + '%</b><span>hit · avg <b>' + fmtVal(ws.avg) + '</b>' + (med != null ? ' · med <b>' + fmtVal(med) + '</b>' : '') + '</span>' + tags + '</div>';
 }
 
 /* ---------- tabs ---------- */
@@ -783,7 +817,7 @@ function renderDiscover(){
   _boardList = list;
   $("#propCount").textContent = list.length + " props · " + state.league + (state.rankMode === "signal"
     ? " · sorted by Signal Score at the research line"
-    : " · sorted by L" + (state.win || 10) + " hit rate at the research line");
+    : " · sorted by " + (winIsSeason() ? "Season" : "L" + (state.win || 10)) + " hit rate at the research line");
   $("#propGrid").innerHTML = list.length ? list.slice(0, 90).map(function(p){ return propCard(p, state.league); }).join("")
     : '<div class="emptybox" style="grid-column:1/-1">No props match those filters. Loosen the minimum hit rate or pick another stat.</div>';
   renderSecPreview();
@@ -1071,8 +1105,14 @@ function watchQual(lg, w){
   var bp = (DATA.leagues[lg].props || []).filter(function(x){ return x.pid === w.pid && x.key === key; })[0];
   if (bp) return winStat(lg, bp);
   var vals = [];
-  udMergedRows(lg, w.pid).forEach(function(r){ var v = winVal(r, key); if (v != null) vals.push(v); });
-  vals = vals.slice(0, state.win || 10);
+  if (winIsSeason()){
+    /* Season window: current-season rows only, no slice — the same
+       season selection winStat uses, read on the watch stat's key */
+    ((DATA.leagues[lg].logs || {})[w.pid] || []).forEach(function(r){ var v = winVal(r, key); if (v != null) vals.push(v); });
+  } else {
+    udMergedRows(lg, w.pid).forEach(function(r){ var v = winVal(r, key); if (v != null) vals.push(v); });
+    vals = vals.slice(0, state.win || 10);
+  }
   if (!vals.length) return null;
   return { n: vals.length, avg: avgOf(vals), rate: null };
 }
@@ -1238,7 +1278,7 @@ function renderUnderdogs(){
   var shown = out.filter(function(u){ var p = players[u.pid] || {}; return searchMatch((p.name || "") + " " + (p.team || "")); });
   var nmShown = nearShown.filter(function(u){ var p = players[u.pid] || {}; return searchMatch((p.name || "") + " " + (p.team || "")); });
   $("#udCount").textContent = (out.length
-    ? out.length + " surging riser stat lines · " + lg + " · bottom-half baseline, last-5 at least 50% above it" + (state.minRate > 0 ? " · min hit rate " + state.minRate + "% (last " + (state.win || 10) + ")" : "")
+    ? out.length + " surging riser stat lines · " + lg + " · bottom-half baseline, last-5 at least 50% above it" + (state.minRate > 0 ? " · min hit rate " + state.minRate + "% (" + winNameIn() + ")" : "")
     : "No risers qualify in " + lg + " right now")
     + (nearShown.length ? " · " + nearShown.length + " near miss" + (nearShown.length > 1 ? "es" : "") : "");
   function nhlCard(u){
@@ -1320,7 +1360,13 @@ function boardRate(lg, pid, key){
   if (!vals.length) return null;
   var l10 = avgOf(vals.slice(0, 10));
   if (l10 == null) return null;
-  var line = Math.round(l10 * 2) / 2, win = vals.slice(0, state.win || 10), hits = 0;
+  var line = Math.round(l10 * 2) / 2, hits = 0;
+  var win;
+  if (winIsSeason()){
+    /* Season window: current-season values only (the same season
+       selection winStat uses), never the merged rows sliced below */
+    win = ((DATA.leagues[lg].logs || {})[pid] || []).map(function(r){ return udStatVal(r, key); }).filter(function(v){ return v != null; });
+  } else win = vals.slice(0, state.win || 10);
   win.forEach(function(v){ if (v > line) hits++; });
   return win.length ? Math.round(100 * hits / win.length) : null;
 }
@@ -1827,7 +1873,7 @@ function renderUdScored(lg){
   var shown = out.filter(function(u){ var p = players[u.pid] || {}; return searchMatch((p.name || "") + " " + (p.team || "")); });
   var nmShown = nearShown.filter(function(u){ var p = players[u.pid] || {}; return searchMatch((p.name || "") + " " + (p.team || "")); });
   $("#udCount").textContent = (out.length
-    ? "Top " + out.length + " surging risers · " + lg + " · ranked by Riser Score · " + (isNfl ? "next game in the Thu–Mon game week" : "next game today or tomorrow") + (state.minRate > 0 ? " · min hit rate " + state.minRate + "% (last " + (state.win || 10) + ")" : "") + (spread ? " · spread across stat categories, best of each first" : (catCount === 1 ? " · all " + udStatLabel(lg, out[0].key) + " — the only stat category that qualified" : ""))
+    ? "Top " + out.length + " surging risers · " + lg + " · ranked by Riser Score · " + (isNfl ? "next game in the Thu–Mon game week" : "next game today or tomorrow") + (state.minRate > 0 ? " · min hit rate " + state.minRate + "% (" + winNameIn() + ")" : "") + (spread ? " · spread across stat categories, best of each first" : (catCount === 1 ? " · all " + udStatLabel(lg, out[0].key) + " — the only stat category that qualified" : ""))
     : "No surging risers with a game " + (isNfl ? "in the Thu–Mon game week" : "today or tomorrow") + " · " + lg)
     + (nearShown.length ? " · " + nearShown.length + " near miss" + (nearShown.length > 1 ? "es" : "") : "");
   function udCard(u){
@@ -2486,15 +2532,36 @@ function renderInjuries(){
 
 /* ---------- filters / search wiring ---------- */
 var fBtn = $("#filterBtn"), fPanel = $("#filtersPanel");
-fBtn.addEventListener("click", function(){
-  var open = fPanel.classList.toggle("open");
+/* One open/close path for the panel: the topbar button, the header
+   duplicates (which click the topbar button) and the outside-press
+   close below all land here, so the panel class and every toggle's
+   aria-expanded can never drift apart. */
+function setFiltersOpen(open){
+  fPanel.classList.toggle("open", open);
   fBtn.setAttribute("aria-expanded", open ? "true" : "false");
   $$(".filters-dup").forEach(function(b){ b.setAttribute("aria-expanded", open ? "true" : "false"); });
+}
+fBtn.addEventListener("click", function(){
+  setFiltersOpen(!fPanel.classList.contains("open"));
   /* No scroll lock here on purpose (see the lockScroll note above):
      Filters stays open over a fully scrollable page, filter changes
      already re-render the board live, and the Filters button itself
      remains the open/close control. Other popups opened on top take
      and release their own lock counts without disturbing this panel. */
+});
+/* A press anywhere outside the open panel closes it. Presses inside
+   the panel leave it alone, and presses on a Filters toggle (the
+   topbar button or a header duplicate) are left to the toggle's own
+   click — excluding them here is what stops a close-then-reopen
+   double toggle. pointerdown rather than click, so the panel is
+   already closed before the press's own action (opening a card,
+   switching a tab) runs. */
+document.addEventListener("pointerdown", function(e){
+  if (!fPanel.classList.contains("open")) return;
+  if (!e.target.closest) return;
+  if (e.target.closest("#filtersPanel")) return;
+  if (e.target.closest("#filterBtn") || e.target.closest(".filters-dup")) return;
+  setFiltersOpen(false);
 });
 /* Duplicate Filters buttons beside each view's heading — a second, more
    reachable copy Jay asked for; the top-right original stays. Each dup
@@ -2543,16 +2610,17 @@ $("#searchInput").addEventListener("input", function(){
 function renderWinChips(){
   var html = WIN_OPTS.map(function(w){
     return '<button class="chip" data-win="' + w + '" aria-pressed="' + ((state.win || 10) === w ? "true" : "false") + '">Last ' + w + '</button>';
-  }).join("");
+  }).join("") + '<button class="chip" data-win="' + WIN_SEASON + '" aria-pressed="' + (winIsSeason() ? "true" : "false") + '">Season</button>';
   ["#winChipsPanel", "#winChipsBoard"].forEach(function(sel){
     var el = $(sel);
     if (!el) return;
     el.innerHTML = html;
     $$(".chip", el).forEach(function(c){
       c.addEventListener("click", function(){
-        state.win = +c.getAttribute("data-win");
+        var dv = c.getAttribute("data-win");
+        state.win = dv === WIN_SEASON ? WIN_SEASON : +dv;
         var lab = $("#minRateWinLab");
-        if (lab) lab.textContent = "Last " + state.win;
+        if (lab) lab.textContent = winName();
         renderWinChips();
         /* hit rates everywhere are evaluated over this window */
         renderDiscover(); renderSheets(); renderWatchlist(); renderUnderdogs();
@@ -2572,7 +2640,7 @@ renderWinChips();
 function syncGamesFoldSum(){
   var el = $("#gamesFoldSum");
   if (!el) return;
-  el.textContent = "· Last " + (state.win || 10) + (state.minGames ? " · Min " + state.minGames + "+" : "");
+  el.textContent = "· " + winName() + (state.minGames ? " · Min " + state.minGames + "+" : "");
 }
 function syncGamesFold(){
   var fold = $("#gamesFold"), body = $("#gamesFoldBody"), head = $("#gamesFoldHead");
@@ -3075,7 +3143,19 @@ function ladderHtml(){
   rows.forEach(function(r){ var v = statVal(r, ws.stat); if (v != null) allVals.push(v); });
   if (!allVals.length) return "";
   var wN = S.win || 10;
-  var vWin = allVals.slice(0, wN), v20 = allVals.slice(0, 20);
+  var v20 = allVals.slice(0, 20);
+  var vWin, winLab;
+  if (wN === "season"){ /* the board's Season window: state.win holds
+       the string "season" (WIN_SEASON in the board code) */
+    /* this season's values only — the current-season rows of
+       allRows(), every one of them, none from last season */
+    vWin = [];
+    rows.forEach(function(r){ if (r.season === SEASON_LABEL[lg][0]){ var v = statVal(r, ws.stat); if (v != null) vWin.push(v); } });
+    winLab = "Season";
+  } else {
+    vWin = allVals.slice(0, wN);
+    winLab = "Last " + vWin.length;
+  }
   var rungs = [];
   [-2, -1, 0, 1, 2].forEach(function(d){
     var L = Math.round((line + d) * 10) / 10;
@@ -3088,7 +3168,7 @@ function ladderHtml(){
       return '<span class="rung' + (L === line ? ' base' : '') + '"><b>' + fmtVal(L) + '</b> ' + (vals.length ? Math.round(100 * h / vals.length) + '%' : '—') + '</span>';
     }).join("") + '</div>';
   }
-  var body = rowHtml("Last " + vWin.length, vWin);
+  var body = rowHtml(winLab, vWin);
   if (v20.length !== vWin.length) body += rowHtml(v20.length === 20 ? "L20" : "Last " + v20.length, v20);
   return '<div class="ladder"><div class="ladtitle">Alt lines · ' + esc(dir) + ' hit rate at each line</div>' + body + '</div>';
 }
