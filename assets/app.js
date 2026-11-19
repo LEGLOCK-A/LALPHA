@@ -10,6 +10,7 @@ var PRIMARY = { NBA:"points", NFL:"passingYards", NHL:"points" };
 
 var state = {
   league:"NBA", view:"discover", stat:"All", minRate:0, win:10, sortXgf:false, sortEfg:false, rankMode:"signal",
+  teamOpen:{},
   minGames:0, minAvg:0, randNoHalf:false, gamesFoldOpen:false, statFoldOpen:false,
   secPlayer:false, secTeam:false,
   dirs:{Over:true, Under:true}, search:"", gameSel:null,
@@ -236,6 +237,121 @@ function seasonRate(lg, p){
 }
 window.__LL.seasonRate = seasonRate;
 
+/* ---------- window values: median / margin / spread ----------
+   The actual stat values behind a prop's selected-window numbers,
+   taken from the same merged logs (this season first, then last)
+   the non-L10 windows already use, sliced to the selected Games
+   window. Cached per prop + window, like winStat. The median sits
+   next to the average so one huge game cannot silently carry the
+   number; margin and standard deviation live in the game-log popup. */
+function winVals(lg, p){
+  var w = state.win || 10;
+  if (p._wv && p._wv.w === w) return p._wv.v;
+  var lgData = DATA.leagues[lg] || {};
+  var rows = ((lgData.logs || {})[p.pid] || []).concat((lgData.logsPrev || {})[p.pid] || []);
+  var vals = [];
+  rows.forEach(function(row){ var v = winVal(row, p.key); if (v != null) vals.push(v); });
+  vals = vals.slice(0, w);
+  p._wv = { w: w, v: vals };
+  return vals;
+}
+function medianOf(vals){
+  if (!vals.length) return null;
+  var s = vals.slice().sort(function(a, b){ return a - b; });
+  var m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+/* population standard deviation: how far the player's games
+   typically land from his own average over the same values */
+function sdOf(vals, avg){
+  if (vals.length < 2) return null;
+  var a = (avg == null) ? avgOf(vals) : avg;
+  var acc = 0;
+  vals.forEach(function(v){ acc += (v - a) * (v - a); });
+  return Math.sqrt(acc / vals.length);
+}
+
+/* ---------- opponent context (card face) ----------
+   One compact line on the prop card: the upcoming opponent and what
+   they allow in this stat, the player's home/away averages for the
+   stat this season, and a B2B flag when the team played yesterday.
+   Defensive averages aggregate every tracked player's current-season
+   log rows by the opponent named in the row — the board's own logs —
+   ranked across every opponent appearing in them (rank 1 allows the
+   least). The fixture (opponent, home/away, back-to-back) comes from
+   the team-props data, which frames every team's next game; if that
+   is unavailable, the slate in DATA supplies the opponent only.
+   Pace is deliberately absent: the team data carries points for and
+   against, not the possession inputs (attempts, free throws,
+   turnovers) a real pace number needs. */
+var _defMemo = {};
+function defTable(lg, key){
+  var lgData = DATA.leagues[lg] || {};
+  var logs = lgData.logs || {};
+  var memo = _defMemo[lg + "|" + key];
+  if (memo && memo.src === logs) return memo.tab;
+  var agg = {};
+  Object.keys(logs).forEach(function(pid){
+    (logs[pid] || []).forEach(function(row){
+      var v = winVal(row, key);
+      if (v == null) return;
+      var opp = String(row.opp || "").split(" ").pop();
+      if (!opp) return;
+      var a = agg[opp] || (agg[opp] = { sum: 0, n: 0 });
+      a.sum += v; a.n++;
+    });
+  });
+  var tab = {};
+  Object.keys(agg).forEach(function(opp){ tab[opp] = { avg: agg[opp].sum / agg[opp].n, n: agg[opp].n }; });
+  Object.keys(tab).sort(function(a, b){ return tab[a].avg - tab[b].avg; })
+    .forEach(function(opp, i){ tab[opp].rank = i + 1; });
+  _defMemo[lg + "|" + key] = { src: logs, tab: tab };
+  return tab;
+}
+function ordinal(n){
+  var v = n % 100;
+  if (v >= 11 && v <= 13) return n + "th";
+  switch (n % 10){ case 1: return n + "st"; case 2: return n + "nd"; case 3: return n + "rd"; default: return n + "th"; }
+}
+function nextFixture(lg, team){
+  var td = window.TEAMS_DATA;
+  var list = (td && td.leagues && td.leagues[lg]) || [];
+  for (var i = 0; i < list.length; i++){
+    if (list[i].team === team) return { opp: list[i].opp, home: !!list[i].home, b2b: !!list[i].b2b, date: list[i].gameDate || "" };
+  }
+  var games = (DATA.leagues[lg] || {}).games || {};
+  var mine = Object.keys(games).map(function(k){ return games[k]; })
+    .filter(function(g){ return g && g.home && g.away && (g.home.abbr === team || g.away.abbr === team) && g.state !== "post"; })
+    .sort(function(a, b){ return String(a.date || "").localeCompare(String(b.date || "")); });
+  if (!mine.length) return null;
+  var g = mine[0], home = g.home.abbr === team;
+  return { opp: home ? g.away.abbr : g.home.abbr, home: home, b2b: false, date: g.date || "" };
+}
+function oppCtxHtml(p, lg){
+  var parts = [];
+  var fx = nextFixture(lg, p.team);
+  if (fx && fx.opp){
+    var head = (fx.home ? "vs " : "@ ") + fx.opp;
+    var dt = defTable(lg, p.key)[fx.opp];
+    if (dt) head += " · allows " + fmtVal(dt.avg) + " (" + ordinal(dt.rank) + ")";
+    parts.push(head);
+  }
+  var rows = ((DATA.leagues[lg] || {}).logs || {})[p.pid] || [];
+  var hS = 0, hN = 0, aS = 0, aN = 0;
+  rows.forEach(function(row){
+    var v = winVal(row, p.key);
+    if (v == null) return;
+    if (String(row.opp || "").indexOf("vs") === 0){ hS += v; hN++; } else { aS += v; aN++; }
+  });
+  var splits = [];
+  if (hN) splits.push("Home " + fmtVal(hS / hN));
+  if (aN) splits.push("Away " + fmtVal(aS / aN));
+  if (splits.length) parts.push(splits.join(" · "));
+  if (fx && fx.b2b) parts.push("B2B");
+  if (!parts.length) return "";
+  return '<div class="oppctx">' + esc(parts.join(" · ")) + '</div>';
+}
+
 /* ---------- Signal Score (Signal ranking mode) ----------
    SignalScore = HitRateScore × VolumeScore × SampleScore × MeaningScore,
    computed per prop for its listed direction over the SELECTED Games
@@ -349,7 +465,8 @@ function winRowHtml(p, lg){
   var l20 = dirRate(p, "L20");
   if (l20 != null && ((ws.rate >= 90 && ws.rate - l20 >= 25) || (p.streak >= 8 && l20 < 60)))
     tags += '<span class="regtag" data-regtag="1" data-no-log role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-controls="regPop" aria-label="Regression risk — show definition">Regression risk</span>';
-  return '<div class="winrow"><span>Last ' + ws.n + ' games</span><b>' + ws.rate + '%</b><span>hit · avg <b>' + fmtVal(ws.avg) + '</b></span>' + tags + '</div>';
+  var med = medianOf(winVals(lg, p));
+  return '<div class="winrow"><span>Last ' + ws.n + ' games</span><b>' + ws.rate + '%</b><span>hit · avg <b>' + fmtVal(ws.avg) + '</b>' + (med != null ? ' · med <b>' + fmtVal(med) + '</b>' : '') + '</span>' + tags + '</div>';
 }
 
 /* ---------- tabs ---------- */
@@ -596,6 +713,7 @@ function propCard(p, lg){
     + '<span class="stat">' + esc(p.stat) + '</span>'
     + '<span class="avg">Avg <b>' + fmtVal(p.avg) + '</b><br>L10 avg <b>' + fmtVal(p.l10avg) + '</b> · Last <b>' + fmtVal(p.last) + '</b></span></div>'
     + winRowHtml(p, lg)
+    + oppCtxHtml(p, lg)
     + '<div class="rates">' + rateCell(p, "L5") + rateCell(p, "L10") + rateCell(p, "L20") + '</div>'
     + '<div class="cardfoot"><span class="note">' + p.gp + ' games logged · hit rates vs this line</span>'
     + (sig ? '<button class="whybtn" data-why="1" data-no-log data-sig="' + Math.round(sig.score) + '" data-hit="' + Math.round(sig.hit) + '" data-raw="' + Math.round(sig.rate) + '" data-shrunk="' + Math.round(sig.shrunk * 100) + '" data-vol="' + sig.vol.toFixed(2) + '" data-sample="' + sig.sample.toFixed(2) + '" data-meaning="' + sig.meaning.toFixed(2) + '" aria-haspopup="true" aria-expanded="false" aria-controls="sigPop" aria-label="Why is this ranked here? Signal Score breakdown">Why?</button>' : '')
@@ -670,7 +788,7 @@ function renderDiscover(){
   renderSecPreview();
 }
 /* One delegated handler for EVERY player surface: any element carrying
-   data-open-logs (prop cards, watchlist / underdog cards, cheatsheet rows,
+   data-open-logs (prop cards, watchlist / riser cards, cheatsheet rows,
    injury rows, ranked Game Logs rows, Players to Watch heads + prop rows)
    opens that player's game-log popup, with data-stat-key preselected when
    the surface has a stat and the league's primary stat otherwise. Because
@@ -738,6 +856,7 @@ function toggleRegPop(tag){
   if (!regPop) return;
   if (regAnchor === tag && !regPop.hidden){ closeRegPop(); return; }
   closeRegPop();
+  closeRankPop();
   regAnchor = tag;
   regPop.hidden = false;
   tag.setAttribute("aria-expanded", "true");
@@ -810,6 +929,7 @@ function toggleSigPop(btn){
   if (sigAnchor === btn && !sigPop.hidden){ closeSigPop(); return; }
   closeSigPop();
   closeRegPop();
+  closeRankPop();
   sigAnchor = btn;
   sigPop.innerHTML = '<b>Signal ' + esc(btn.getAttribute("data-sig")) + '</b> — Hit rate ' + esc(btn.getAttribute("data-hit"))
     + ' (' + esc(btn.getAttribute("data-raw")) + '% &rarr; shrunk ' + esc(btn.getAttribute("data-shrunk")) + '%)'
@@ -837,17 +957,105 @@ if (window.MutationObserver){
   }).observe(document.body, { childList:true, subtree:true });
 }
 
+/* ---------- Signal / Classic definition popover ----------
+   Same pattern as the Regression risk and Why? popovers: one shared
+   tooltip (#rankPop, a .regpop box whose two definitions are static
+   markup) serves the info button beside the Signal/Classic switch on
+   the Props board AND the matching info button in the Watchlist pane —
+   the Watchlist follows the same rankMode, so it gets the same
+   explanation. Tapping the info button toggles the popover anchored at
+   it; on hover-capable devices, hovering the switch itself or the info
+   button also opens it (anchored at the switch), and moving the mouse
+   away closes a hover-opened popover. A tap-opened popover dismisses
+   the usual ways: tapping the button again, tapping anywhere else,
+   scrolling, resizing or pressing Escape. Only one of the three
+   definition popovers is ever open at a time. */
+var rankPop = document.getElementById("rankPop");
+var rankAnchor = null;
+var rankHoverOpen = false;
+function closeRankPop(){
+  if (rankAnchor && rankAnchor.hasAttribute && rankAnchor.hasAttribute("data-rankinfo")) rankAnchor.setAttribute("aria-expanded", "false");
+  rankAnchor = null;
+  rankHoverOpen = false;
+  if (rankPop) rankPop.hidden = true;
+}
+function placeRankPop(anchor){
+  var r = anchor.getBoundingClientRect();
+  var vw = window.innerWidth, vh = window.innerHeight, M = 8, GAP = 6;
+  rankPop.style.left = "0px"; rankPop.style.top = "0px";
+  var w = rankPop.offsetWidth, h = rankPop.offsetHeight;
+  var left = r.left + r.width / 2 - w / 2;
+  left = Math.max(M, Math.min(left, vw - w - M));
+  var top = r.bottom + GAP;
+  if (top + h > vh - M) top = r.top - GAP - h;      /* no room below: flip above */
+  if (top < M) top = Math.min(vh - h - M, r.bottom + GAP);
+  if (top < M) top = M;
+  rankPop.style.left = Math.round(left) + "px";
+  rankPop.style.top = Math.round(top) + "px";
+}
+function openRankPop(anchor, fromHover){
+  if (!rankPop) return;
+  closeRegPop();
+  closeSigPop();
+  if (rankAnchor && rankAnchor !== anchor && rankAnchor.hasAttribute && rankAnchor.hasAttribute("data-rankinfo")) rankAnchor.setAttribute("aria-expanded", "false");
+  rankAnchor = anchor;
+  rankHoverOpen = !!fromHover;
+  rankPop.hidden = false;
+  if (anchor.hasAttribute && anchor.hasAttribute("data-rankinfo")) anchor.setAttribute("aria-expanded", "true");
+  placeRankPop(anchor);
+}
+function toggleRankPop(btn){
+  if (!rankPop) return;
+  if (rankAnchor === btn && !rankPop.hidden){ closeRankPop(); return; }
+  openRankPop(btn, false);
+}
+document.addEventListener("click", function(e){
+  if (!e.target.closest) return;
+  var btn = e.target.closest("[data-rankinfo]");
+  if (btn){ e.stopPropagation(); toggleRankPop(btn); return; }
+  if (rankPop && !rankPop.hidden && !e.target.closest("#rankPop")) closeRankPop();
+}, true);
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape"){ closeRankPop(); return; }
+  if ((e.key === "Enter" || e.key === " ") && e.target && e.target.closest){
+    var btn = e.target.closest("[data-rankinfo]");
+    if (btn){ e.preventDefault(); toggleRankPop(btn); }
+  }
+});
+window.addEventListener("scroll", closeRankPop, { passive:true, capture:true });
+window.addEventListener("resize", closeRankPop);
+if (window.MutationObserver){
+  new MutationObserver(function(){
+    if (rankAnchor && !document.contains(rankAnchor)) closeRankPop();
+  }).observe(document.body, { childList:true, subtree:true });
+}
+if (window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches){
+  /* desktop hover: the switch and its info buttons are hover targets;
+     a hover-opened popover closes when the mouse leaves the target,
+     while a tap-opened one stays until dismissed */
+  var rankSegEl = document.getElementById("rankSeg");
+  if (rankSegEl){
+    rankSegEl.addEventListener("mouseenter", function(){ openRankPop(rankSegEl, true); });
+    rankSegEl.addEventListener("mouseleave", function(){ if (rankHoverOpen && rankAnchor === rankSegEl) closeRankPop(); });
+  }
+  $$("[data-rankinfo]").forEach(function(btn){
+    btn.addEventListener("mouseenter", function(){ openRankPop(btn, true); });
+    btn.addEventListener("mouseleave", function(){ if (rankHoverOpen && rankAnchor === btn) closeRankPop(); });
+  });
+}
+
 /* ---------- Ranking mode switch (Signal / Classic) ----------
    In-session only, like every other board control: state.rankMode drives
    filteredProps ordering, the count-line wording, the Watchlist order
    and whether prop cards render their Why? target. Switching re-renders
-   the two affected segments; Streaks, Underdogs and Shuffle never read
+   the two affected segments; Streaks, Risers and Shuffle never read
    rankMode and keep their own ordering in both modes. */
 $$("#rankSeg button").forEach(function(b){
   b.addEventListener("click", function(){
     state.rankMode = b.getAttribute("data-rank");
     $$("#rankSeg button").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
     closeSigPop();
+    closeRankPop();
     renderDiscover(); renderWatchlist();
   });
 });
@@ -924,7 +1132,7 @@ function renderWatchlist(){
   }).join("") : '<div class="emptybox">No recent top stat lines for ' + state.league + ' in the current data.</div>';
 }
 
-  /* ---------- Underdogs ---------- */
+  /* ---------- Risers ---------- */
 /* Hard rule, no vibes: baseline = last-20 average for the stat, and it must sit in the
    bottom half of the tracked pool for that league + stat. Surging = last-5 average at
    least 50% above baseline AND the absolute jump clears the per-stat minimum below. */
@@ -949,7 +1157,7 @@ function udStatLabel(lg, key){
   return key;
 }
 function avgOf(vals){ return vals.length ? vals.reduce(function(a, b){ return a + b; }, 0) / vals.length : null; }
-/* The Underdogs grid is recomputed on every live check, but its inputs
+/* The Risers grid is recomputed on every live check, but its inputs
    are the baked game logs (static between checks) plus the schedule —
    so on most checks the HTML comes out byte-identical. When it does,
    the DOM is left completely untouched: assigning the same innerHTML
@@ -957,7 +1165,7 @@ function avgOf(vals){ return vals.length ? vals.reduce(function(a, b){ return a 
 var _udGridHtml = null;
 function renderUnderdogs(){
   var lg = state.league;
-  /* NBA and NFL use the ranked Underdog Score (see renderUdScored below);
+  /* NBA and NFL use the ranked Riser Score (see renderUdScored below);
      the NHL keeps this hard bar exactly as it has always been. */
   if (lg !== "NHL"){ renderUdScored(lg); return; }
   var mins = UD_MIN[lg] || {};
@@ -1029,8 +1237,8 @@ function renderUnderdogs(){
   var shown = out.filter(function(u){ var p = players[u.pid] || {}; return searchMatch((p.name || "") + " " + (p.team || "")); });
   var nmShown = nearShown.filter(function(u){ var p = players[u.pid] || {}; return searchMatch((p.name || "") + " " + (p.team || "")); });
   $("#udCount").textContent = (out.length
-    ? out.length + " surging underdog stat lines · " + lg + " · bottom-half baseline, last-5 at least 50% above it" + (state.minRate > 0 ? " · min hit rate " + state.minRate + "% (last " + (state.win || 10) + ")" : "")
-    : "No underdogs qualify in " + lg + " right now")
+    ? out.length + " surging riser stat lines · " + lg + " · bottom-half baseline, last-5 at least 50% above it" + (state.minRate > 0 ? " · min hit rate " + state.minRate + "% (last " + (state.win || 10) + ")" : "")
+    : "No risers qualify in " + lg + " right now")
     + (nearShown.length ? " · " + nearShown.length + " near miss" + (nearShown.length > 1 ? "es" : "") : "");
   function nhlCard(u){
     var p = players[u.pid] || {};
@@ -1049,18 +1257,18 @@ function renderUnderdogs(){
       + '<div class="cardfoot" style="margin-top:10px"><span class="note">Tap for the full game log — up to 82 games merged.</span>'
       + '<button class="openbtn" data-open-logs="' + esc(u.pid) + '" data-stat-key="' + esc(u.key) + '" data-lg="' + lg + '">Game log</button></div></div>';
   }
-  var gridHtml = out.length ? shown.map(nhlCard).join("") : '<div class="emptybox">Nobody in ' + lg + ' clears the underdog bar in the current data — bottom-half baseline, last-5 at least 50% above it, and the minimum jump for the stat. The bar stays where it is; check back after more games.</div>';
+  var gridHtml = out.length ? shown.map(nhlCard).join("") : '<div class="emptybox">Nobody in ' + lg + ' clears the riser bar in the current data — bottom-half baseline, last-5 at least 50% above it, and the minimum jump for the stat. The bar stays where it is; check back after more games.</div>';
   if (nmShown.length) gridHtml += '<div class="nmwrap"><div class="nmhead">Near misses</div><div class="nmsub">Close, but each missed one test — they are not on the list.</div><div class="wlist">' + nmShown.map(nhlCard).join("") + '</div></div>';
-  if (out.length && !shown.length && !nmShown.length) gridHtml = '<div class="emptybox">No underdogs match your search in ' + lg + '.</div>';
+  if (out.length && !shown.length && !nmShown.length) gridHtml = '<div class="emptybox">No risers match your search in ' + lg + '.</div>';
   if (gridHtml !== _udGridHtml){ _udGridHtml = gridHtml; $("#udGrid").innerHTML = gridHtml; }
 }
 window.__LL.renderUnderdogs = renderUnderdogs;
 
-/* ---------- Underdogs, scored (NBA + NFL) ----------
+/* ---------- Risers, scored (NBA + NFL) ----------
    Same pool as ever: the player's last-20 baseline for the stat sits in the
    bottom half of the league pool for that stat, and injured players stay
    hidden. What changed is the bar: instead of pass/fail, every qualifier
-   gets an Underdog Score built to estimate whether the surge is likely to
+   gets a Riser Score built to estimate whether the surge is likely to
    CONTINUE, not how big the spike looks:
      consistency — games above baseline in the last 5 (6 pts each) and the
        last 10 (2 pts each): the heaviest weight, and the reason one blowup
@@ -1300,7 +1508,7 @@ window.__LL.nflRoleText = nflRoleText;
    filter this is a display rule computed from the logs on every render:
    the prop data is never edited, and the prop returns on its own when
    the log evidence changes. Only the 1.5 line is in scope — 0.5 TD lines
-   and every other stat are untouched, and Underdogs (surge-based) does
+   and every other stat are untouched, and Risers (surge-based) does
    not use this filter. */
 function nflTdGimme(p){
   if (!p || p.dir !== "Under" || p.line !== 1.5 || !NFL_TD_KEYS[p.key]) return false;
@@ -1618,8 +1826,8 @@ function renderUdScored(lg){
   var shown = out.filter(function(u){ var p = players[u.pid] || {}; return searchMatch((p.name || "") + " " + (p.team || "")); });
   var nmShown = nearShown.filter(function(u){ var p = players[u.pid] || {}; return searchMatch((p.name || "") + " " + (p.team || "")); });
   $("#udCount").textContent = (out.length
-    ? "Top " + out.length + " surging underdogs · " + lg + " · ranked by Underdog Score · " + (isNfl ? "next game in the Thu–Mon game week" : "next game today or tomorrow") + (state.minRate > 0 ? " · min hit rate " + state.minRate + "% (last " + (state.win || 10) + ")" : "") + (spread ? " · spread across stat categories, best of each first" : (catCount === 1 ? " · all " + udStatLabel(lg, out[0].key) + " — the only stat category that qualified" : ""))
-    : "No surging underdogs with a game " + (isNfl ? "in the Thu–Mon game week" : "today or tomorrow") + " · " + lg)
+    ? "Top " + out.length + " surging risers · " + lg + " · ranked by Riser Score · " + (isNfl ? "next game in the Thu–Mon game week" : "next game today or tomorrow") + (state.minRate > 0 ? " · min hit rate " + state.minRate + "% (last " + (state.win || 10) + ")" : "") + (spread ? " · spread across stat categories, best of each first" : (catCount === 1 ? " · all " + udStatLabel(lg, out[0].key) + " — the only stat category that qualified" : ""))
+    : "No surging risers with a game " + (isNfl ? "in the Thu–Mon game week" : "today or tomorrow") + " · " + lg)
     + (nearShown.length ? " · " + nearShown.length + " near miss" + (nearShown.length > 1 ? "es" : "") : "");
   function udCard(u){
     var p = players[u.pid] || {};
@@ -1648,10 +1856,10 @@ function renderUdScored(lg){
       + '<button class="openbtn" data-open-logs="' + esc(u.pid) + '" data-stat-key="' + esc(u.key) + '" data-lg="' + lg + '">Game log</button></div></div>';
   }
   var gridHtml = out.length ? shown.map(udCard).join("") : '<div class="emptybox">' + (isNfl
-    ? 'No surging underdogs with a game in the Thu–Mon game week in NFL. The list only shows bottom-half players whose last-5 form is above their baseline, with their next game in the current game week (Thursday–Monday, Eastern) — it never reaches further ahead to fill the spots.'
-    : 'No surging underdogs with a game today or tomorrow in ' + lg + '. The list only shows bottom-half players whose last-5 form is above their baseline, with their next game today or tomorrow (Eastern) — it never reaches further ahead to fill the spots.') + '</div>';
+    ? 'No surging risers with a game in the Thu–Mon game week in NFL. The list only shows bottom-half players whose last-5 form is above their baseline, with their next game in the current game week (Thursday–Monday, Eastern) — it never reaches further ahead to fill the spots.'
+    : 'No surging risers with a game today or tomorrow in ' + lg + '. The list only shows bottom-half players whose last-5 form is above their baseline, with their next game today or tomorrow (Eastern) — it never reaches further ahead to fill the spots.') + '</div>';
   if (nmShown.length) gridHtml += '<div class="nmwrap"><div class="nmhead">Near misses</div><div class="nmsub">Close, but each missed one test — they are not in the Top 10.</div><div class="wlist">' + nmShown.map(udCard).join("") + '</div></div>';
-  if (out.length && !shown.length && !nmShown.length) gridHtml = '<div class="emptybox">No underdogs match your search in ' + lg + '.</div>';
+  if (out.length && !shown.length && !nmShown.length) gridHtml = '<div class="emptybox">No risers match your search in ' + lg + '.</div>';
   if (gridHtml !== _udGridHtml){ _udGridHtml = gridHtml; $("#udGrid").innerHTML = gridHtml; }
 }
 
@@ -2290,7 +2498,7 @@ var range = $("#minRate");
 range.addEventListener("input", function(){
   state.minRate = +range.value;
   $("#minRateVal").textContent = range.value + "%";
-  /* one shared floor: Props, Streaks, Watchlist and Underdogs all follow it */
+  /* one shared floor: Props, Streaks, Watchlist and Risers all follow it */
   renderDiscover(); renderSheets(); renderWatchlist(); renderUnderdogs();
 });
 $$("#filterDirChips .chip").forEach(function(c){
@@ -2577,8 +2785,15 @@ function teamGroupsHtml(shown){
   return order.map(function(t){
     var props = byTeam[t], first = props[0];
     var label = first.teamName ? first.teamName + " (" + t + ")" : t;
-    return '<div class="teamgroup"><div class="teamgroup-head">' + esc(label) + '</div>'
-      + '<div class="grid">' + props.map(teamPropCard).join("") + '</div></div>';
+    /* every group starts closed; the open set lives on state (in
+       memory only — a fresh page load starts all closed) so a team
+       the reader opened stays open across re-renders */
+    var key = state.league + ":" + t;
+    var open = !!state.teamOpen[key];
+    return '<div class="teamgroup' + (open ? " open" : "") + '">'
+      + '<button type="button" class="teamgroup-head" data-tgroup="' + esc(key) + '" aria-expanded="' + (open ? "true" : "false") + '">'
+      + '<span>' + esc(label) + ' · ' + props.length + '</span><span class="gf-chev" aria-hidden="true"></span></button>'
+      + '<div class="grid tgroup-body"' + (open ? "" : " hidden") + '>' + props.map(teamPropCard).join("") + '</div></div>';
   }).join("");
 }
 function renderTeamProps(){
@@ -2600,6 +2815,26 @@ function renderTeamProps(){
   renderTeamSecPreview();
 }
 window.__LL.renderTeamProps = renderTeamProps;
+/* Team group toggles: one delegated listener on the grid container
+   (which itself is never re-rendered — only its innerHTML is), so it
+   survives every renderTeamProps pass. Toggling flips the in-memory
+   open set and the DOM in place — no grid re-render. */
+(function(){
+  var grid = $("#teamPropGrid");
+  if (!grid) return;
+  grid.addEventListener("click", function(e){
+    var b = e.target && e.target.closest ? e.target.closest("[data-tgroup]") : null;
+    if (!b) return;
+    var key = b.getAttribute("data-tgroup");
+    state.teamOpen[key] = !state.teamOpen[key];
+    var open = !!state.teamOpen[key];
+    b.setAttribute("aria-expanded", open ? "true" : "false");
+    var wrap = b.parentNode;
+    if (wrap) wrap.classList.toggle("open", open);
+    var body = wrap ? wrap.querySelector(".tgroup-body") : null;
+    if (body) body.hidden = !open;
+  });
+})();
 
 /* ---------- Min games / Min average ----------
    Min games lives only in the Filters panel's collapsible Games
@@ -2696,6 +2931,110 @@ function statVal(row, key){
   }
   var v = (row.s || {})[key];
   return (v == null || isNaN(v)) ? null : v;
+}
+/* median + population standard deviation over a value list — the
+   popup's window companions to its Window avg cell */
+function wsMedian(vals){
+  if (!vals.length) return null;
+  var s = vals.slice().sort(function(a, b){ return a - b; });
+  var m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function wsSd(vals, avg){
+  if (vals.length < 2) return null;
+  var a = (avg == null) ? vals.reduce(function(x, y){ return x + y; }, 0) / vals.length : avg;
+  var acc = 0;
+  vals.forEach(function(v){ acc += (v - a) * (v - a); });
+  return Math.sqrt(acc / vals.length);
+}
+function wsAvg(vals){ return vals.length ? vals.reduce(function(x, y){ return x + y; }, 0) / vals.length : null; }
+/* ---------- alt-line ladder ----------
+   Hit rates for the featured stat at the board line and the four
+   neighbouring lines (steps of 1.0, never below 0.5), in the prop's
+   featured direction, over the board's selected Games window and
+   over the last 20 — so a reader can see how much of the headline
+   rate is the line itself. The board line rung is highlighted.
+   When the selected window IS the last 20, one row serves both. */
+function ladderHtml(){
+  var lg = S.league, ws = S.ws;
+  var bp = (DATA.leagues[lg].props || []).filter(function(x){ return x.pid === ws.pid && x.key === ws.stat; })[0];
+  var line = bp ? bp.line : ws.line, dir = bp ? bp.dir : ws.dir;
+  var rows = allRows();
+  var allVals = [];
+  rows.forEach(function(r){ var v = statVal(r, ws.stat); if (v != null) allVals.push(v); });
+  if (!allVals.length) return "";
+  var wN = S.win || 10;
+  var vWin = allVals.slice(0, wN), v20 = allVals.slice(0, 20);
+  var rungs = [];
+  [-2, -1, 0, 1, 2].forEach(function(d){
+    var L = Math.round((line + d) * 10) / 10;
+    if (L >= 0.5 && rungs.indexOf(L) < 0) rungs.push(L);
+  });
+  function rowHtml(label, vals){
+    return '<div class="ladrow"><span class="ladlab">' + label + '</span>' + rungs.map(function(L){
+      var h = 0;
+      vals.forEach(function(v){ if (dir === "Over" ? v > L : v < L) h++; });
+      return '<span class="rung' + (L === line ? ' base' : '') + '"><b>' + fmtVal(L) + '</b> ' + (vals.length ? Math.round(100 * h / vals.length) + '%' : '—') + '</span>';
+    }).join("") + '</div>';
+  }
+  var body = rowHtml("Last " + vWin.length, vWin);
+  if (v20.length !== vWin.length) body += rowHtml(v20.length === 20 ? "L20" : "Last " + v20.length, v20);
+  return '<div class="ladder"><div class="ladtitle">Alt lines · ' + esc(dir) + ' hit rate at each line</div>' + body + '</div>';
+}
+/* ---------- injury impact ----------
+   When a teammate is on the injury report, the popup shows what the
+   player has actually done without him this season: his featured-
+   stat average in games the teammate also played vs games he did
+   not (a game counts as "with" when the teammate has a log row for
+   the same date + opponent). The teammate used is the highest-
+   minutes one on the report (games played breaks the tie where a
+   league's logs carry no minutes). Shown only with at least 3
+   without-games and at least 1 with-game — otherwise the split
+   would be noise, so the line is omitted entirely. */
+function injuryImpactHtml(){
+  var lg = S.league, ws = S.ws;
+  var players = DATA.leagues[lg].players || {};
+  var me = players[ws.pid];
+  if (!me) return "";
+  var inj = DATA.leagues[lg].injuries || [];
+  if (!inj.length) return "";
+  var injByName = {};
+  inj.forEach(function(i){ if (i && i.name) injByName[i.name] = i; });
+  var cands = [];
+  Object.keys(players).forEach(function(pid){
+    if (pid === ws.pid) return;
+    var pl = players[pid];
+    if (!pl || !injByName[pl.name]) return;
+    if (me.teamName ? pl.teamName !== me.teamName : pl.team !== me.team) return;
+    cands.push(pid);
+  });
+  if (!cands.length) return "";
+  var logs = DATA.leagues[lg].logs || {};
+  function mateRank(pid){
+    var rows = logs[pid] || [], mins = 0, mn = 0;
+    rows.forEach(function(r){ var m = (r.s || {}).minutes; if (m != null && !isNaN(m)){ mins += m; mn++; } });
+    return { avgMin: mn ? mins / mn : null, gp: rows.length };
+  }
+  cands.sort(function(a, b){
+    var ra = mateRank(a), rb = mateRank(b);
+    if (ra.avgMin != null && rb.avgMin != null) return rb.avgMin - ra.avgMin;
+    if (ra.avgMin != null) return -1;
+    if (rb.avgMin != null) return 1;
+    return rb.gp - ra.gp;
+  });
+  var matePid = cands[0], mate = players[matePid], entry = injByName[mate.name];
+  var mateKeys = {};
+  (logs[matePid] || []).forEach(function(r){ mateKeys[r.d + "|" + r.opp] = 1; });
+  var withV = [], withoutV = [];
+  curRows().forEach(function(r){
+    var v = statVal(r, ws.stat);
+    if (v == null) return;
+    if (mateKeys[r.d + "|" + r.opp]) withV.push(v); else withoutV.push(v);
+  });
+  if (withoutV.length < 3 || !withV.length) return "";
+  var nm = String(mate.name || "").split(" ");
+  var short = nm.length > 1 ? nm[0].charAt(0) + ". " + nm[nm.length - 1] : mate.name;
+  return '<div class="injimpact">Without ' + esc(short) + ' (' + esc(entry.status || "Out") + '): <b>' + fmtVal(wsAvg(withoutV)) + ' ' + esc(statLabel(ws.stat)) + '</b> in ' + withoutV.length + ' games · With: <b>' + fmtVal(wsAvg(withV)) + '</b> in ' + withV.length + '</div>';
 }
 function tagRows(rows, season){
   return (rows || []).map(function(r){
@@ -2907,9 +3246,14 @@ function renderWorkstation(){
     + '<div class="sumcell"><span>Hit % · window</span><b>' + (rate ? rate.pct + '% (' + rate.hits + '/' + rate.n + ')' : '—') + '</b></div>'
     + '<div class="sumcell"><span>Streak · ' + (ws.dir === "Over" ? "overs" : "unders") + '</span><b>' + (streak ? streak + ' straight' : '0') + '</b></div>'
     + '<div class="sumcell"><span>' + (nx ? 'Avg vs ' + esc(nx.opp) + ' · next' : 'H2H avg' + (h2hOpp ? ' vs ' + esc(h2hOpp) : '')) + '</span><b>' + (h2hAvg != null ? fmtVal(h2hAvg) : 'no meetings') + '</b></div>'
+    + '<div class="sumcell"><span>Median · window</span><b>' + fmtVal(wsMedian(wVals)) + '</b></div>'
+    + '<div class="sumcell"><span>Avg margin vs line</span><b>' + (wAvg == null ? '—' : ((wAvg - ws.line) >= 0 ? '+' : '') + fmtVal(wAvg - ws.line)) + '</b></div>'
+    + '<div class="sumcell"><span>Std dev · window</span><b>' + fmtVal(wsSd(wVals, wAvg)) + '</b></div>'
     + xgfCell + efgCell
     + '</div>'
-    + '<div class="sumnote">' + esc(splitTitle(rows)) + ' · Last 25 / 50 / 82 fill from last season and count in the averages and hit %.</div>';
+    + '<div class="sumnote">' + esc(splitTitle(rows)) + ' · Last 25 / 50 / 82 fill from last season and count in the averages and hit %.</div>'
+    + ladderHtml()
+    + injuryImpactHtml();
   $$("#wsPanel [data-wsdir]").forEach(function(b){ b.addEventListener("click", function(){ ws.dir = b.getAttribute("data-wsdir"); renderWorkstation(); }); });
   $("#stepUp").addEventListener("click", function(){ ws.line = Math.round((ws.line + 0.5) * 10) / 10; renderWorkstation(); });
   $("#stepDown").addEventListener("click", function(){ if (ws.line > 0.5) ws.line = Math.round((ws.line - 0.5) * 10) / 10; renderWorkstation(); });
