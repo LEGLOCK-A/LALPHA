@@ -1,1 +1,1 @@
-window.__PICKS = {"date": null, "picks": []};
+window.__PICKS = {"date": "2026-11-19", "picks": [{"league": "NBA", "player": "Yaxel Lendeborg", "pick": "Over 6.5 Rebounds", "note": ""}, {"league": "NHL", "player": "Kirill Kaprizov", "pick": "Over 2.5 Shots on Goal", "note": ""}, {"league": "NFL", "player": "Nico Collins", "pick": "Anytime TD scorer", "note": ""}]};
