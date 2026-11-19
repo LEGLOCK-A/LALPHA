@@ -11,15 +11,27 @@ var PRIMARY = { NBA:"points", NFL:"passingYards", NHL:"points" };
 var state = {
   league:"NBA", view:"discover", stat:"All", minRate:0, win:10, sortXgf:false, sortEfg:false, rankMode:"signal",
   minGames:0, minAvg:0, randNoHalf:false, gamesFoldOpen:false, statFoldOpen:false,
+  secPlayer:true, secTeam:false,
   dirs:{Over:true, Under:true}, search:"", gameSel:null,
   injStatus:"All", injTeam:"All", idxSearch:"", logStat:"", logWin:10,
   randLeagues:{NBA:true, NFL:true, NHL:true},
+  randGames:{},
   randStats:null,
   randDir:"Both",
   streakDir:"Both",
   ws:{ pid:null, stat:"points", dir:"Over", line:0.5, split:"all", opp:null }
 };
 window.__LL = { state: state };
+/* Props view section folds (Player Props / Team Props) persist their
+   open/closed choice in localStorage — the app's other UI choices are
+   in-session only, so the folds keep their own keys. Defaults: Player
+   Props open, Team Props closed. */
+try {
+  var _secP = window.localStorage.getItem("leglock.sec.player");
+  if (_secP !== null) state.secPlayer = _secP === "1";
+  var _secT = window.localStorage.getItem("leglock.sec.team");
+  if (_secT !== null) state.secTeam = _secT === "1";
+} catch (e) {}
 
 /* ----- iOS-safe background scroll lock, shared by every popup -----
    Reference-counted: the first popup to open saves the scroll position and
@@ -1684,12 +1696,111 @@ function randStatsSummary(){
   if (labs.length > 5) return labs.slice(0, 5).join(", ") + " +" + (labs.length - 5) + " more";
   return labs.join(", ");
 }
+/* ---------- Shuffle games filter ----------
+   A "Games" row at the top of the Shuffle view: a "Today's games"
+   toggle chip plus one tappable chip per game on the slate,
+   multi-select. The slate is today's games (ET) for NBA/NHL and the
+   current Thu–Mon week for the NFL — the same windows the board and
+   the pipeline use — read from LG (the live-merged game lists),
+   falling back to the baked chunk games. "Today's games" selects the
+   whole slate; tapping it again (or Clear, which appears whenever a
+   selection exists) empties the selection, and its pressed state
+   simply reflects "the whole slate is selected". The selection lives
+   in state.randGames keyed by game id; every chip re-render prunes
+   ids whose games left the slate or whose league was switched off in
+   the Shuffle league row, so fresh games data after a poll refreshes
+   the chips without wiping a live selection. While any game is
+   selected, the deal pool keeps only props whose player is on one of
+   the selected games' two teams; every other Shuffle rule (injuries,
+   hit-rate floor, No 0.5 lines, stat picks, direction, NFL usage
+   weighting, weighted draw, short-pool honesty) applies on top,
+   unchanged. */
+function etDayStr(iso){
+  try { return new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/New_York" }); } catch (e) { return ""; }
+}
+function nflWeekDayStrs(){
+  var d = new Date(etDayStr(new Date().toISOString()) + "T12:00:00Z");
+  var dow = (d.getUTCDay() + 6) % 7;               /* Mon=0 ... Sun=6 */
+  var start = new Date(d.getTime());
+  start.setUTCDate(start.getUTCDate() - ((dow - 3 + 7) % 7));   /* back to Thursday */
+  if (d.getTime() > start.getTime() + 4 * 864e5) start.setUTCDate(start.getUTCDate() + 7);
+  var days = [];
+  for (var i = 0; i < 5; i++){
+    var x = new Date(start.getTime());
+    x.setUTCDate(x.getUTCDate() + i);
+    days.push(x.toISOString().slice(0, 10));
+  }
+  return days;
+}
+function randSlateGames(lg){
+  var all = ((window.__LL.LG || {})[lg]) || (DATA.leagues[lg] && DATA.leagues[lg].games) || [];
+  var days = lg === "NFL" ? nflWeekDayStrs() : [etDayStr(new Date().toISOString())];
+  var inDays = {};
+  days.forEach(function(x){ inDays[x] = 1; });
+  return stripGames(all.filter(function(g){ return inDays[etDayStr(g.date)]; }));
+}
+function randSelectedGames(){
+  var out = [];
+  LEAGUES.forEach(function(lg){
+    if (!state.randLeagues[lg]) return;
+    randSlateGames(lg).forEach(function(g){ if (state.randGames[g.id]) out.push({ lg: lg, g: g }); });
+  });
+  return out;
+}
+function randGameTeamSet(){
+  var set = {};
+  randSelectedGames().forEach(function(x){
+    set[x.lg + "|" + x.g.away.abbr] = 1;
+    set[x.lg + "|" + x.g.home.abbr] = 1;
+  });
+  return Object.keys(set).length ? set : null;
+}
+function renderRandGames(){
+  var wrap = $("#randGames");
+  if (!wrap) return;
+  var valid = {};
+  LEAGUES.forEach(function(lg){
+    if (!state.randLeagues[lg]) return;
+    randSlateGames(lg).forEach(function(g){ valid[g.id] = 1; });
+  });
+  Object.keys(state.randGames).forEach(function(id){ if (!valid[id]) delete state.randGames[id]; });
+  var html = "", slateCount = 0, selCount = 0;
+  LEAGUES.forEach(function(lg){
+    if (!state.randLeagues[lg]) return;
+    randSlateGames(lg).forEach(function(g){
+      slateCount++;
+      var on = !!state.randGames[g.id];
+      if (on) selCount++;
+      html += '<button class="chip" data-rg="' + esc(g.id) + '" aria-pressed="' + (on ? "true" : "false") + '">'
+        + esc(g.away.abbr) + ' @ ' + esc(g.home.abbr) + ' · ' + esc(gameStatusLine(g)) + '</button>';
+    });
+  });
+  wrap.innerHTML = html || '<span style="color:var(--ink3);font-size:12px">No games on the slate for the selected leagues.</span>';
+  $$("#randGames .chip").forEach(function(c){
+    c.addEventListener("click", function(){
+      var id = c.getAttribute("data-rg");
+      if (state.randGames[id]) delete state.randGames[id]; else state.randGames[id] = 1;
+      renderRandGames();
+      renderPoolNote(null);
+    });
+  });
+  var todayBtn = $("#randToday");
+  if (todayBtn) todayBtn.setAttribute("aria-pressed", slateCount > 0 && selCount === slateCount ? "true" : "false");
+  var clearBtn = $("#randGamesClear");
+  if (clearBtn) clearBtn.hidden = selCount === 0;
+}
+window.__LL.renderRandGames = renderRandGames;
+
 function randPool(){
   syncRandStats();
   var min = +$("#randMin").value, pool = [];
+  var gameSet = randGameTeamSet();
   LEAGUES.forEach(function(lg){
     if (!state.randLeagues[lg]) return;
     (DATA.leagues[lg].props || []).forEach(function(p){
+      /* games filter: with games selected, only the two teams in
+         those games deal */
+      if (gameSet && !gameSet[lg + "|" + p.team]) return;
       if (isInjured(lg, p)) return;
       if (lg === "NFL" && nflTdGimme(p)) return;
       if (rareUnderHidden(lg, p)) return;
@@ -1728,6 +1839,8 @@ function renderPoolNote(dealt, picks){
   var dirTxt = state.randDir === "Over" ? "Overs only" : (state.randDir === "Under" ? "Unders only" : "both directions");
   var txt = '<b>' + pool.length + '</b> props at ' + $("#randMin").value + '%+ (L10) across ' + LEAGUES.filter(function(l){ return state.randLeagues[l]; }).join(", ") + ' · ' + dirTxt + ' · stats: ' + esc(randStatsSummary()) + '.';
   if (state.randNoHalf) txt += ' 0.5 lines are excluded from the pool.';
+  var selGames = randSelectedGames();
+  if (selGames.length) txt += ' Games filter on: ' + selGames.length + ' game' + (selGames.length > 1 ? 's' : '') + ' selected — the pool only deals players from those matchups.';
   /* a control change makes any dealt set's correlation warning stale */
   if (dealt == null){ var dw0 = $("#dealWarn"); if (dw0) dw0.hidden = true; }
   if (state.randLeagues.NFL) txt += ' NFL props are usage-weighted: rising-usage players are drawn more often, and TD props need red-zone usage behind them.';
@@ -1872,6 +1985,20 @@ $$("#randDir button").forEach(function(b){
 });
 $("#randMin").addEventListener("change", function(){ renderPoolNote(null); });
 $("#randCount").addEventListener("change", function(){ renderPoolNote(null); });
+$("#randToday").addEventListener("click", function(){
+  var ids = [];
+  LEAGUES.forEach(function(lg){ if (state.randLeagues[lg]) randSlateGames(lg).forEach(function(g){ ids.push(g.id); }); });
+  var allOn = ids.length > 0 && ids.every(function(id){ return state.randGames[id]; });
+  state.randGames = {};
+  if (!allOn) ids.forEach(function(id){ state.randGames[id] = 1; });
+  renderRandGames();
+  renderPoolNote(null);
+});
+$("#randGamesClear").addEventListener("click", function(){
+  state.randGames = {};
+  renderRandGames();
+  renderPoolNote(null);
+});
 $$("#randLeagues .chip").forEach(function(c){
   c.addEventListener("click", function(){
     var lg = c.getAttribute("data-rl");
@@ -1885,10 +2012,12 @@ $$("#randLeagues .chip").forEach(function(c){
       randStatOptions().forEach(function(o){ if (o.lg === lg) state.randStats[o.id] = true; });
     }
     renderRandStats();
+    renderRandGames();
     renderPoolNote(null);
   });
 });
 renderRandStats();
+renderRandGames();
 renderPoolNote(null);
 
 /* ---------- Cheatsheets ---------- */
@@ -2199,6 +2328,91 @@ var statFoldHead = $("#statFoldHead");
 if (statFoldHead) statFoldHead.addEventListener("click", function(){ state.statFoldOpen = !state.statFoldOpen; syncStatFold(); });
 syncStatFold();
 
+/* ---------- Props view section folds + Team Props ----------
+   The Props view is two collapsible sections: Player Props (the
+   board as it always was) and Team Props (team totals, opponent
+   totals, win-by margins, first-half / first-period totals, NBA team
+   threes, NHL team shots — built by the refresh pipeline into
+   data-teams.js, exposed as TEAMS_DATA by data-merge.js). The folds
+   follow the stat-fold idiom (head button, chevron, aria-expanded,
+   hidden body) and persist per section in localStorage. Team cards
+   mirror the player cards: line box, L5/L10/L20 rates in the
+   featured direction (higher L10 rate, ties to Over), and one
+   research sub-line carrying the venue split, the opponent's
+   defensive rank, a rest flag and any top-scorer injury note. */
+function syncSec(which){
+  var cap = which === "player" ? "Player" : "Team";
+  var sec = $("#sec" + cap), body = $("#sec" + cap + "Body"), head = $("#sec" + cap + "Head");
+  if (!sec || !body || !head) return;
+  var open = which === "player" ? !!state.secPlayer : !!state.secTeam;
+  sec.classList.toggle("open", open);
+  body.hidden = !open;
+  head.setAttribute("aria-expanded", open ? "true" : "false");
+}
+function bindSec(which, key){
+  var cap = which === "player" ? "Player" : "Team";
+  var head = $("#sec" + cap + "Head");
+  if (!head) return;
+  head.addEventListener("click", function(){
+    if (which === "player") state.secPlayer = !state.secPlayer; else state.secTeam = !state.secTeam;
+    try { window.localStorage.setItem(key, (which === "player" ? state.secPlayer : state.secTeam) ? "1" : "0"); } catch (e) {}
+    syncSec(which);
+  });
+}
+bindSec("player", "leglock.sec.player");
+bindSec("team", "leglock.sec.team");
+syncSec("player");
+syncSec("team");
+
+function teamFeatured(p){
+  var c = (p.counts || {}).L10 || { o:0, u:0, n:0 };
+  if (c.o >= c.u) return { dir:"Over", hits:c.o, n:c.n, rate: c.n ? Math.round(100 * c.o / c.n) : 0 };
+  return { dir:"Under", hits:c.u, n:c.n, rate: c.n ? Math.round(100 * c.u / c.n) : 0 };
+}
+function teamRateCell(p, w){
+  var c = (p.counts || {})[w];
+  if (!c || !c.n) return '<div class="rate"><div class="lab"><span>' + w + '</span><b>—</b></div><div class="bar"><i style="width:0%"></i></div></div>';
+  var hits = teamFeatured(p).dir === "Over" ? c.o : c.u;
+  var v = Math.round(100 * hits / c.n);
+  return '<div class="rate"><div class="lab"><span>' + w + ' · ' + c.n + 'g</span><b>' + v + '%</b></div><div class="bar"><i class="' + barClass(v) + '" style="width:' + v + '%"></i></div></div>';
+}
+function teamPropCard(p){
+  var f = teamFeatured(p);
+  var meta = [];
+  if (p.venue && p.venue.n) {
+    var vh = f.dir === "Over" ? p.venue.o : p.venue.u;
+    meta.push('<span>' + (p.home ? "Home" : "Away") + ' L10: <b>' + vh + '/' + p.venue.n + '</b> ' + f.dir.toLowerCase() + '</span>');
+  }
+  if (p.oppDefRank != null) meta.push('<span>Opp defence <b>#' + p.oppDefRank + '</b> (' + fmtVal(p.oppDefAvg) + ' allowed L10)</span>');
+  if (p.b2b) meta.push('<span><b>On a back-to-back</b></span>');
+  else if (p.shortWeek) meta.push('<span><b>Short week</b> · ' + p.restDays + ' days rest</span>');
+  if (p.injuryNote) meta.push('<span><b>' + esc(p.injuryNote) + '</b></span>');
+  return '<article class="card teamcard">'
+    + '<div class="cardtop"><div class="who"><div class="nm">' + esc(p.teamName) + '</div>'
+    + '<div class="tm">' + (p.home ? "vs " : "at ") + esc(p.oppName) + ' · ' + esc(fmtD(p.gameDate)) + ' · ' + esc(p.league) + '</div></div></div>'
+    + '<div class="linebox"><span class="dir ' + (f.dir === "Over" ? "over" : "under") + '">' + f.dir + ' ' + fmtVal(p.line) + '</span>'
+    + '<span class="stat">' + esc(p.statLabel) + '</span>'
+    + '<span class="avg">L10 avg <b>' + fmtVal(p.avg) + '</b>' + (p.lineBasis === "venue" && p.venueAvg != null ? '<br>Venue avg <b>' + fmtVal(p.venueAvg) + '</b>' : '') + '</span></div>'
+    + '<div class="rates">' + teamRateCell(p, "L5") + teamRateCell(p, "L10") + teamRateCell(p, "L20") + '</div>'
+    + (meta.length ? '<div class="tmeta">' + meta.join(' · ') + '</div>' : '')
+    + '<div class="cardfoot"><span class="note">Research line from the team&rsquo;s last-10 average · hit rates vs this line</span></div>'
+    + '</article>';
+}
+function renderTeamProps(){
+  var grid = $("#teamPropGrid"), count = $("#teamPropCount");
+  if (!grid || !count) return;
+  var td = window.TEAMS_DATA;
+  var list = (td && td.leagues && td.leagues[state.league]) || [];
+  var sorted = list.slice().sort(function(a, b){ return teamFeatured(b).rate - teamFeatured(a).rate; });
+  count.textContent = sorted.length
+    ? sorted.length + " team props · " + state.league + " · sorted by L10 hit rate at the research line"
+    : "";
+  grid.innerHTML = sorted.length
+    ? sorted.slice(0, 30).map(teamPropCard).join("")
+    : '<div class="emptybox" style="grid-column:1/-1">No team props for the current slate.</div>';
+}
+window.__LL.renderTeamProps = renderTeamProps;
+
 /* ---------- Min games / Min average ----------
    Min games lives only in the Filters panel's collapsible Games
    section: the prop's game count in the selected Games window must
@@ -2262,7 +2476,7 @@ window.__LL.syncEfgUI = syncEfgUI;
 function renderAll(){
   syncXgfUI();
   syncEfgUI();
-  renderStatChips(); renderDiscover(); renderWatchlist(); renderUnderdogs(); renderSheets(); renderInjuries(); renderPlayerIndex(); renderDSeg();
+  renderStatChips(); renderDiscover(); renderTeamProps(); renderWatchlist(); renderUnderdogs(); renderSheets(); renderInjuries(); renderPlayerIndex(); renderDSeg();
   renderGamesStrip(); renderTeamH2h();
   if (window.__LL.renderWorkstation) window.__LL.renderWorkstation();
   if (window.__LL.renderLive) window.__LL.renderLive();
@@ -2977,6 +3191,7 @@ function runCheck(manual){
     renderLive();
     if (window.__LL.renderUnderdogs) window.__LL.renderUnderdogs();
     if (window.__LL.renderPlayersToWatch) window.__LL.renderPlayersToWatch();
+    if (window.__LL.renderRandGames) window.__LL.renderRandGames();
     scheduleNext();
   });
 }
@@ -3235,6 +3450,24 @@ document.addEventListener("keydown", function(e){
 });
 
 /* ---------- init ---------- */
+/* Seed LG from the baked chunks before the first paint. The strip
+   renders from LG, and if LG is empty at init (or an early fetch
+   replaced it with an empty list) the strip paints "No games on the
+   schedule" until a manual refresh forces a good fetch — the baked
+   per-league games are already in strip shape, so paint from them;
+   runCheck keeps overwriting LG with fresh data exactly as before.
+   Baked in-progress games also get clockSec parsed from their M:SS
+   clock string so the ticking clock works from first paint. */
+LEAGUES.forEach(function(lg){
+  var baked = (DATA.leagues[lg] && DATA.leagues[lg].games) || [];
+  if (baked.length && !(LG[lg] || []).length) LG[lg] = baked.slice();
+  (LG[lg] || []).forEach(function(g){
+    if (g.state === "in" && g.clock && g.clockSec == null){
+      var m = String(g.clock).match(/(\d+):(\d+)/);
+      if (m) g.clockSec = parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+    }
+  });
+});
 window.__LL.renderAll();
 var top = (DATA.leagues.NBA.props || [])[0];
 if (top) window.__LL.initWorkstation(top.pid, top.key);
