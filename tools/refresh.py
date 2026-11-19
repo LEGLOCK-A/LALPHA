@@ -974,7 +974,7 @@ PAGE_TABS = ('<nav class="tabs" aria-label="Main views">'
              '<a href="/workstation/"><span class="tab-label">Workstation</span></a>'
              '<a href="/cheatsheet/"><span class="tab-label">Cheatsheet</span></a>'
              '<a href="/logs/"><span class="tab-label">Logs</span></a>'
-             '<a href="/make-me-a-lay/"><span class="tab-label">Make me a Lay</span></a>'
+             '<a href="/make-me-a-lay/"><span class="tab-label">Shuffle</span></a>'
              '<a href="/injuries/"><span class="tab-label">Injuries</span></a></nav>')
 
 PAGE_FOOTER = ('<footer><div class="site-footer"><span class="site-footer-brand">LEGLOCK</span>'
