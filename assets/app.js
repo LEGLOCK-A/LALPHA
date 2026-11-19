@@ -11,7 +11,7 @@ var PRIMARY = { NBA:"points", NFL:"passingYards", NHL:"points" };
 var state = {
   league:"NBA", view:"discover", stat:"All", minRate:0, win:10, sortXgf:false, sortEfg:false, rankMode:"signal",
   minGames:0, minAvg:0, randNoHalf:false, gamesFoldOpen:false, statFoldOpen:false,
-  secPlayer:true, secTeam:false,
+  secPlayer:false, secTeam:false,
   dirs:{Over:true, Under:true}, search:"", gameSel:null,
   injStatus:"All", injTeam:"All", idxSearch:"", logStat:"", logWin:10,
   randLeagues:{NBA:true, NFL:true, NHL:true},
@@ -24,10 +24,13 @@ var state = {
 window.__LL = { state: state };
 /* Props view section folds (Player Props / Team Props) persist their
    open/closed choice in localStorage — the app's other UI choices are
-   in-session only, so the folds keep their own keys. Defaults: Player
-   Props open, Team Props closed. */
+   in-session only, so the folds keep their own keys. Both sections are
+   pre-collapsed by default. The player key is versioned (v2): the old
+   unversioned key may hold an "open" stored under the previous open-by-
+   default behaviour, and it must not override the new closed default;
+   it is simply ignored from now on. */
 try {
-  var _secP = window.localStorage.getItem("leglock.sec.player");
+  var _secP = window.localStorage.getItem("leglock.sec.player.v2");
   if (_secP !== null) state.secPlayer = _secP === "1";
   var _secT = window.localStorage.getItem("leglock.sec.team");
   if (_secT !== null) state.secTeam = _secT === "1";
@@ -207,6 +210,31 @@ function winStat(lg, p){
   p._wc = { w: w, v: out };
   return out;
 }
+/* A prop's hit rate at its board line over the player's whole current
+   season — the Shuffle pool's qualifying test. Same conventions as
+   winStat's log-computed windows (winVal values, so combos need all
+   three parts; a game counts only when the stat was recorded in it;
+   the featured direction p.dir against the board line p.line), but the
+   rows are this season's logs only — never logsPrev — with no slice:
+   every game the player has logged this season counts, however few.
+   No values at all returns null, and the pool treats null as not
+   qualifying, exactly like a window with no games. Cached per prop. */
+function seasonRate(lg, p){
+  if (p._sr !== undefined) return p._sr;
+  var lgData = DATA.leagues[lg] || {};
+  var rows = (lgData.logs || {})[p.pid] || [];
+  var vals = [];
+  rows.forEach(function(row){ var v = winVal(row, p.key); if (v != null) vals.push(v); });
+  var out = null;
+  if (vals.length){
+    var hits = 0;
+    vals.forEach(function(v){ if (p.dir === "Over" ? v > p.line : v < p.line) hits++; });
+    out = Math.round(100 * hits / vals.length);
+  }
+  p._sr = out;
+  return out;
+}
+window.__LL.seasonRate = seasonRate;
 
 /* ---------- Signal Score (Signal ranking mode) ----------
    SignalScore = HitRateScore × VolumeScore × SampleScore × MeaningScore,
@@ -917,6 +945,12 @@ function udStatLabel(lg, key){
   return key;
 }
 function avgOf(vals){ return vals.length ? vals.reduce(function(a, b){ return a + b; }, 0) / vals.length : null; }
+/* The Underdogs grid is recomputed on every live check, but its inputs
+   are the baked game logs (static between checks) plus the schedule —
+   so on most checks the HTML comes out byte-identical. When it does,
+   the DOM is left completely untouched: assigning the same innerHTML
+   would still recreate every card's headshot and flash them all. */
+var _udGridHtml = null;
 function renderUnderdogs(){
   var lg = state.league;
   /* NBA and NFL use the ranked Underdog Score (see renderUdScored below);
@@ -1014,7 +1048,7 @@ function renderUnderdogs(){
   var gridHtml = out.length ? shown.map(nhlCard).join("") : '<div class="emptybox">Nobody in ' + lg + ' clears the underdog bar in the current data — bottom-half baseline, last-5 at least 50% above it, and the minimum jump for the stat. The bar stays where it is; check back after more games.</div>';
   if (nmShown.length) gridHtml += '<div class="nmwrap"><div class="nmhead">Near misses</div><div class="nmsub">Close, but each missed one test — they are not on the list.</div><div class="wlist">' + nmShown.map(nhlCard).join("") + '</div></div>';
   if (out.length && !shown.length && !nmShown.length) gridHtml = '<div class="emptybox">No underdogs match your search in ' + lg + '.</div>';
-  $("#udGrid").innerHTML = gridHtml;
+  if (gridHtml !== _udGridHtml){ _udGridHtml = gridHtml; $("#udGrid").innerHTML = gridHtml; }
 }
 window.__LL.renderUnderdogs = renderUnderdogs;
 
@@ -1614,7 +1648,7 @@ function renderUdScored(lg){
     : 'No surging underdogs with a game today or tomorrow in ' + lg + '. The list only shows bottom-half players whose last-5 form is above their baseline, with their next game today or tomorrow (Eastern) — it never reaches further ahead to fill the spots.') + '</div>';
   if (nmShown.length) gridHtml += '<div class="nmwrap"><div class="nmhead">Near misses</div><div class="nmsub">Close, but each missed one test — they are not in the Top 10.</div><div class="wlist">' + nmShown.map(udCard).join("") + '</div></div>';
   if (out.length && !shown.length && !nmShown.length) gridHtml = '<div class="emptybox">No underdogs match your search in ' + lg + '.</div>';
-  $("#udGrid").innerHTML = gridHtml;
+  if (gridHtml !== _udGridHtml){ _udGridHtml = gridHtml; $("#udGrid").innerHTML = gridHtml; }
 }
 
 
@@ -1826,19 +1860,25 @@ function randPool(){
          the higher L10 hit rate). "Both" deals either; Over/Under deal only
          that side — the pool never pads with the other direction. */
       if (state.randDir && state.randDir !== "Both" && p.dir !== state.randDir) return;
-      var r = dirRate(p, "L20");
-      if (r != null && r >= min){
+      /* Qualifying test: the prop's SEASON hit rate at the board line
+         (seasonRate — this season's logs only, every game counting).
+         The entry's r stays the L20 rate: it only feeds the draw weight
+         and the combined-rate note, neither of which changed. */
+      var sr = seasonRate(lg, p);
+      if (sr != null && sr >= min){
         /* NFL usage tier for deal weighting: 0 = usage rising, 1 = steady
            or no usage data, 2 = usage falling. Other leagues stay tier 1
            (neutral weight). */
+        var r = dirRate(p, "L20");
         var tier = 1;
         if (lg === "NFL"){ var tr = nflUsageTrend(p.pid); tier = !tr ? 1 : (tr.rising ? 0 : (tr.falling ? 2 : 1)); }
-        pool.push({ p:p, lg:lg, r:r, tier:tier });
+        pool.push({ p:p, lg:lg, r: (r != null ? r : sr), tier:tier });
       }
     });
   });
   return pool;
 }
+window.__LL.randPool = randPool;
 function renderPoolNote(dealt, picks){
   if (randStatOptions().length && randSelectedCount() === 0){
     $("#poolNote").innerHTML = '<b>0</b> props in the pool — no stats selected. Tap <b>All stats</b> or pick stats to fill it.';
@@ -1846,7 +1886,7 @@ function renderPoolNote(dealt, picks){
   }
   var pool = randPool(), want = +$("#randCount").value;
   var dirTxt = state.randDir === "Over" ? "Overs only" : (state.randDir === "Under" ? "Unders only" : "both directions");
-  var txt = '<b>' + pool.length + '</b> props at ' + $("#randMin").value + '%+ (L20) across ' + LEAGUES.filter(function(l){ return state.randLeagues[l]; }).join(", ") + ' · ' + dirTxt + ' · stats: ' + esc(randStatsSummary()) + '.';
+  var txt = '<b>' + pool.length + '</b> props at ' + $("#randMin").value + '%+ (Season) across ' + LEAGUES.filter(function(l){ return state.randLeagues[l]; }).join(", ") + ' · ' + dirTxt + ' · stats: ' + esc(randStatsSummary()) + '.';
   if (state.randNoHalf) txt += ' 0.5 lines are excluded from the pool.';
   var selGames = randSelectedGames();
   if (selGames.length) txt += ' Games filter on: ' + selGames.length + ' game' + (selGames.length > 1 ? 's' : '') + ' selected — the pool only deals players from those matchups.';
@@ -2374,7 +2414,7 @@ function bindSec(which, key){
     syncSec(which);
   });
 }
-bindSec("player", "leglock.sec.player");
+bindSec("player", "leglock.sec.player.v2");
 bindSec("team", "leglock.sec.team");
 syncSec("player");
 syncSec("team");
@@ -3035,7 +3075,7 @@ function lptRowHtml(lg, p, v, oc){
   var name = p.name || pinfo.name || "";
   var avatar = pinfo.img ? '<div class="avatar"><img src="' + esc(pinfo.img) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + esc((name || "P").charAt(0)) + '\'"></div>'
                          : '<div class="avatar">' + esc((name || "P").charAt(0)) + '</div>';
-  return '<div class="lpt-row">'
+  return '<div class="lpt-row" data-lptk="' + esc(p.pid + "|" + p.key) + '">'
     + lptDisc(oc)
     + avatar
     + '<div class="lpt-main">'
@@ -3049,9 +3089,12 @@ function lptRowHtml(lg, p, v, oc){
     +   '</div></div>'
     + '</div></div>';
 }
-function lptPopupHtml(lg, g){
+/* The tracker's candidate model, shared by the block builder and the
+   in-place updater: the qualifying props for this game, in display
+   order, each with its live value and outcome. */
+function lptModel(lg, g){
   var box = BOX[g.id];
-  if (!box) return "";
+  if (!box) return [];
   var seen = {}, cands = [];
   (DATA.leagues[lg].props || []).forEach(function(p){
     var a = box.athletes[p.pid];
@@ -3065,7 +3108,7 @@ function lptPopupHtml(lg, g){
     seen[dedupe] = 1;
     cands.push({ p: p, v: v, rate: rate });
   });
-  if (!cands.length) return "";
+  if (!cands.length) return [];
   /* rank by featured-direction L10 rate, then cap — no padding */
   cands.sort(function(a, b){ return b.rate - a.rate; });
   cands = cands.slice(0, 10);
@@ -3081,10 +3124,52 @@ function lptPopupHtml(lg, g){
     if (a.grp === 1 && a.ratio !== b.ratio) return b.ratio - a.ratio;
     return 0;
   });
+  return cands;
+}
+function lptPopupHtml(lg, g){
+  var cands = lptModel(lg, g);
+  if (!cands.length) return "";
   return '<div class="lpt"><div class="lpt-title">Live props</div>' + cands.map(function(c){ return lptRowHtml(lg, c.p, c.v, c.oc); }).join("") + '</div>';
 }
+/* In-place update for one tracker row: the status disc, the outcome
+   badge, the bar fill and the value pill are rewritten in the existing
+   row — its headshot node is never touched. */
+function updLptRow(lg, row, c){
+  var p = c.p, v = c.v, oc = c.oc;
+  var ref = p.line <= 0.5 ? p.line + 1 : p.line / 0.82;
+  var fillPct = Math.max(0, Math.min(100, Math.round(1000 * v / ref) / 10));
+  var pillPct = Math.max(5, fillPct);
+  var fillCls = lptFillCls(p, v, oc);
+  var disc = row.querySelector(".lpt-disc");
+  if (disc){
+    var tmp = document.createElement("div");
+    tmp.innerHTML = lptDisc(oc);
+    if (tmp.firstChild) row.replaceChild(tmp.firstChild, disc);
+  }
+  var top = row.querySelector(".lpt-top");
+  if (top){
+    var pinfo = (DATA.leagues[lg].players || {})[p.pid] || {};
+    var name = p.name || pinfo.name || "";
+    top.innerHTML = '<span class="lpt-name">' + esc(name) + ' <b>' + p.dir + ' ' + fmtVal(p.line) + '</b></span>' + (oc.badge ? ' ' + oc.badge : '');
+  }
+  var fill = row.querySelector(".lpt-fill");
+  if (fill){ fill.className = "lpt-fill " + fillCls; fill.style.width = fillPct + "%"; }
+  var pill = row.querySelector(".lpt-pill");
+  if (pill){ pill.className = "lpt-pill " + fillCls; pill.style.left = pillPct + "%"; pill.textContent = fmtVal(v); }
+}
+/* In-place update for one Live-view game card: the shared box update
+   (scores, live marker, status line) plus the leader bolding and the
+   accessible label, all written into the existing card node. */
+function updLiveCard(card, g){
+  updGameBox(card, g);
+  var rows = $$(".gteamrow", card);
+  var aWin = g.state !== "pre" && (+g.away.score > +g.home.score), hWin = g.state !== "pre" && (+g.home.score > +g.away.score);
+  if (rows[0]) rows[0].classList.toggle("win", aWin);
+  if (rows[1]) rows[1].classList.toggle("win", hWin);
+  card.setAttribute("aria-label", (g.away.name || g.away.abbr) + " at " + (g.home.name || g.home.abbr) + ". Tap for players to watch.");
+}
 function renderLive(){
-  var html = "", totalLive = 0;
+  var totalLive = 0, model = [];
   LEAGUES.forEach(function(lg){
     /* same order as the games slider, inside each sport section: games in
        progress first, then upcoming, then finals — chronological within
@@ -3092,18 +3177,65 @@ function renderLive(){
     var games = window.__LL.stripGames ? window.__LL.stripGames(LG[lg] || []) : (LG[lg] || []);
     var live = games.filter(function(g){ return g.state === "in"; }).length;
     totalLive += live;
-    var open = liveOpenTouched[lg] ? !!liveOpen[lg] : live > 0;
-    html += '<div class="livesec' + (open ? "" : " closed") + '" data-livesec="' + lg + '">'
-      + '<button type="button" class="livesec-head" data-live-toggle="' + lg + '" aria-expanded="' + (open ? "true" : "false") + '">'
-      + '<span class="ls-name">' + lg + '</span>'
-      + '<span class="ls-count">' + live + ' live / ' + games.length + ' total</span>'
-      + '<span class="ls-chev" aria-hidden="true"></span></button>'
-      + '<div class="livesec-body">'
-      + (games.length ? '<div class="lgrid">' + games.map(function(g){ return gameCard(lg, g); }).join("") + '</div>'
-                      : '<div class="emptybox">No games today.</div>')
-      + '</div></div>';
+    model.push({ lg: lg, games: games, live: live });
   });
-  $("#liveWrap").innerHTML = html;
+  /* Keyed in-place path: when the sections and cards already in the DOM
+     are exactly the games the new data describes (same leagues, same
+     game ids per section — renderGamesStripLive keeps them ordered),
+     update scores, status lines and win markers in the existing nodes
+     instead of rebuilding #liveWrap. Rebuilding recreates every card on
+     every check; the in-place path leaves the DOM — and anything in it
+     still loading — alone. A structure change (a game appears or
+     disappears, a section gains or loses its last game) takes the full
+     build below, exactly as before. */
+  var wrap = $("#liveWrap");
+  var secs = wrap ? $$(".livesec", wrap) : [];
+  var canPatch = secs.length === model.length;
+  if (canPatch){
+    model.forEach(function(m, i){
+      if (!canPatch) return;
+      var sec = secs[i];
+      if (sec.getAttribute("data-livesec") !== m.lg){ canPatch = false; return; }
+      m._sec = sec;
+      var grid = sec.querySelector(".lgrid");
+      if (!m.games.length){ if (grid) canPatch = false; return; }
+      if (!grid){ canPatch = false; return; }
+      var cards = $$(".game", grid);
+      if (cards.length !== m.games.length){ canPatch = false; return; }
+      var byId = {};
+      cards.forEach(function(c){ byId[c.getAttribute("data-pw-gid")] = c; });
+      m.games.forEach(function(g){ if (!byId[String(g.id)]) canPatch = false; });
+      m._byId = byId;
+    });
+  }
+  if (canPatch){
+    model.forEach(function(m){
+      m.games.forEach(function(g){ updLiveCard(m._byId[String(g.id)], g); });
+      var cnt = m._sec.querySelector(".ls-count");
+      if (cnt) cnt.textContent = m.live + " live / " + m.games.length + " total";
+      if (!liveOpenTouched[m.lg]){
+        var open = m.live > 0;
+        m._sec.classList.toggle("closed", !open);
+        var head = m._sec.querySelector(".livesec-head");
+        if (head) head.setAttribute("aria-expanded", open ? "true" : "false");
+      }
+    });
+  } else {
+    var html = "";
+    model.forEach(function(m){
+      var open = liveOpenTouched[m.lg] ? !!liveOpen[m.lg] : m.live > 0;
+      html += '<div class="livesec' + (open ? "" : " closed") + '" data-livesec="' + m.lg + '">'
+        + '<button type="button" class="livesec-head" data-live-toggle="' + m.lg + '" aria-expanded="' + (open ? "true" : "false") + '">'
+        + '<span class="ls-name">' + m.lg + '</span>'
+        + '<span class="ls-count">' + m.live + ' live / ' + m.games.length + ' total</span>'
+        + '<span class="ls-chev" aria-hidden="true"></span></button>'
+        + '<div class="livesec-body">'
+        + (m.games.length ? '<div class="lgrid">' + m.games.map(function(g){ return gameCard(m.lg, g); }).join("") + '</div>'
+                          : '<div class="emptybox">No games today.</div>')
+        + '</div></div>';
+    });
+    if (wrap) wrap.innerHTML = html;
+  }
   var meta = totalLive
     ? totalLive + ' game' + (totalLive > 1 ? "s" : "") + ' in progress — scores and player stats update in place about every 20 seconds.'
     : 'Nothing in progress right now — the page still checks about every minute for games starting.';
@@ -3233,18 +3365,23 @@ setInterval(function(){
 }, 1000);
 
 /* ---------- games strip: in-place text updates for scores/clocks ---------- */
-window.__LL.renderGamesStripLive = function(){
-  function updBox(box, g){
-    if (!g) return;
-    var aS = box.querySelector('[data-score="away"]'), hS = box.querySelector('[data-score="home"]');
-    if (g.state !== "pre"){
-      if (aS) aS.textContent = g.away.score || "0";
-      if (hS) hS.textContent = g.home.score || "0";
-    }
-    box.classList.toggle("is-live", g.state === "in");
-    var tm = box.querySelector(".time");
-    if (tm && window.__LL.gameStatusLine) tm.textContent = window.__LL.gameStatusLine(g);
+/* One in-place game-box update shared by the strip, the Live view and
+   the clock ticker: scores, the live marker and the status line are
+   written into the existing nodes — the box itself is never recreated,
+   so nothing in it can flash or reload. */
+function updGameBox(box, g){
+  if (!box || !g) return;
+  var aS = box.querySelector('[data-score="away"]'), hS = box.querySelector('[data-score="home"]');
+  if (g.state !== "pre"){
+    if (aS) aS.textContent = g.away.score || "0";
+    if (hS) hS.textContent = g.home.score || "0";
   }
+  box.classList.toggle("is-live", g.state === "in");
+  var tm = box.querySelector(".time");
+  if (tm && window.__LL.gameStatusLine) tm.textContent = window.__LL.gameStatusLine(g);
+}
+window.__LL.renderGamesStripLive = function(){
+  var updBox = updGameBox;
   $$("#gamesStrip .game").forEach(function(chip){
     var id = chip.getAttribute("data-gid");
     updBox(chip, (LG[S.league] || []).filter(function(x){ return x.id === id; })[0]);
@@ -3293,6 +3430,10 @@ window.__LL.renderGamesStripLive = function(){
 
 /* ================= Players to Watch popup (z-index 900 — game log opens above it) ================= */
 var pwCtx = null;
+/* Structure signatures for the popup's in-place live updates: the teams
+   body's shape last built, and the tracker block's row keys. A matching
+   signature means a re-check may only touch values, never rebuild. */
+var pwBuiltSig = null, pwLptKeys = null;
 function pwStatVal(stats, key){
   if (!stats) return null;
   if (key === "combo"){
@@ -3364,15 +3505,22 @@ function renderPw(){
   if (g.spread || g.total) sub += " \u00B7 " + (g.spread || "") + (g.total ? " O/U " + g.total : "");
   $("#pwSub").textContent = sub.trim();
   var box = BOX[g.id];
-  var body = "";
+  /* The popup body is built from a small model: the two team sections,
+     their top players and each player's prop rows, every row carrying
+     the live value data an in-place update needs. The signature
+     captures structure only (game, state, box-score presence, teams,
+     players, prop keys) — never values. When the signature matches
+     what is already in the DOM, a live re-check updates team scores,
+     row values, badges and bars in the existing nodes; rebuilding the
+     body would recreate every headshot in it and flash them all on
+     every check. A structure change (the state flips, the box score
+     first arrives, another game opens) takes the full build below. */
+  var teams = [], rows = [], sigParts = [pwCtx.gid, g.state, box ? "box" : "nobox"];
   [g.away, g.home].forEach(function(tm){
     var tops = pwTopPlayers(lg, tm.abbr);
-    body += '<div class="pwteam"><h4>' + esc(tm.abbr) + ' <span>' + esc(tm.name || "") + (g.state === "pre" ? "" : " \u00B7 " + esc(tm.score || "0")) + '</span></h4>';
-    if (!tops.length){ body += '<div class="emptybox">No tracked players for ' + esc(tm.abbr) + ' in the ' + lg + ' pool.</div></div>'; return; }
+    sigParts.push(tm.abbr);
+    var tmodel = { tm: tm, tops: [] };
     tops.forEach(function(tp){
-      var pinfo = (DATA.leagues[lg].players || {})[tp.pid] || {};
-      var img = pinfo.img ? '<div class="avatar"><img src="' + esc(pinfo.img) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + esc((tp.name || "P").charAt(0)) + '\'"></div>'
-                          : '<div class="avatar">' + esc((tp.name || "P").charAt(0)) + '</div>';
       var prows = tp.props.slice(0, 4);
       /* NBA: the 3PM prop always gets a row too, so live progress toward the
          3-pointers line shows like every other tracked stat */
@@ -3381,30 +3529,132 @@ function renderPw(){
         tp.props.forEach(function(x){ if (x.key === "threePointersMade") p3 = x; });
         if (p3 && prows.indexOf(p3) < 0) prows.push(p3);
       }
-      body += '<div class="pwplayer"><button class="pwhead" data-open-logs="' + esc(tp.pid) + '" data-stat-key="' + esc(PRIMARY[lg]) + '" data-lg="' + esc(lg) + '">' + img
-        + '<span class="who"><span class="nm">' + esc(tp.name) + '</span><span class="tm">' + esc(tm.abbr) + (pinfo.pos ? ' \u00B7 ' + esc(pinfo.pos) : '') + ' \u00B7 tap for game log</span></span><span class="golog">Log \u203A</span></button>'
-        + prows.map(function(pr){ return pwPropRow(pr, box, g.state, lg); }).join("") + '</div>';
+      sigParts.push(tp.pid);
+      var prowModels = prows.map(function(pr){
+        sigParts.push(pr.key);
+        var m = { p: pr, v: null, oc: null, pct: null };
+        if (started && box){
+          var a = box.athletes[pr.pid];
+          var v = a ? pwStatVal(a.stats, pr.key) : null;
+          if (v != null){
+            m.v = v;
+            m.pct = pr.line > 0 ? Math.min(100, Math.round(100 * v / pr.line)) : 100;
+            m.oc = pwOutcome(pr, v, g.state === "post");
+          }
+        }
+        rows.push(m);
+        return m;
+      });
+      tmodel.tops.push({ tp: tp, prows: prowModels });
     });
-    body += '</div>';
+    teams.push(tmodel);
   });
-  if (started && !box) body += '<div style="color:var(--ink3);font-size:12.5px;margin-top:10px">Loading player stats for this game\u2026</div>';
-  /* in-progress games only: the bar-style Live props tracker goes at the
+  var sig = sigParts.join("|");
+  var bodyEl = $("#pwBody");
+  var patched = false;
+  if (bodyEl && sig === pwBuiltSig){
+    var secEls = $$("#pwBody .pwteam");
+    var btns = $$("#pwBody .pwprow");
+    if (secEls.length === 2 && btns.length === rows.length){
+      teams.forEach(function(tmodel, ti){
+        var span = secEls[ti] ? secEls[ti].querySelector("h4 span") : null;
+        if (span) span.textContent = (tmodel.tm.name || "") + (g.state === "pre" ? "" : " \u00B7 " + (tmodel.tm.score || "0"));
+      });
+      if (started && box){
+        rows.forEach(function(m, i){
+          var btn = btns[i]; if (!btn) return;
+          var valEl = btn.querySelector(".pwval");
+          var bar = btn.nextElementSibling;
+          if (!bar || !bar.classList.contains("pwbar")) bar = null;
+          if (m.v == null){
+            if (valEl) valEl.textContent = "\u2014";
+            if (bar) bar.parentNode.removeChild(bar);
+          } else {
+            if (valEl) valEl.innerHTML = fmtVal(m.v) + (m.oc.badge ? " " + m.oc.badge : "");
+            if (!bar){
+              bar = document.createElement("div");
+              bar.className = "bar pwbar";
+              bar.innerHTML = "<i></i>";
+              btn.parentNode.insertBefore(bar, btn.nextSibling);
+            }
+            var fill = bar.querySelector("i");
+            if (fill){ fill.className = m.oc.cls; fill.style.width = m.pct + "%"; }
+          }
+        });
+      }
+      patched = true;
+    }
+  }
+  if (!patched && bodyEl){
+    var body = "";
+    teams.forEach(function(tmodel){
+      var tm = tmodel.tm;
+      body += '<div class="pwteam"><h4>' + esc(tm.abbr) + ' <span>' + esc(tm.name || "") + (g.state === "pre" ? "" : " \u00B7 " + esc(tm.score || "0")) + '</span></h4>';
+      if (!tmodel.tops.length){ body += '<div class="emptybox">No tracked players for ' + esc(tm.abbr) + ' in the ' + lg + ' pool.</div></div>'; return; }
+      tmodel.tops.forEach(function(tw){
+        var tp = tw.tp;
+        var pinfo = (DATA.leagues[lg].players || {})[tp.pid] || {};
+        var img = pinfo.img ? '<div class="avatar"><img src="' + esc(pinfo.img) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + esc((tp.name || "P").charAt(0)) + '\'"></div>'
+                            : '<div class="avatar">' + esc((tp.name || "P").charAt(0)) + '</div>';
+        body += '<div class="pwplayer"><button class="pwhead" data-open-logs="' + esc(tp.pid) + '" data-stat-key="' + esc(PRIMARY[lg]) + '" data-lg="' + esc(lg) + '">' + img
+          + '<span class="who"><span class="nm">' + esc(tp.name) + '</span><span class="tm">' + esc(tm.abbr) + (pinfo.pos ? ' \u00B7 ' + esc(pinfo.pos) : '') + ' \u00B7 tap for game log</span></span><span class="golog">Log \u203A</span></button>'
+          + tw.prows.map(function(m){ return pwPropRow(m.p, box, g.state, lg); }).join("") + '</div>';
+      });
+      body += '</div>';
+    });
+    if (started && !box) body += '<div style="color:var(--ink3);font-size:12.5px;margin-top:10px">Loading player stats for this game\u2026</div>';
+    bodyEl.innerHTML = body;
+    pwBuiltSig = sig;
+    pwLptKeys = null;   /* a rebuilt body takes any tracker block with it */
+  }
+  /* In-progress games only: the bar-style Live props tracker goes at the
      very bottom of the popup, below everything the popup already shows —
      nothing above it changes. No qualifying props (or no box score yet)
      means no block at all, never an empty heading. renderPw re-runs on
      every live check while the popup is open (and once the on-open box
-     score fetch lands), so the block stays current on the same ~20s
-     cycle as the rest of the popup — no separate timer. */
-  if (g.state === "in"){
-    var lptHtml = lptPopupHtml(lg, g);
-    if (lptHtml) body += lptHtml;
+     score fetch lands), so the block stays current on the same cycle as
+     the rest of the popup — no separate timer. While the tracked set is
+     unchanged, its rows update in place (re-appended into display order
+     when the ranking moves); the block is rebuilt only when the set
+     itself changes, e.g. a player records a tracked stat for the first
+     time. */
+  if (g.state === "in" && bodyEl){
+    var cands = lptModel(lg, g);
+    var keys = cands.map(function(c){ return c.p.pid + "|" + c.p.key; });
+    var lptEl = bodyEl.querySelector(".lpt");
+    var sameSet = false;
+    if (lptEl && pwLptKeys && pwLptKeys.length === keys.length){
+      var keySet = {};
+      pwLptKeys.forEach(function(k){ keySet[k] = 1; });
+      sameSet = keys.every(function(k){ return keySet[k]; });
+    }
+    if (sameSet){
+      var rowByKey = {};
+      $$(".lpt-row", lptEl).forEach(function(r){ rowByKey[r.getAttribute("data-lptk")] = r; });
+      cands.forEach(function(c){
+        var row = rowByKey[c.p.pid + "|" + c.p.key];
+        if (!row) return;
+        lptEl.appendChild(row);
+        updLptRow(lg, row, c);
+      });
+      pwLptKeys = keys;
+    } else {
+      if (lptEl) lptEl.parentNode.removeChild(lptEl);
+      if (cands.length){
+        var tmp = document.createElement("div");
+        tmp.innerHTML = lptPopupHtml(lg, g);
+        if (tmp.firstChild) bodyEl.appendChild(tmp.firstChild);
+      }
+      pwLptKeys = cands.length ? keys : null;
+    }
   }
-  $("#pwBody").innerHTML = body;
   /* player heads + prop rows carry data-open-logs: the shared delegated
      handler opens the log popup on top, so live re-renders need no rebinding */
 }
+
 function openPw(lg, gid){
   pwCtx = { lg: lg, gid: gid };
+  pwBuiltSig = null; pwLptKeys = null;
   var hp = $("#pwH2hPanel"); hp.className = "h2hpanel"; hp.innerHTML = "";
   $("#pwH2hBtn").setAttribute("aria-expanded", "false");
   var pwWasOpen = $("#pwModal").classList.contains("open");
@@ -3425,6 +3675,7 @@ function closePw(){
   var wasOpen = m.classList.contains("open");
   m.classList.remove("open");
   pwCtx = null;
+  pwBuiltSig = null; pwLptKeys = null;
   if (!$("#logModal").classList.contains("open")) document.body.classList.remove("modal-open");
   if (wasOpen && window.__LL.unlockScroll) window.__LL.unlockScroll();
 }

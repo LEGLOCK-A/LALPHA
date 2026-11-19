@@ -159,9 +159,9 @@
      leglock.sec.team in localStorage); Player Props starts open,
      Team Props closed. */
   .propsec{margin:10px 0 2px}
-  .propsec-head{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 2px;min-height:40px;cursor:pointer;color:var(--ink);text-align:left;font-family:inherit;-webkit-tap-highlight-color:transparent}
-  .propsec-head .gf-title{font-size:16px;font-weight:700;letter-spacing:.01em;color:var(--ink)}
-  .propsec-head .gf-chev{margin-left:auto;flex:none;width:10px;height:10px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:rotate(-45deg);transition:transform .18s ease}
+  .propsec-head{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 2px;min-height:46px;cursor:pointer;color:var(--ink);text-align:left;font-family:inherit;-webkit-tap-highlight-color:transparent}
+  .propsec-head .gf-title{font-size:21px;font-weight:700;letter-spacing:.01em;color:var(--ink)}
+  .propsec-head .gf-chev{margin-left:auto;flex:none;width:13px;height:13px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:rotate(-45deg);transition:transform .18s ease}
   .propsec.open .propsec-head .gf-chev{transform:rotate(45deg)}
   .propsec-body{padding-top:6px}
   .propsec-body[hidden]{display:none}
