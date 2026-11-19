@@ -2,6 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<!-- Consent Mode v2 defaults - must stay before the Google tag:
+     analytics and ad storage start denied; assets/consent.js applies
+     the visitor's stored choice (or region decision) as an update. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'analytics_storage': 'denied',
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJB3JWSKZB"></script>
 <script>
@@ -651,5 +665,6 @@
 </script>
 <script src="/assets/app.js"></script>
 <script>if (window.showView) showView("randomizer");</script>
+<script src="/assets/consent.js" defer></script>
 </body>
 </html>
