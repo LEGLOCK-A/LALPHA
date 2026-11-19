@@ -2913,7 +2913,7 @@ function updateStamp(){
 function scheduleNext(){
   clearTimeout(pollTimer);
   if (document.hidden) return;
-  pollTimer = setTimeout(function(){ runCheck(false); }, anyLive() ? 20000 : 60000);
+  pollTimer = setTimeout(function(){ runCheck(false); }, anyLive() ? 10000 : 60000);
 }
 function fetchJson(url){
   return fetch(url, { cache: "no-store" }).then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); });
