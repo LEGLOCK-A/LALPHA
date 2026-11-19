@@ -2905,6 +2905,7 @@ document.addEventListener("click", function(e){
 var lastCheckedAt = null, liveUpdatedAt = null, checking = false, pollTimer = null;
 function updateStamp(){
   var dot = $("#liveDot"), el = $("#liveStamp");
+  if (!dot || !el) return;
   var live = anyLive();
   dot.className = "livedot" + (live ? " on" : "");
   if (live) el.textContent = 'Live — updated ' + (liveUpdatedAt ? fmtTime(liveUpdatedAt) : "—") + ' · checked ' + (lastCheckedAt ? fmtTime(lastCheckedAt) : "—") + ' · auto-checks ~20s';
