@@ -1993,7 +1993,14 @@ function etDayStrPlus(n){
   return etDayStr(new Date(Date.now() + n * 864e5).toISOString());
 }
 function randSlateGames(lg){
-  var all = ((window.__LL.LG || {})[lg]) || (DATA.leagues[lg] && DATA.leagues[lg].games) || [];
+  /* Merge the baked slate with the live one by id instead of picking one:
+     the baked chunks span today + tomorrow, the live list is fresher for
+     states and scores. Live wins on conflict, so a game that has tipped
+     off (or finished) since the bake drops out of the pre filter. */
+  var byId = {}, all = [];
+  ((DATA.leagues[lg] && DATA.leagues[lg].games) || []).forEach(function(g){ if (g && g.id) byId[g.id] = g; });
+  (((window.__LL.LG || {})[lg]) || []).forEach(function(g){ if (g && g.id) byId[g.id] = g; });
+  Object.keys(byId).forEach(function(k){ all.push(byId[k]); });
   var days = lg === "NFL" ? nflWeekDayStrs() : [etDayStr(new Date().toISOString()), etDayStrPlus(1)];
   var inDays = {};
   days.forEach(function(x){ inDays[x] = 1; });
@@ -3772,7 +3779,19 @@ function fetchJson(url){
    fetch for the following day is merged in by game id, so today's games
    (live, finals and upcoming) never drop out when next-day games are added */
 function etDayOf(iso){
-  try { return etYMD(iso); } catch(e){ return ""; }
+  /* Self-contained on purpose: etYMD lives in another IIFE and is NOT in
+     scope here — calling it threw, the catch swallowed it, and every
+     caller downstream silently got "" (which killed the dated fetches). */
+  try {
+    var parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(iso));
+    var y = "", m = "", d = "";
+    for (var i = 0; i < parts.length; i++){
+      if (parts[i].type === "year") y = parts[i].value;
+      else if (parts[i].type === "month") m = parts[i].value;
+      else if (parts[i].type === "day") d = parts[i].value;
+    }
+    return (y && m && d) ? (y + "-" + m + "-" + d) : "";
+  } catch(e){ return ""; }
 }
 function nextDayParam(games){
   var base = "";
@@ -3796,15 +3815,27 @@ function runCheck(manual){
   if (btn){ btn.disabled = true; }
   var sbDone = LEAGUES.map(function(lg){
     var url = "https://site.api.espn.com/apis/site/v2/sports/" + SITE[lg] + "/scoreboard";
-    return fetchJson(url).then(function(json){
-      var today = parseScoreboard(json);
-      var param = nextDayParam(today);
-      if (!param){ LG[lg] = today; return true; }
-      return fetchJson(url + "?dates=" + param).then(function(json2){
-        LG[lg] = mergeGameLists(today, parseScoreboard(json2));
-        return true;
-      }).catch(function(){ LG[lg] = today; return true; });
-    }).catch(function(){ return false; });
+    /* Default slate + explicit today/tomorrow (ET) dated slates, merged by
+       id. The old chain derived the dated fetch from the default slate's
+       latest game, so when the default slate lagged a day behind (ESPN
+       serves yesterday's finals well past midnight ET) the fetch landed on
+       the wrong day and the merged list lost every upcoming game. Any
+       source may fail on its own; LG is only replaced when the merge
+       produced games, so a bad check never wipes the baked slate. */
+    var dayParam = function(iso){ var d = etDayOf(iso); return d ? d.replace(/-/g, "") : ""; };
+    var pToday = dayParam(new Date().toISOString());
+    var pTomorrow = dayParam(new Date(Date.now() + 864e5).toISOString());
+    var urls = [url];
+    if (pToday) urls.push(url + "?dates=" + pToday);
+    if (pTomorrow && pTomorrow !== pToday) urls.push(url + "?dates=" + pTomorrow);
+    return Promise.all(urls.map(function(u){
+      return fetchJson(u).then(function(json){ return parseScoreboard(json); }).catch(function(){ return null; });
+    })).then(function(lists){
+      var merged = [];
+      lists.forEach(function(l){ if (l) merged = mergeGameLists(merged, l); });
+      if (merged.length) LG[lg] = merged;
+      return merged.length > 0;
+    });
   });
   Promise.all(sbDone).then(function(){
     var liveGames = [];
