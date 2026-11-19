@@ -2561,6 +2561,26 @@ function teamPropCard(p){
     + '<div class="cardfoot"><span class="note">Research line from the team&rsquo;s last-10 average · hit rates vs this line</span></div>'
     + '</article>';
 }
+/* Expanded Team Props grid only: the SAME ranked, capped list,
+   grouped by team so the grid reads team by team instead of one
+   long mixed run. Groups appear in first-appearance order (the
+   order each team's highest-ranked prop appears in the ranking);
+   cards inside a group keep their ranked order. Which props
+   qualify, the ranking and the cap are untouched — and the
+   collapsed preview keeps the overall top 2, ungrouped. */
+function teamGroupsHtml(shown){
+  var order = [], byTeam = {};
+  shown.forEach(function(p){
+    if (!byTeam[p.team]){ byTeam[p.team] = []; order.push(p.team); }
+    byTeam[p.team].push(p);
+  });
+  return order.map(function(t){
+    var props = byTeam[t], first = props[0];
+    var label = first.teamName ? first.teamName + " (" + t + ")" : t;
+    return '<div class="teamgroup"><div class="teamgroup-head">' + esc(label) + '</div>'
+      + '<div class="grid">' + props.map(teamPropCard).join("") + '</div></div>';
+  }).join("");
+}
 function renderTeamProps(){
   var grid = $("#teamPropGrid"), count = $("#teamPropCount");
   if (!grid || !count) return;
@@ -2572,7 +2592,7 @@ function renderTeamProps(){
     ? sorted.length + " team props · " + state.league + " · sorted by L10 hit rate at the research line"
     : "";
   grid.innerHTML = sorted.length
-    ? sorted.slice(0, 30).map(teamPropCard).join("")
+    ? teamGroupsHtml(sorted.slice(0, 30))
     : '<div class="emptybox" style="grid-column:1/-1">No team props for the current slate.</div>';
   renderTeamSecPreview();
 }
