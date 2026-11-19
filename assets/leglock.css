@@ -267,7 +267,7 @@ footer{margin-top:28px}
 .site-footer{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px}
 .site-footer-brand{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--dim)}
 .site-footer-links{display:flex;flex-wrap:wrap;gap:4px 14px}
-.site-footer-links button{background:none;border:0;padding:4px 2px;font-size:12px;font-weight:700;color:var(--dim);text-decoration:underline;text-underline-offset:3px}
+.site-footer-links button{background:none;border:0;padding:4px 2px;font-size:12px;font-weight:700;color:var(--dim);text-decoration:none}
 .site-footer-links button:hover{color:var(--text)}
 .modalwrap.info-modalwrap{z-index:65}
 .info-body{margin-top:6px}
@@ -284,7 +284,7 @@ footer{margin-top:28px}
 .tabs a[aria-current="page"] .tab-count{background:var(--bg);color:var(--text)}
 @media (max-width:760px){.tabs a{flex:1 1 auto;min-width:0;padding:4px 5px;font-size:9.5px;letter-spacing:-.01em;gap:2px}}
 @media (max-width:400px){.tabs a{padding:4px 4px;font-size:9px}}
-.site-footer-links a{background:none;border:0;padding:4px 2px;font-size:12px;font-weight:700;color:var(--dim);text-decoration:underline;text-underline-offset:3px}
+.site-footer-links a{background:none;border:0;padding:4px 2px;font-size:12px;font-weight:700;color:var(--dim);text-decoration:none}
 .site-footer-links a:hover{color:var(--text)}
 .info-inline-link{color:var(--accent-ink);font-weight:700}
 

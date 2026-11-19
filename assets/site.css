@@ -575,7 +575,7 @@
 
   /* ---------- Info pages (Privacy / About / Guides / Responsible Play / Contact) ---------- */
   .footlinks{display:flex;gap:4px 18px;flex-wrap:wrap;flex-basis:100%;margin-bottom:2px}
-  .footlinks button{background:none;border:0;padding:4px 2px;color:var(--accent-ink);font-weight:700;font-size:13px;min-height:32px;text-decoration:underline;text-underline-offset:3px}
+  .footlinks button{background:none;border:0;padding:4px 2px;color:var(--accent-ink);font-weight:700;font-size:13px;min-height:32px;text-decoration:none}
   .doc{max-width:780px}
   .docnav{display:flex;gap:7px;flex-wrap:wrap;margin:2px 0 9px}
   .backbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);border-radius:9px;padding:5px 11px;font-weight:700;font-size:13px;min-height:34px;box-shadow:var(--shadow)}
