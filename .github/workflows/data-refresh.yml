@@ -11,7 +11,7 @@ name: Data refresh
 
 on:
   schedule:
-    - cron: "*/1 * * * *"
+    - cron: "*/2 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -42,7 +42,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/data-nba.js assets/data-nba-prev.js assets/data-nfl.js assets/data-nfl-prev.js assets/data-nhl.js assets/data-nhl-prev.js assets/data-merge.js assets/nfl-usage.js nba/index.html nhl/index.html nfl/index.html sitemap.xml
+          git add -A -- assets nba nhl nfl archive sitemap.xml
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit."
           else
