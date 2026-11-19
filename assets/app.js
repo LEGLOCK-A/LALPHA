@@ -2550,7 +2550,7 @@ function teamPropCard(p){
   if (p.b2b) meta.push('<span><b>On a back-to-back</b></span>');
   else if (p.shortWeek) meta.push('<span><b>Short week</b> · ' + p.restDays + ' days rest</span>');
   if (p.injuryNote) meta.push('<span><b>' + esc(p.injuryNote) + '</b></span>');
-  return '<article class="card teamcard">'
+  return '<article class="card teamcard tcard">'
     + '<div class="cardtop"><div class="who"><div class="nm">' + esc(p.teamName) + '</div>'
     + '<div class="tm">' + (p.home ? "vs " : "at ") + esc(p.oppName) + ' · ' + esc(fmtD(p.gameDate)) + ' · ' + esc(p.league) + '</div></div></div>'
     + '<div class="linebox"><span class="dir ' + (f.dir === "Over" ? "over" : "under") + '">' + f.dir + ' ' + fmtVal(p.line) + '</span>'
@@ -2561,13 +2561,13 @@ function teamPropCard(p){
     + '<div class="cardfoot"><span class="note">Research line from the team&rsquo;s last-10 average · hit rates vs this line</span></div>'
     + '</article>';
 }
-/* Expanded Team Props grid only: the SAME ranked, capped list,
-   grouped by team so the grid reads team by team instead of one
-   long mixed run. Groups appear in first-appearance order (the
-   order each team's highest-ranked prop appears in the ranking);
-   cards inside a group keep their ranked order. Which props
-   qualify, the ranking and the cap are untouched — and the
-   collapsed preview keeps the overall top 2, ungrouped. */
+/* Expanded Team Props grid only: the SAME ranked list, grouped
+   by team so the grid reads team by team instead of one long
+   mixed run. Groups appear in first-appearance order (the order
+   each team's highest-ranked prop appears in the ranking); cards
+   inside a group keep their ranked order. Which props qualify
+   and the ranking are untouched — and the collapsed preview
+   keeps the overall top 2, ungrouped. */
 function teamGroupsHtml(shown){
   var order = [], byTeam = {};
   shown.forEach(function(p){
@@ -2591,8 +2591,11 @@ function renderTeamProps(){
   count.textContent = sorted.length
     ? sorted.length + " team props · " + state.league + " · sorted by L10 hit rate at the research line"
     : "";
+  /* No display cap: the grouped grid shows every team's props
+     (the data itself is bounded by teams x stats per league).
+     The 500 slice is only a pathological-data safety bound. */
   grid.innerHTML = sorted.length
-    ? teamGroupsHtml(sorted.slice(0, 30))
+    ? teamGroupsHtml(sorted.slice(0, 500))
     : '<div class="emptybox" style="grid-column:1/-1">No team props for the current slate.</div>';
   renderTeamSecPreview();
 }

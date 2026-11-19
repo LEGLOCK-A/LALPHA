@@ -279,6 +279,25 @@
   .openbtn{margin-left:auto;border:1px solid var(--line2);background:var(--surface);color:var(--ink2);border-radius:8px;font-weight:300;font-size:12.5px;padding:5px 11px;min-height:34px}
   .openbtn:hover{border-color:var(--accent);color:var(--accent-ink)}
   .emptybox{border:1.5px dashed var(--line2);border-radius:var(--radius);padding:19px 14px;text-align:center;color:var(--ink3);background:var(--surface)}
+  /* team prop cards, compact (.tcard): the team board lists every
+     team in the league, so team cards run tighter than player
+     cards — less padding, smaller gaps, smaller secondary type,
+     slimmer rate bars. Same information, smaller footprint.
+     Player cards (.card without .tcard) are untouched. */
+  .card.tcard{padding:6px;gap:4px;border-radius:11px}
+  .tcard .cardtop{gap:5px}
+  .tcard .who .nm{font-size:13.5px}
+  .tcard .who .tm{font-size:11px;margin-top:0;line-height:1.25}
+  .tcard .linebox{padding:5px 8px;gap:6px;border-radius:8px}
+  .tcard .linebox .dir{font-size:14px}
+  .tcard .linebox .stat{font-size:11.5px}
+  .tcard .linebox .avg{font-size:10.5px;line-height:1.25}
+  .tcard .linebox .avg b{font-size:11.5px}
+  .tcard .rates{gap:5px}
+  .tcard .rate .lab{font-size:9.5px;margin-bottom:2px}
+  .tcard .bar{height:5px}
+  .tcard .tmeta{font-size:11px;line-height:1.3}
+  .tcard .cardfoot .note{font-size:10.5px;line-height:1.3}
 
   /* ---------- Watchlist ---------- */
   .wlist{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -782,6 +801,22 @@
     .bar{height:4px}
     .cardfoot{gap:4px}
     .cardfoot .note{font-size:8.5px;line-height:1.25}
+    /* team prop cards, phone-compact: a further step down from the
+       phone player-card sizes above, so a full league of team
+       props stays scrollable */
+    .card.tcard{padding:4px;gap:3px;border-radius:8px}
+    .tcard .who .nm{font-size:10px}
+    .tcard .who .tm{font-size:8px;margin-top:0;line-height:1.2}
+    .tcard .linebox{padding:2px 5px;gap:4px;border-radius:6px}
+    .tcard .linebox .dir{font-size:11px}
+    .tcard .linebox .stat{font-size:8.5px}
+    .tcard .linebox .avg{font-size:8px;line-height:1.2}
+    .tcard .linebox .avg b{font-size:8.5px}
+    .tcard .rates{gap:2px}
+    .tcard .rate .lab{font-size:7.5px;margin-bottom:0}
+    .tcard .bar{height:3px}
+    .tcard .tmeta{font-size:9px;line-height:1.25}
+    .tcard .cardfoot .note{font-size:8px;line-height:1.2}
     .openbtn{padding:3px 7px;min-height:26px;font-size:10.5px;border-radius:6px}
     .emptybox{padding:11px 8px;font-size:11px;border-radius:9px}
     .wlist{gap:6px}
