@@ -37,7 +37,7 @@
   .wrap{max-width:1180px;margin:0 auto;padding:0 14px 40px}
   .brand{text-align:center;padding:9px 0 2px}
   .brand img{width:min(430px,86vw);height:auto;display:block;margin:0 auto}
-  .brand .tagline{color:var(--ink3);font-size:13px;margin-top:2px}
+  .brand .tagline{color:var(--accent);font-size:13px;margin-top:2px}
   .livestamp{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;color:var(--ink3);font-size:12px;padding:5px 0 0}
   .livedot{width:8px;height:8px;border-radius:50%;background:var(--skel2);flex:none}
   .livedot.on{background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
