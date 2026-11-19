@@ -126,12 +126,12 @@
 
   <!-- ======= PROPS (Top Props / Streaks / Watchlist — one board, three cuts) ======= -->
   <section class="view" id="view-discover">
-    <div class="propsec open" id="secPlayer">
-      <button class="propsec-head" id="secPlayerHead" type="button" aria-expanded="true" aria-controls="secPlayerBody">
+    <div class="propsec" id="secPlayer">
+      <button class="propsec-head" id="secPlayerHead" type="button" aria-expanded="false" aria-controls="secPlayerBody">
         <span class="gf-title">Player Props</span>
         <span class="gf-chev" aria-hidden="true"></span>
       </button>
-      <div class="propsec-body" id="secPlayerBody">
+      <div class="propsec-body" id="secPlayerBody" hidden>
     <div class="sechead">
       <h2 id="discoverTitle">Prop Board</h2>
       <span class="sub">Lines from last-10 averages · hit rates from game logs.</span>
@@ -251,7 +251,7 @@
           </select>
         </div>
         <div class="rfield">
-          <label for="randMin">Min L20 &mdash; <span id="randMinVal">80%</span></label>
+          <label for="randMin">Min Season &mdash; <span id="randMinVal">80%</span></label>
           <input type="range" id="randMin" min="50" max="100" step="1" value="80" />
         </div>
         <div class="rfield">
