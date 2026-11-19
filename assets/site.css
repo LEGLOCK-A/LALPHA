@@ -165,6 +165,8 @@
   .propsec.open .propsec-head .gf-chev{transform:rotate(45deg)}
   .propsec-body{padding-top:6px}
   .propsec-body[hidden]{display:none}
+  .secpreview{margin:8px 0 2px}
+  .secpreview[hidden]{display:none}
   @media (prefers-reduced-motion: reduce){.propsec-head .gf-chev{transition:none}}
   /* team prop cards: the research layers ride on one sub-line */
   .tmeta{font-size:12px;color:var(--ink3);line-height:1.45}

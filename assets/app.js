@@ -657,13 +657,16 @@ function renderDSeg(){
   $$("#dsegChips .chip").forEach(function(c){ c.setAttribute("aria-pressed", c.getAttribute("data-dseg") === state.dseg ? "true" : "false"); });
 }
 $$("#dsegChips .chip").forEach(function(c){ c.addEventListener("click", function(){ state.dseg = c.getAttribute("data-dseg"); renderDSeg(); }); });
+var _boardList = null; /* the board's last computed list — the collapsed Player Props preview reads the same array */
 function renderDiscover(){
   var list = filteredProps(state.league);
+  _boardList = list;
   $("#propCount").textContent = list.length + " props · " + state.league + (state.rankMode === "signal"
     ? " · sorted by Signal Score at the research line"
     : " · sorted by L" + (state.win || 10) + " hit rate at the research line");
   $("#propGrid").innerHTML = list.length ? list.slice(0, 90).map(function(p){ return propCard(p, state.league); }).join("")
     : '<div class="emptybox" style="grid-column:1/-1">No props match those filters. Loosen the minimum hit rate or pick another stat.</div>';
+  renderSecPreview();
 }
 /* One delegated handler for EVERY player surface: any element carrying
    data-open-logs (prop cards, watchlist / underdog cards, cheatsheet rows,
@@ -2403,6 +2406,7 @@ function syncSec(which){
   sec.classList.toggle("open", open);
   body.hidden = !open;
   head.setAttribute("aria-expanded", open ? "true" : "false");
+  if (which === "player") renderSecPreview();
 }
 function bindSec(which, key){
   var cap = which === "player" ? "Player" : "Team";
@@ -2418,6 +2422,46 @@ bindSec("player", "leglock.sec.player.v2");
 bindSec("team", "leglock.sec.team");
 syncSec("player");
 syncSec("team");
+
+/* ---------- Player Props collapsed preview ----------
+   While the Player Props section is collapsed, a preview of the
+   board's top 2 props sits between the section header and the
+   hidden body, so the page still leads with the day's best lines.
+   It renders the first two entries of the SAME list renderDiscover()
+   computed (stashed in _boardList, already filtered and ranked for
+   the current league) through the same propCard() renderer — no
+   forked logic, so league switches, filters and Signal/Classic
+   ranking all match the board exactly, and renderDiscover() calls
+   this on every board rebuild. The markup carries no element ids
+   and both card interactions (the game-log tap and the Why?
+   popover) are document-delegated, so preview cards behave exactly
+   like their board twins. Expanding the section hides the preview —
+   the board itself starts with the same two cards. An empty board
+   (or a board not computed yet) shows no preview at all. */
+function ensureSecPreview(){
+  var head = $("#secPlayerHead");
+  if (!head) return null;
+  var el = document.getElementById("secPlayerPreview");
+  if (!el){
+    el = document.createElement("div");
+    el.id = "secPlayerPreview";
+    el.className = "grid secpreview";
+    el.setAttribute("aria-label", "Top 2 props preview");
+    head.insertAdjacentElement("afterend", el);
+  }
+  return el;
+}
+function renderSecPreview(){
+  var el = ensureSecPreview();
+  if (!el) return;
+  if (state.secPlayer || !_boardList || !_boardList.length){
+    el.hidden = true;
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = _boardList.slice(0, 2).map(function(p){ return propCard(p, state.league); }).join("");
+  el.hidden = false;
+}
 
 function teamFeatured(p){
   var c = (p.counts || {}).L10 || { o:0, u:0, n:0 };
