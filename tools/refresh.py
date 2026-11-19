@@ -43,6 +43,15 @@ see README.md for the full list and the flagged uncertainties):
   * NFL usage from nflverse (snap_counts, stats_player_week, play_by_play
     red-zone counts); on any failure the existing nfl-usage.js is copied
     through unchanged.
+  * Static league pages (nba/, nhl/, nfl/ "hit rates today") + sitemap.xml
+    rendered from the same in-memory dataset — plain HTML, no JS needed
+    to read them. Staging mode writes them under staging/; repo mode
+    writes them at the repo root. They follow the data's all-or-nothing
+    rule: generated only when every league built, published only on
+    full success. The pages apply the board's rare-event rule: an
+    Under 0.5 prop on a rare-event stat (NBA steals/blocks/3PM, NHL
+    goals, NFL TDs) lists only when the player's L20 average for the
+    stat is >= 0.3.
 
 Failure behaviour: a league whose ESPN pull fails wholesale (injuries /
 scoreboard error, or >15% gamelog failures) aborts that league — nothing
@@ -68,6 +77,7 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
+from html import escape as html_escape
 from zoneinfo import ZoneInfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -869,6 +879,413 @@ def build_usage(pool_players, nfl_season):
 
 
 # --------------------------------------------------------------------------
+# Static per-league pages + sitemap. Rendered from the same in-memory
+# dataset as the data chunks: plain HTML tables/lists a crawler (or a
+# browser with JS off) can read immediately, in the standalone guides
+# pages' shell (leglock.css, brand header, site footer).
+# --------------------------------------------------------------------------
+
+SITE_ORIGIN = "https://leglock.online"
+ET = ZoneInfo("America/Toronto")
+
+PAGE_LEAGUES = {
+    "NBA": {
+        "slug": "nba",
+        "title": "NBA Player Prop Hit Rates Today — LegLock",
+        "h1": "NBA Player Prop Hit Rates Today",
+        "sub": "Today's slate, ranked by L10 hit rate",
+        "description": "NBA player prop hit rates today: the top 25 props ranked by L10 hit rate, with L5, L10 and L20 rates counted from game logs at research lines set from each player's own recent average.",
+    },
+    "NFL": {
+        "slug": "nfl",
+        "title": "NFL Player Prop Hit Rates Today — LegLock",
+        "h1": "NFL Player Prop Hit Rates Today",
+        "sub": "This week's slate (Thursday to Monday), ranked by L10 hit rate",
+        "description": "NFL player prop hit rates today: the top 25 props for this week's games, ranked by L10 hit rate, with L5, L10 and L20 rates counted from game logs at research lines set from each player's own recent average.",
+    },
+    "NHL": {
+        "slug": "nhl",
+        "title": "NHL Player Prop Hit Rates Today — LegLock",
+        "h1": "NHL Player Prop Hit Rates Today",
+        "sub": "Today's slate, ranked by L10 hit rate",
+        "description": "NHL player prop hit rates today: the top 25 props ranked by L10 hit rate, with L5, L10 and L20 rates counted from game logs at research lines set from each player's own recent average.",
+    },
+}
+
+# Head snippets copied verbatim from the standalone guides pages.
+GA4_SNIPPET = """<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MJB3JWSKZB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-MJB3JWSKZB');
+</script>"""
+
+ADS_SNIPPET = '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1221762448386445" crossorigin="anonymous"></script>'
+
+THEME_PIN_SNIPPET = """<script>
+try{var _t=window.localStorage.getItem("lm-theme");document.documentElement.setAttribute("data-theme",_t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light");}
+</script>"""
+
+PAGE_TABS = ('<nav class="tabs" aria-label="Main views">'
+             '<a href="/"><span class="tab-label">Discover</span></a>'
+             '<a href="/live/"><span class="tab-label">Live</span></a>'
+             '<a href="/prop-watch/"><span class="tab-label">Prop Watch</span></a>'
+             '<a href="/workstation/"><span class="tab-label">Workstation</span></a>'
+             '<a href="/cheatsheet/"><span class="tab-label">Cheatsheet</span></a>'
+             '<a href="/logs/"><span class="tab-label">Logs</span></a>'
+             '<a href="/make-me-a-lay/"><span class="tab-label">Make me a Lay</span></a>'
+             '<a href="/injuries/"><span class="tab-label">Injuries</span></a></nav>')
+
+PAGE_FOOTER = ('<footer><div class="site-footer"><span class="site-footer-brand">LEGLOCK</span>'
+               '<nav class="site-footer-links" aria-label="Site information">'
+               '<a href="/privacy/">Privacy Policy</a><a href="/about/">About</a>'
+               '<a href="/guides/">Guides</a><a href="/guides/responsible-play/">Responsible Play</a>'
+               '<a href="/contact/">Contact</a><a href="/donation/">Donate</a></nav></div>'
+               '<p class="site-footer-note">Questions: '
+               '<a href="mailto:support@leglock.online">support@leglock.online</a></p>'
+               '<p class="site-footer-note">LegLock — sports statistics &amp; information only '
+               '— not gambling advice. No bets are taken here.</p></footer>')
+
+PAGE_STYLE = """<style>
+.props-table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0 4px}
+.props-table th,.props-table td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+.props-table th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
+.props-table td.num,.props-table th.num{white-space:nowrap}
+.streak-list{margin:8px 0;padding-left:20px}
+.streak-list li{margin:4px 0}
+.props-note{font-size:12.5px;color:var(--dim)}
+.site-footer-note{font-size:12.5px;color:var(--dim);margin:6px 0 0}
+</style>"""
+
+
+def page_logo_uri():
+    """The guides pages' brand wordmark (a data URI), reused so the
+    generated pages carry the same header brand block without a second
+    copy of the artwork living in this script. Falls back to the app
+    logo asset, then to no image (the footer keeps the text brand)."""
+    site_root = os.path.dirname(CURRENT_ASSETS)
+    guide = os.path.join(site_root, "guides", "how-hit-rates-work", "index.html")
+    try:
+        with open(guide, "r", encoding="utf-8") as f:
+            m = re.search(r'class="site-logo"><img src="(data:image/[^"]+)"', f.read())
+        if m:
+            return m.group(1)
+    except OSError:
+        pass
+    try:
+        with open(os.path.join(CURRENT_ASSETS, "images.js"), "r", encoding="utf-8") as f:
+            m = re.search(r'logo:\s*"(data:image/[^"]+)"', f.read())
+        if m:
+            return m.group(1)
+    except OSError:
+        pass
+    return None
+
+
+def fmt_stamp(dt_et):
+    """'November 18, 2026, 7:15 PM ET' from an ET datetime."""
+    hour = dt_et.hour % 12 or 12
+    ampm = "AM" if dt_et.hour < 12 else "PM"
+    return f"{dt_et.strftime('%B')} {dt_et.day}, {dt_et.year}, {hour}:{dt_et.minute:02d} {ampm} ET"
+
+
+def featured_pct(prop, window):
+    r = prop["rates"][window]
+    return r["o"] if prop["dir"] == "Over" else r["u"]
+
+
+def featured_counts(prop, window):
+    """(hits, games) in the featured direction for a window. The rates
+    store integer percentages over n games, which round-trips exactly."""
+    r = prop["rates"][window]
+    pct = r["o"] if prop["dir"] == "Over" else r["u"]
+    return js_round(pct * r["n"] / 100.0), r["n"]
+
+
+def fmt_counts(prop, window):
+    hits, n = featured_counts(prop, window)
+    return f"{hits}/{n}"
+
+
+def fmt_line(line):
+    return str(int(line)) if float(line) == int(line) else f"{line:.1f}"
+
+
+def game_et_date(game):
+    raw = (game.get("date") or "").replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(ET).date()
+
+
+def game_teams(game):
+    teams = set()
+    for side in ("home", "away"):
+        abbr = (game.get(side) or {}).get("abbr")
+        if abbr:
+            teams.add(abbr)
+    return teams
+
+
+def slate_teams_today(league, today_et):
+    teams = set()
+    for g in league["games"]:
+        if game_et_date(g) == today_et:
+            teams |= game_teams(g)
+    return teams
+
+
+def nfl_week_window(today_et):
+    """(Thu, Mon) of the current NFL game week: the Thu–Mon span that
+    contains today, or the upcoming one when today is Tue/Wed."""
+    start = today_et - timedelta(days=(today_et.weekday() - 3) % 7)
+    if today_et > start + timedelta(days=4):
+        start += timedelta(days=7)
+    return start, start + timedelta(days=4)
+
+
+def slate_teams_nfl_week(league, today_et):
+    """Teams playing in the current Thu–Mon NFL week (the board's NFL
+    window). The baked games only cover today + tomorrow, so the week's
+    scoreboards are pulled the same way build_league pulls them; on any
+    failure the teams in the baked games are used instead."""
+    start, end = nfl_week_window(today_et)
+    cfg = LEAGUES["NFL"]
+    base = f"{API}/site/v2/sports/{cfg['sport']}/{cfg['code']}"
+    teams = set()
+    try:
+        d = start
+        while d <= end:
+            payload = FETCH.get_json(f"{base}/scoreboard?dates={d.strftime('%Y%m%d')}")
+            for g in parse_scoreboard(payload):
+                teams |= game_teams(g)
+            d += timedelta(days=1)
+    except Exception:
+        teams = set()
+    if not teams:
+        for g in league["games"]:
+            teams |= game_teams(g)
+    return teams
+
+
+# The board's rare-event rule, mirrored for the generated pages: an
+# Under 0.5 prop on a rare-event stat lists only when the player's L20
+# average for that stat is at least 0.3 — otherwise the top lists fill
+# with near-automatic Unders on events that almost never happen.
+RARE_EVENT_KEYS = {
+    "NBA": {"steals", "blocks", "threePointersMade"},
+    "NHL": {"goals"},
+    "NFL": {"passingTouchdowns", "rushingTouchdowns", "receivingTouchdowns"},
+}
+RARE_L20_MIN = 0.3
+
+
+def l20_average(league, prop):
+    """Mean of the prop stat's values over the player's last 20 games —
+    the same value series build_prop rates (current-season log rows,
+    most recent first). Prop objects carry only the season and L10
+    averages, so the L20 average is computed from the logs."""
+    rows = league["logs"].get(prop["pid"]) or []
+    vals = [r["s"][prop["key"]] for r in rows if prop["key"] in r["s"]][:20]
+    return mean(vals) if vals else 0.0
+
+
+def passes_rare_gate(lg, league, prop):
+    if prop["dir"] != "Under" or prop["line"] != 0.5:
+        return True
+    if prop["key"] not in RARE_EVENT_KEYS.get(lg, ()):
+        return True
+    return l20_average(league, prop) >= RARE_L20_MIN - 1e-9
+
+
+def build_league_page(lg, league, stamp, today_et, logo_uri):
+    cfg = PAGE_LEAGUES[lg]
+    slug = cfg["slug"]
+    injured = {i["name"] for i in league["injuries"]}
+    props_all = [p for p in league["props"] if p["name"] not in injured]
+    props = [p for p in props_all if passes_rare_gate(lg, league, p)]
+
+    if lg == "NFL":
+        teams = slate_teams_nfl_week(league, today_et)
+    else:
+        teams = slate_teams_today(league, today_et)
+
+    def top25(source):
+        pool = [p for p in source if p["team"] in teams] if teams else []
+        if pool:
+            return sorted(pool, key=lambda p: (-featured_pct(p, "L10"), -featured_pct(p, "L20"),
+                                               -featured_pct(p, "L5"), p["name"]))[:25], \
+                ("week" if lg == "NFL" else "today")
+        # No games in the window: the league's top 25 overall, honestly
+        # labelled as the next slate rather than today's.
+        return sorted(source, key=lambda p: (-featured_pct(p, "L10"), -featured_pct(p, "L20"),
+                                             -featured_pct(p, "L5"), p["name"]))[:25], "fallback"
+
+    listed, window = top25(props)
+    heading = "Top props — next slate" if window == "fallback" else \
+        ("Top props this week" if lg == "NFL" else "Top props today")
+    pre_gate_top = top25(props_all)[0]
+    gated_top = sum(1 for p in pre_gate_top if not passes_rare_gate(lg, league, p))
+
+    # prop["streak"] is the true current streak: consecutive most-recent
+    # games hitting in the featured direction (see build_prop).
+    def streak_list(source):
+        return sorted((p for p in source if p["streak"] >= 5),
+                      key=lambda p: (-p["streak"], -featured_pct(p, "L10"), p["name"]))[:10]
+
+    streaks = streak_list(props)
+    gated_streaks = sum(1 for p in streak_list(props_all)
+                        if not passes_rare_gate(lg, league, p))
+
+    rows = []
+    for p in listed:
+        rows.append(
+            '<tr><td>{}</td><td>{}</td><td>{}</td><td class="num">{} {}</td>'
+            '<td class="num">{}</td><td class="num">{}</td><td class="num">{}</td></tr>'.format(
+                html_escape(p["name"]), html_escape(p["team"]), html_escape(p["stat"]),
+                p["dir"], fmt_line(p["line"]),
+                fmt_counts(p, "L5"), fmt_counts(p, "L10"), fmt_counts(p, "L20")))
+
+    streak_html = ""
+    if streaks:
+        items = []
+        for p in streaks:
+            items.append(
+                "<li><strong>{}</strong> ({}) — {}, {} {} — {}-game hit streak "
+                "&middot; L10 {}</li>".format(
+                    html_escape(p["name"]), html_escape(p["team"]), html_escape(p["stat"]),
+                    p["dir"], fmt_line(p["line"]), p["streak"], fmt_counts(p, "L10")))
+        streak_html = ("<h2>On a streak</h2>\n"
+                       "<p>Props whose featured side has cashed in at least five straight games:</p>\n"
+                       '<ul class="streak-list">\n' + "\n".join(items) + "\n</ul>\n")
+
+    others = [o for o in ("NBA", "NHL", "NFL") if o != lg]
+    more_links = " and ".join(
+        '<a href="/{}/">{} player prop hit rates today</a>'.format(PAGE_LEAGUES[o]["slug"], o)
+        for o in others)
+    logo_html = ('<div class="site-logo"><img src="{}" alt="LEGLOCK" /></div>'.format(logo_uri)
+                 if logo_uri else
+                 '<div class="site-logo"><span class="site-footer-brand">LEGLOCK</span></div>')
+
+    page = f"""<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+{GA4_SNIPPET}
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+{ADS_SNIPPET}
+<meta name="apple-mobile-web-app-title" content="LEGLOCK" />
+<meta name="theme-color" content="#0b1220" />
+{THEME_PIN_SNIPPET}
+<title>{cfg['title']}</title>
+<meta name="description" content="{cfg['description']}" />
+<link rel="canonical" href="{SITE_ORIGIN}/{slug}/" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Sofia+Sans+Condensed:wght@600;700&family=Sofia+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/leglock.css" />
+{PAGE_STYLE}
+</head>
+<body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{cfg['h1']}</h1><p class="sub" style="margin:0 0 10px">{cfg['sub']}</p><section class="content-body">
+<p class="content-byline">Updated {stamp}</p>
+<p>{lg} player prop hit rates, ranked by how often each prop has cashed over the last 10 games. Every rate below is counted from actual game logs, and every line is a research line set from the player's own recent average — not a sportsbook price. This page is a static snapshot of the board; the full <a href="/">interactive prop board</a> covers every player and prop, and the <a href="/live/">live page</a> tracks games in progress.</p>
+<h2>{heading}</h2>
+<table class="props-table">
+<thead><tr><th>Player</th><th>Team</th><th>Stat</th><th>Line</th><th>L5</th><th>L10</th><th>L20</th></tr></thead>
+<tbody>
+{chr(10).join(rows)}
+</tbody>
+</table>
+<p class="props-note">Rates read as hits/games in each prop's featured direction — the side (Over or Under) with the higher L10 rate. Players on the injury report are left out, the same rule the board uses.</p>
+{streak_html}<h2>More on LegLock</h2>
+<p>See the {more_links}, or learn <a href="/guides/how-hit-rates-work/">how hit rates work</a> — what L5, L10 and L20 really measure, and how to read them without fooling yourself.</p>
+</section>{PAGE_FOOTER}</main>
+</body>
+</html>
+"""
+    info = {"propsListed": len(listed), "streaks": len(streaks), "window": window,
+            "gatedOutTop": gated_top, "gatedOutStreaks": gated_streaks,
+            "gatedProps": len(props_all) - len(props)}
+    return page, info
+
+
+SITEMAP_FALLBACK_URLS = [
+    "https://leglock.online/",
+    "https://leglock.online/live/",
+    "https://leglock.online/underdogs/",
+    "https://leglock.online/shuffle/",
+    "https://leglock.online/game-logs/",
+    "https://leglock.online/injuries/",
+    "https://leglock.online/donation/",
+    "https://leglock.online/about/",
+    "https://leglock.online/privacy/",
+    "https://leglock.online/contact/",
+    "https://leglock.online/guides/",
+    "https://leglock.online/guides/getting-started/",
+    "https://leglock.online/guides/how-hit-rates-work/",
+    "https://leglock.online/guides/how-to-read-a-prop-board/",
+    "https://leglock.online/guides/research-lines-vs-real-odds/",
+    "https://leglock.online/guides/responsible-play/",
+]
+
+
+def build_sitemap(run_date):
+    """The sitemap rewritten: the URLs already listed (read from the
+    current file when available, else the known 16) plus the three
+    league pages. lastmod is refreshed to the run date for the homepage
+    and the league pages; every other entry carries over unchanged."""
+    entries = []
+    path = os.path.join(os.path.dirname(CURRENT_ASSETS), "sitemap.xml")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for m in re.finditer(r"<loc>([^<]+)</loc><lastmod>([^<]+)</lastmod>", f.read()):
+                entries.append([m.group(1), m.group(2)])
+    except OSError:
+        entries = []
+    if not entries:
+        entries = [[u, "2026-11-18"] for u in SITEMAP_FALLBACK_URLS]
+    by_url = {u: e for u, e in ((e[0], e) for e in entries)}
+    home = f"{SITE_ORIGIN}/"
+    if home in by_url:
+        by_url[home][1] = run_date
+    else:
+        entries.insert(0, [home, run_date])
+    for lg in ("NBA", "NHL", "NFL"):
+        url = f"{SITE_ORIGIN}/{PAGE_LEAGUES[lg]['slug']}/"
+        if url in by_url:
+            by_url[url][1] = run_date
+        else:
+            entries.append([url, run_date])
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for url, lastmod in entries:
+        lines.append(f"  <url><loc>{url}</loc><lastmod>{lastmod}</lastmod></url>")
+    lines.append("</urlset>")
+    return "\n".join(lines) + "\n"
+
+
+def generate_pages(league_objs, now_utc):
+    """Return ({repo-relative path: content}, per-league info)."""
+    now_et = now_utc.astimezone(ET)
+    stamp = fmt_stamp(now_et)
+    logo_uri = page_logo_uri()
+    staged_root, info = {}, {}
+    for lg in ("NBA", "NFL", "NHL"):
+        page, pinfo = build_league_page(lg, league_objs[lg], stamp, now_et.date(), logo_uri)
+        staged_root[f"{PAGE_LEAGUES[lg]['slug']}/index.html"] = page
+        info[lg] = pinfo
+    staged_root["sitemap.xml"] = build_sitemap(now_et.strftime("%Y-%m-%d"))
+    return staged_root, info
+
+
+# --------------------------------------------------------------------------
 # Main
 # --------------------------------------------------------------------------
 
@@ -940,6 +1357,18 @@ def main():
             "DATA.leagues.NHL = window.__DL_NHL; DATA.leagues.NHL.logsPrev = window.__DL_NHL_PREV;\n"
         )
 
+    # Static league pages + sitemap, from the same dataset. A failure
+    # here is reported but never blocks the data publish — the pages
+    # simply regenerate on the next successful run.
+    staged_root = {}
+    if not failed:
+        try:
+            staged_root, page_info = generate_pages(league_objs, now_utc)
+            report["pages"] = page_info
+        except Exception as e:
+            report["errors"].append(f"pages: {e}")
+            staged_root = {}
+
     changed, unchanged = [], []
     for name, content in sorted(staged.items()):
         path = os.path.join(out_dir, name)
@@ -951,6 +1380,25 @@ def main():
     report["filesChanged"] = changed
     report["filesUnchanged"] = unchanged
 
+    # Root-level outputs (league pages + sitemap) stage alongside the
+    # data files: in the temp dir in repo mode, under staging/ otherwise.
+    if REPO_ROOT:
+        root_stage_dir, root_cur_dir = out_dir, REPO_ROOT
+    else:
+        root_stage_dir = os.path.join(HERE, "staging")
+        root_cur_dir = os.path.dirname(CURRENT_ASSETS)
+    root_changed, root_unchanged = [], []
+    for rel, content in sorted(staged_root.items()):
+        path = os.path.join(root_stage_dir, rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        cur_hash = sha256_file(os.path.join(root_cur_dir, rel))
+        new_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        (root_changed if cur_hash != new_hash else root_unchanged).append(rel)
+    report["pageFilesChanged"] = root_changed
+    report["pageFilesUnchanged"] = root_unchanged
+
     if REPO_ROOT:
         # Publish only on full success: move just the changed files into
         # the repo. On failure nothing is moved — assets stay untouched.
@@ -958,6 +1406,10 @@ def main():
             for name in changed:
                 shutil.move(os.path.join(out_dir, name),
                             os.path.join(CURRENT_ASSETS, name))
+            for rel in root_changed:
+                dest = os.path.join(REPO_ROOT, rel)
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                shutil.move(os.path.join(out_dir, rel), dest)
         shutil.rmtree(out_dir, ignore_errors=True)
 
     print(json.dumps(report, indent=1))
