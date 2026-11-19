@@ -961,7 +961,7 @@ PAGE_FOOTER = ('<footer><div class="site-footer"><span class="site-footer-brand"
                '<nav class="site-footer-links" aria-label="Site information">'
                '<a href="/privacy/">Privacy Policy</a><a href="/about/">About</a>'
                '<a href="/guides/">Guides</a><a href="/guides/responsible-play/">Responsible Play</a>'
-               '<a href="/contact/">Contact</a><a href="/donation/">Donate</a></nav></div>'
+               '<a href="/contact/">Contact</a><a href="/our-picks/">Our Picks</a><a href="/donation/">Donate</a></nav></div>'
                '<p class="site-footer-note">Questions: '
                '<a href="mailto:support@leglock.online">support@leglock.online</a></p>'
                '<p class="site-footer-note">LegLock — sports statistics &amp; information only '
@@ -1265,6 +1265,7 @@ SITEMAP_FALLBACK_URLS = [
     "https://leglock.online/game-logs/",
     "https://leglock.online/injuries/",
     "https://leglock.online/donation/",
+    "https://leglock.online/our-picks/",
     "https://leglock.online/about/",
     "https://leglock.online/privacy/",
     "https://leglock.online/contact/",
@@ -1307,6 +1308,9 @@ def build_sitemap(run_date, archive_lastmod=None):
             by_url[url][1] = run_date
         else:
             entries.append([url, run_date])
+    picks_url = f"{SITE_ORIGIN}/our-picks/"
+    if picks_url not in by_url:
+        entries.append([picks_url, run_date])
     archive_url = f"{SITE_ORIGIN}/archive/"
     archive_mod = archive_lastmod or run_date
     if archive_url in by_url:
