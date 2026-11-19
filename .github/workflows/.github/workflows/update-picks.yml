@@ -1,0 +1,86 @@
+# Update Our Picks for LEGLOCK.online.
+#
+# Jay posts picks by opening a GitHub issue from the "Our Picks" issue
+# form (.github/ISSUE_TEMPLATE/our-picks.yml), one pick per line:
+#   League | Player | Pick | Note (optional)
+# This workflow runs tools/update_picks.py against the issue body.
+# On success it commits assets/picks.js (the /our-picks/ page renders
+# that file), comments a confirmation on the issue and closes it. On a
+# validation error the script writes nothing — the previous picks stay
+# live — and this workflow comments the errors on the issue and leaves
+# it open; editing the issue re-runs the workflow.
+#
+# The job only runs for issues carrying the form's "our-picks" label
+# AND opened by the repo owner, so nobody else's issue can publish.
+name: Update Our Picks
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: contains(github.event.issue.labels.*.name, 'our-picks') && github.event.issue.user.login == 'LEGLOCK-A'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The body travels through an env var into a file — never
+      # interpolated into a shell string — so any characters Jay
+      # types are inert data for the parser.
+      - name: Save the issue body to a file
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: python3 -c "import os; open('body.txt', 'w', encoding='utf-8').write(os.environ.get('ISSUE_BODY') or '')"
+
+      - name: Parse picks and rewrite assets/picks.js
+        id: parse
+        env:
+          LEGLOCK_REPO_ROOT: ${{ github.workspace }}
+        run: |
+          set +e
+          python3 tools/update_picks.py body.txt > parse-output.txt 2>&1
+          code=$?
+          cat parse-output.txt
+          exit $code
+
+      - name: Comment the errors on the issue and stop
+        if: failure() && steps.parse.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "❌ **Those picks couldn't be published** — nothing on the site changed, and the previous picks are still live. Fix the line(s) below, then edit this issue and it will try again automatically:"
+            echo
+            echo '```'
+            cat parse-output.txt
+            echo '```'
+          } > comment.md
+          gh issue comment ${{ github.event.issue.number }} --body-file comment.md
+
+      - name: Commit and push picks.js
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/picks.js
+          if git diff --cached --quiet; then
+            echo "picks.js unchanged — nothing to commit."
+          else
+            git commit -m "Our Picks $(TZ=America/Toronto date +%F)"
+            git push
+          fi
+
+      - name: Confirm on the issue and close it
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "✅ Published — your picks are live: https://leglock.online/our-picks/"
+          gh issue close ${{ github.event.issue.number }}
