@@ -59,6 +59,17 @@ see README.md for the full list and the flagged uncertainties):
     merged logs once their game date has passed and render
     archive/<date>/ pages plus an archive index. Archive work never
     fails the data publish — errors land in the report instead.
+  * Team props (data-teams.js): per-team game logs rebuilt from ESPN
+    dated scoreboards (final scores, per-period linescores, NBA team
+    statistics) plus — for NHL shots on goal only, which scoreboards
+    do not carry — the per-game summary endpoint's boxscore. Props
+    (team total, opponent total, win-by margin, first-half / first-
+    period total, NBA team threes, NHL team shots) are built for
+    teams with a pre-game fixture in the slate window, at research
+    lines from the team's L10 average (venue L10 when the team has
+    >= 5 games at the upcoming venue in its last 10), with L5/L10/L20
+    hit counts for both directions and the research layers the card
+    shows (opponent defensive rank, rest, top-scorer injuries).
 
 Failure behaviour: a league whose ESPN pull fails wholesale (injuries /
 scoreboard error, or >15% gamelog failures) aborts that league — nothing
@@ -977,7 +988,7 @@ def page_logo_uri():
     guide = os.path.join(site_root, "guides", "how-hit-rates-work", "index.html")
     try:
         with open(guide, "r", encoding="utf-8") as f:
-            m = re.search(r'class="site-logo"><img src="(data:image/[^"]+)"', f.read())
+            m = re.search(r'class="site-logo">(?:<a[^>]*>)?<img src="(data:image/[^"]+)"', f.read())
         if m:
             return m.group(1)
     except OSError:
@@ -1198,9 +1209,11 @@ def build_league_page(lg, league, stamp, today_et, logo_uri):
     more_links = " and ".join(
         '<a href="/{}/">{} player prop hit rates today</a>'.format(PAGE_LEAGUES[o]["slug"], o)
         for o in others)
-    logo_html = ('<div class="site-logo"><img src="{}" alt="LEGLOCK" /></div>'.format(logo_uri)
+    logo_html = ('<div class="site-logo"><a href="/" aria-label="LegLock home">'
+                 '<img src="{}" alt="LEGLOCK" /></a></div>'.format(logo_uri)
                  if logo_uri else
-                 '<div class="site-logo"><span class="site-footer-brand">LEGLOCK</span></div>')
+                 '<div class="site-logo"><a href="/" aria-label="LegLock home">'
+                 '<span class="site-footer-brand">LEGLOCK</span></a></div>')
 
     page = f"""<!doctype html>
 <html lang="en" data-theme="light">
@@ -1531,9 +1544,11 @@ def archive_page_shell(title, description, canonical_path, h1, sub, body_html, l
     """The league pages' shell (same head snippets, tabs and footer)
     for archive pages. No 'Updated' stamp: the content is a fixed
     record, and a stamp would dirty the file on every run."""
-    logo_html = ('<div class="site-logo"><img src="{}" alt="LEGLOCK" /></div>'.format(logo_uri)
+    logo_html = ('<div class="site-logo"><a href="/" aria-label="LegLock home">'
+                 '<img src="{}" alt="LEGLOCK" /></a></div>'.format(logo_uri)
                  if logo_uri else
-                 '<div class="site-logo"><span class="site-footer-brand">LEGLOCK</span></div>')
+                 '<div class="site-logo"><a href="/" aria-label="LegLock home">'
+                 '<span class="site-footer-brand">LEGLOCK</span></a></div>')
     return f"""<!doctype html>
 <html lang="en" data-theme="light">
 <head>
@@ -1682,6 +1697,350 @@ def run_archive(league_objs, logs_prev_objs, now_utc, state):
 
 
 # --------------------------------------------------------------------------
+# Team game logs + team props (data-teams.js).
+#
+# Sources (all ESPN, verified against the live feeds):
+#   * Dated scoreboards — GET /site/v2/sports/{sport}/{code}/scoreboard
+#     ?dates=YYYYMMDD, one fetch per date from the season start (Oct 1
+#     for NBA/NHL, Sep 1 for the NFL) through today ET. Competitors
+#     carry the final score, per-period linescores (NBA/NFL periods
+#     1+2 = first half; NHL period 1 = first period) and, for the NBA,
+#     team statistics including threePointFieldGoalsMade. Events are
+#     kept only when completed (status state "post") and regular
+#     season / postseason (season.type 2 or 3 — the gamelog rule).
+#   * NHL shots on goal are NOT in the scoreboard payload; they come
+#     from the per-game summary endpoint — GET .../summary?event={id}
+#     — boxscore.teams[].statistics, name "shotsTotal": one fetch per
+#     completed NHL game.
+# --------------------------------------------------------------------------
+
+TEAM_STAT_DEFS = {
+    "NBA": [("total", "Team Total"), ("oppTotal", "Opponent Total"),
+            ("winBy", "Win By"), ("firstHalf", "First Half Total"),
+            ("teamThrees", "Team Threes")],
+    "NFL": [("total", "Team Total"), ("oppTotal", "Opponent Total"),
+            ("winBy", "Win By"), ("firstHalf", "First Half Total")],
+    "NHL": [("total", "Team Total"), ("oppTotal", "Opponent Total"),
+            ("winBy", "Win By"), ("firstPeriod", "First Period Total"),
+            ("teamShots", "Team Shots")],
+}
+
+
+def team_season_start(lg, now_utc):
+    cur, _ = season_years(lg, now_utc)
+    if lg == "NFL":
+        return datetime(cur, 9, 1).date()
+    return datetime(cur - 1, 10, 1).date()
+
+
+def _scoreboard_day(base, d):
+    try:
+        return FETCH.get_json(f"{base}/scoreboard?dates={d.strftime('%Y%m%d')}")
+    except FetchError:
+        return None
+
+
+def _espn_stat(holder, name):
+    """A named team statistic's numeric value from a competitor or a
+    summary boxscore team entry (both carry statistics as
+    {name, displayValue} lists)."""
+    for st in (holder or {}).get("statistics") or []:
+        if st.get("name") == name:
+            return parse_num(st.get("displayValue"))
+    return None
+
+
+def _period_points(competitor, periods):
+    """Sum of the given 1-based periods from a competitor's
+    linescores; None when the linescores are missing or short."""
+    ls = competitor.get("linescores") or []
+    if len(ls) < max(periods):
+        return None
+    total = 0
+    for p in periods:
+        v = parse_num((ls[p - 1] or {}).get("value"))
+        if v is None:
+            return None
+        total += v
+    return int(total)
+
+
+def _nhl_game_shots(eid):
+    cfg = LEAGUES["NHL"]
+    url = f"{API}/site/v2/sports/{cfg['sport']}/{cfg['code']}/summary?event={eid}"
+    try:
+        payload = FETCH.get_json(url, allow_404=True)
+    except FetchError:
+        return eid, {}
+    out = {}
+    for t in ((payload or {}).get("boxscore") or {}).get("teams") or []:
+        abbr = (t.get("team") or {}).get("abbreviation") or ""
+        v = _espn_stat(t, "shotsTotal")
+        if abbr and v is not None:
+            out[abbr] = int(v)
+    return eid, out
+
+
+def fetch_team_logs(lg, now_utc, today_et):
+    """{team abbr: {"name": display name, "rows": [...]}} — rows most
+    recent first: {d (ET date), opp, home, pf, pa, margin, fh
+    (first-half points, NBA/NFL), p1 (first-period goals, NHL),
+    threes (NBA), shots (NHL)}. Raises FetchError when the pull fails
+    wholesale (>10% of the dated scoreboards, or — NHL — fewer than
+    half the game summaries carrying shots)."""
+    cfg = LEAGUES[lg]
+    base = f"{API}/site/v2/sports/{cfg['sport']}/{cfg['code']}"
+    start = team_season_start(lg, now_utc)
+    days = [start + timedelta(days=i) for i in range((today_et - start).days + 1)]
+    payloads = FETCH.map(lambda d: _scoreboard_day(base, d), days)
+    failed_days = sum(1 for p in payloads if p is None)
+    if days and failed_days > 0.1 * len(days):
+        raise FetchError(f"{lg}: {failed_days}/{len(days)} team scoreboard days failed")
+
+    games = {}
+    for payload in payloads:
+        for ev in (payload or {}).get("events") or []:
+            if (ev.get("season") or {}).get("type") not in (2, 3):
+                continue  # regular season + postseason only
+            if ((ev.get("status") or {}).get("type") or {}).get("state") != "post":
+                continue  # completed games only
+            comps = ((ev.get("competitions") or [{}])[0]).get("competitors") or []
+            if len(comps) != 2 or not ev.get("id") or ev["id"] in games:
+                continue
+            games[ev["id"]] = (ev, comps)
+
+    teams = {}
+    for eid, (ev, comps) in games.items():
+        et_date = game_et_date({"date": ev.get("date") or ""})
+        if et_date is None:
+            continue
+        parsed = []
+        for c in comps:
+            score = parse_num(c.get("score"))
+            if score is None:
+                break
+            parsed.append((c, int(score)))
+        if len(parsed) != 2:
+            continue
+        for i, (c, pf) in enumerate(parsed):
+            t = c.get("team") or {}
+            abbr = t.get("abbreviation") or ""
+            if not abbr:
+                continue
+            row = {
+                "d": et_date.isoformat(),
+                "opp": (parsed[1 - i][0].get("team") or {}).get("abbreviation") or "",
+                "home": c.get("homeAway") == "home",
+                "pf": pf, "pa": parsed[1 - i][1], "margin": pf - parsed[1 - i][1],
+                "fh": _period_points(c, (1, 2)) if lg in ("NBA", "NFL") else None,
+                "p1": _period_points(c, (1,)) if lg == "NHL" else None,
+                "threes": _espn_stat(c, "threePointFieldGoalsMade") if lg == "NBA" else None,
+                "shots": None, "eid": eid,
+            }
+            entry = teams.setdefault(abbr, {"name": t.get("displayName") or abbr, "rows": []})
+            entry["rows"].append(row)
+    for entry in teams.values():
+        entry["rows"].sort(key=lambda r: r["d"], reverse=True)
+
+    if lg == "NHL" and teams:
+        eids = sorted({r["eid"] for e in teams.values() for r in e["rows"]})
+        results = dict(FETCH.map(_nhl_game_shots, eids))
+        filled = sum(1 for v in results.values() if v)
+        if eids and filled < 0.5 * len(eids):
+            raise FetchError(f"NHL: only {filled}/{len(eids)} game summaries carried shots")
+        for abbr, entry in teams.items():
+            for r in entry["rows"]:
+                r["shots"] = (results.get(r["eid"]) or {}).get(abbr)
+    return teams
+
+
+def team_stat_value(key, row):
+    if key == "total":
+        return row["pf"]
+    if key == "oppTotal":
+        return row["pa"]
+    if key == "winBy":
+        return row["margin"]
+    if key == "firstHalf":
+        return row["fh"]
+    if key == "firstPeriod":
+        return row["p1"]
+    if key == "teamThrees":
+        return row["threes"]
+    if key == "teamShots":
+        return row["shots"]
+    return None
+
+
+def team_def_ranks(team_logs):
+    """{abbr: (rank, L10 points-against average)} — rank 1 = toughest
+    defence (fewest points allowed over the last 10 games). Ordinal
+    ranking over the sorted averages; the abbreviation breaks ties so
+    the ranking is deterministic."""
+    avgs = {}
+    for abbr, entry in team_logs.items():
+        rows = entry["rows"][:10]
+        if rows:
+            avgs[abbr] = mean([r["pa"] for r in rows])
+    ranks = {}
+    for i, abbr in enumerate(sorted(avgs, key=lambda a: (avgs[a], a))):
+        ranks[abbr] = (i + 1, js_round1(avgs[abbr]))
+    return ranks
+
+
+def team_injury_note(lg, league, team_abbr):
+    """"Name out" / "Name doubtful" for any of the team's top-3
+    scorers (by L10 scoring average) listed Out or Doubtful on the
+    injury report; None when none qualify. Scoring = the points stat
+    for NBA/NHL; for the NFL it is total touchdowns (passing +
+    rushing + receiving), the closest scoring measure in its logs."""
+    scored = []
+    for pid, p in league["players"].items():
+        if p["team"] != team_abbr:
+            continue
+        rows = league["logs"].get(pid) or []
+        if lg == "NFL":
+            vals = [r["s"].get("passingTouchdowns", 0) + r["s"].get("rushingTouchdowns", 0)
+                    + r["s"].get("receivingTouchdowns", 0) for r in rows]
+        else:
+            vals = [r["s"]["points"] for r in rows if "points" in r["s"]]
+        if vals:
+            scored.append((mean(vals[:10]), p))
+    scored.sort(key=lambda x: -x[0])
+    notes = []
+    for _, p in scored[:3]:
+        for inj in league["injuries"]:
+            if inj["name"] != p["name"] or inj["status"] not in ("Out", "Doubtful"):
+                continue
+            if inj.get("team") and p.get("teamName") and inj["team"] != p["teamName"]:
+                continue
+            notes.append(f"{p['name']} {'out' if inj['status'] == 'Out' else 'doubtful'}")
+            break
+    return " · ".join(notes) if notes else None
+
+
+def team_upcoming(lg, league, today_et):
+    """One entry per team with a pre-game fixture in the slate window
+    (today ET for NBA/NHL, the current Thu–Mon week for the NFL):
+    {team, opp, oppName, home, date (ET)}. Games already started or
+    finished never produce team props."""
+    if lg == "NFL":
+        games = slate_games_nfl_week(league, today_et)
+    else:
+        games = [g for g in league["games"] if game_et_date(g) == today_et]
+    out, seen = [], set()
+    for g in games:
+        if g.get("state") != "pre":
+            continue
+        d = game_et_date(g)
+        home = (g.get("home") or {}).get("abbr")
+        away = (g.get("away") or {}).get("abbr")
+        if d is None or not home or not away:
+            continue
+        for team, opp, is_home in ((home, away, True), (away, home, False)):
+            if team in seen:
+                continue
+            seen.add(team)
+            opp_side = (g.get("away") if is_home else g.get("home")) or {}
+            out.append({"team": team, "opp": opp,
+                        "oppName": opp_side.get("name") or opp,
+                        "home": is_home, "date": d.isoformat()})
+    return out
+
+
+def build_team_props(lg, league, team_logs, today_et):
+    """Team props for the slate window. Research line =
+    floor(average) + 0.5 over the team's last 10 games for the stat —
+    or over the venue subset of those 10 when the team has >= 5 games
+    at the upcoming venue in them (lineBasis says which). Hit counts
+    are exact counts for both directions over L5/L10/L20; `venue`
+    counts the team's last 10 games at the upcoming venue."""
+    ranks = team_def_ranks(team_logs)
+    props = []
+    for up in team_upcoming(lg, league, today_et):
+        entry = team_logs.get(up["team"])
+        if not entry or len(entry["rows"]) < 5:
+            continue
+        rows = entry["rows"]
+        game_date = datetime.strptime(up["date"], "%Y-%m-%d").date()
+        last_date = datetime.strptime(rows[0]["d"], "%Y-%m-%d").date()
+        rest_days = (game_date - last_date).days
+        note = team_injury_note(lg, league, up["team"])
+        opp_rank, opp_avg = ranks.get(up["opp"], (None, None))
+        for key, label in TEAM_STAT_DEFS[lg]:
+            series = [v for v in (team_stat_value(key, r) for r in rows) if v is not None]
+            if len(series) < 5:
+                continue
+            venue_vals = []
+            for r in rows[:10]:
+                if r["home"] != up["home"]:
+                    continue
+                v = team_stat_value(key, r)
+                if v is not None:
+                    venue_vals.append(v)
+            avg = mean(series[:10])
+            venue_avg = mean(venue_vals) if venue_vals else None
+            use_venue = len(venue_vals) >= 5
+            line_avg = venue_avg if use_venue else avg
+            line = math.floor(line_avg) + 0.5
+            counts = {}
+            for n, wname in ((5, "L5"), (10, "L10"), (20, "L20")):
+                seg = series[:n]
+                o = sum(1 for v in seg if v > line)
+                counts[wname] = {"o": o, "u": len(seg) - o, "n": len(seg)}
+            vseries = []
+            for r in rows:
+                if r["home"] != up["home"]:
+                    continue
+                v = team_stat_value(key, r)
+                if v is not None:
+                    vseries.append(v)
+                if len(vseries) >= 10:
+                    break
+            vo = sum(1 for v in vseries if v > line)
+            props.append({
+                "league": lg, "team": up["team"], "teamName": entry["name"],
+                "opp": up["opp"], "oppName": up["oppName"], "gameDate": up["date"],
+                "home": up["home"], "stat": key, "statLabel": label, "line": line,
+                "dir": "Over" if counts["L10"]["o"] >= counts["L10"]["u"] else "Under",
+                "counts": counts,
+                "venue": {"venue": "home" if up["home"] else "away",
+                          "o": vo, "u": len(vseries) - vo, "n": len(vseries)},
+                "avg": js_round1(avg),
+                "venueAvg": js_round1(venue_avg) if venue_avg is not None else None,
+                "venueN": len(venue_vals),
+                "lineAvg": js_round1(line_avg),
+                "lineBasis": "venue" if use_venue else "all",
+                "oppDefRank": opp_rank, "oppDefAvg": opp_avg,
+                "restDays": rest_days,
+                "b2b": bool(lg in ("NBA", "NHL") and rest_days == 1),
+                "shortWeek": bool(lg == "NFL" and rest_days <= 4),
+                "injuryNote": note,
+            })
+    return props
+
+
+def build_teams(league_objs, now_utc):
+    """({league: [team props]}, {league: info}) for data-teams.js. A
+    league whose team pull fails degrades to an empty prop list for
+    that league (with the error in the info) rather than failing the
+    run or wiping the other leagues' team props."""
+    today_et = now_utc.astimezone(ET).date()
+    leagues, info = {}, {}
+    for lg in ("NBA", "NFL", "NHL"):
+        try:
+            logs = fetch_team_logs(lg, now_utc, today_et)
+            props = build_team_props(lg, league_objs[lg], logs, today_et)
+            leagues[lg] = props
+            info[lg] = {"teams": len(logs), "teamProps": len(props),
+                        "gamesLogged": sum(len(e["rows"]) for e in logs.values())}
+        except Exception as e:
+            leagues[lg] = []
+            info[lg] = {"teamProps": 0, "error": str(e)}
+    return leagues, info
+
+
+# --------------------------------------------------------------------------
 # Main
 # --------------------------------------------------------------------------
 
@@ -1754,7 +2113,22 @@ def main():
             "DATA.leagues.NBA = window.__DL_NBA; DATA.leagues.NBA.logsPrev = window.__DL_NBA_PREV;\n"
             "DATA.leagues.NFL = window.__DL_NFL; DATA.leagues.NFL.logsPrev = window.__DL_NFL_PREV;\n"
             "DATA.leagues.NHL = window.__DL_NHL; DATA.leagues.NHL.logsPrev = window.__DL_NHL_PREV;\n"
+            "var TEAMS_DATA = window.__TEAMS_DATA || {fetchedAt: null, leagues: {}};\n"
         )
+
+    # Team props (data-teams.js), from the same run. build_teams
+    # degrades per league, so this never fails the run; the chunk is
+    # part of the same all-or-nothing publish set as the other data
+    # files (staged here, moved only on full success in repo mode).
+    if not failed:
+        team_leagues, team_info = build_teams(league_objs, now_utc)
+        staged["data-teams.js"] = "window.__TEAMS_DATA = " + js_dumps(
+            {"fetchedAt": fetched_at, "leagues": team_leagues}) + ";\n"
+        report["teams"] = team_info
+        report["teamProps"] = {lg: len(team_leagues[lg]) for lg in team_leagues}
+        for lg, tinfo in team_info.items():
+            if tinfo.get("error"):
+                report["errors"].append(f"teams {lg}: {tinfo['error']}")
 
     # Results archive (snapshot + grade + render), from the same
     # dataset. Wrapped separately: an archive failure is reported but
