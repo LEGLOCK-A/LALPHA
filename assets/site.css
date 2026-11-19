@@ -153,6 +153,25 @@
   .statfold-body[hidden]{display:none}
   .statfold .statfilter{margin:2px 0 4px}
   @media (prefers-reduced-motion: reduce){.statfold-head .gf-chev{transition:none}}
+  /* Props view section folds (Player Props / Team Props): the same
+     head + chevron idiom as the stat fold, at section-title scale.
+     Open/closed persists per section (leglock.sec.player /
+     leglock.sec.team in localStorage); Player Props starts open,
+     Team Props closed. */
+  .propsec{margin:10px 0 2px}
+  .propsec-head{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:7px 2px;min-height:40px;cursor:pointer;color:var(--ink);text-align:left;font-family:inherit;-webkit-tap-highlight-color:transparent}
+  .propsec-head .gf-title{font-size:16px;font-weight:700;letter-spacing:.01em;color:var(--ink)}
+  .propsec-head .gf-chev{margin-left:auto;flex:none;width:10px;height:10px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:rotate(-45deg);transition:transform .18s ease}
+  .propsec.open .propsec-head .gf-chev{transform:rotate(45deg)}
+  .propsec-body{padding-top:6px}
+  .propsec-body[hidden]{display:none}
+  @media (prefers-reduced-motion: reduce){.propsec-head .gf-chev{transition:none}}
+  /* team prop cards: the research layers ride on one sub-line */
+  .tmeta{font-size:12px;color:var(--ink3);line-height:1.45}
+  .tmeta b{color:var(--ink2);font-weight:600}
+  /* the brand logo is a home link; the anchor is block so the centred
+     logo image lays out exactly as it did unwrapped */
+  .brand a{display:block}
   .xgfbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:-4px 0 11px}
   /* flex-wrap is load-bearing: in the two-across phone grid the row's
      text plus the Small sample / Regression risk tags are wider than the
