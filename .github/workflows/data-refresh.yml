@@ -1,0 +1,51 @@
+# Data refresh for LEGLOCK.online.
+#
+# The refresh script lives IN THIS REPO at tools/refresh.py (copy it there
+# from the canonical pipeline; this workflow runs that in-repo copy).
+# It rebuilds the data chunks under assets/ from ESPN + nflverse (free,
+# no API keys), regenerates the static league pages (nba/, nhl/, nfl/)
+# and sitemap.xml, and this workflow commits whatever changed. The script
+# exits non-zero on any whole-league failure and leaves assets/
+# untouched, so a failed run never commits partial data.
+name: Data refresh
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # Node is preinstalled on the runner; the script only shells out
+      # to `node -e` to read the current chunks — no npm installs.
+      - name: Rebuild data chunks
+        env:
+          LEGLOCK_REPO_ROOT: ${{ github.workspace }}
+        run: python3 tools/refresh.py
+
+      - name: Commit changed data files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/data-nba.js assets/data-nba-prev.js assets/data-nfl.js assets/data-nfl-prev.js assets/data-nhl.js assets/data-nhl-prev.js assets/data-merge.js assets/nfl-usage.js nba/index.html nhl/index.html nfl/index.html sitemap.xml
+          if git diff --cached --quiet; then
+            echo "No data changes — nothing to commit."
+          else
+            git commit -m "Data refresh $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git push
+          fi
