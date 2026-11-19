@@ -184,7 +184,14 @@
   #teamPropGrid{display:block}
   .teamgroup{margin-top:16px}
   .teamgroup:first-child{margin-top:2px}
-  .teamgroup-head{font-size:14px;font-weight:700;color:var(--ink2);margin:0 0 7px;padding:0 2px}
+  /* Team group header is a toggle: the .propsec chevron pattern at
+     group scale, no divider lines. Groups start closed; opening one
+     reveals its compact .tcard grid. */
+  .teamgroup-head{display:flex;align-items:center;gap:7px;width:100%;background:none;border:0;font-family:inherit;text-align:left;font-size:14px;font-weight:700;color:var(--ink2);margin:0 0 7px;padding:2px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .teamgroup-head .gf-chev{margin-left:auto;flex:none;width:9px;height:9px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:rotate(-45deg);transition:transform .18s ease}
+  .teamgroup.open .teamgroup-head .gf-chev{transform:rotate(45deg)}
+  @media (prefers-reduced-motion: reduce){.teamgroup-head .gf-chev{transition:none}}
+  .tgroup-body[hidden]{display:none}
   /* team prop cards: the research layers ride on one sub-line */
   .tmeta{font-size:12px;color:var(--ink3);line-height:1.45}
   .tmeta b{color:var(--ink2);font-weight:600}
@@ -198,6 +205,21 @@
      the neighbouring card painted over them. Wrapping keeps every item —
      tags included — inside the card, on its own line when needed. */
   .winrow{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);margin-top:7px}
+  /* Opponent context line on prop cards: next opponent + what they
+     allow in the stat (ranked from the board's own logs), the player's
+     home/away averages this season, and a B2B flag. One quiet line —
+     the cards were deliberately shrunk, so this stays small. */
+  .oppctx{font-size:11px;line-height:1.35;color:var(--ink3);margin-top:4px}
+  /* Alt-line ladder + injury impact in the game-log popup summary */
+  .ladder{margin-top:10px}
+  .ladtitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin-bottom:5px}
+  .ladrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:4px}
+  .ladlab{font-size:11px;color:var(--ink3);min-width:46px}
+  .rung{border:1px solid var(--line2);border-radius:999px;padding:1px 8px;font-size:11.5px;color:var(--ink2);white-space:nowrap}
+  .rung b{color:var(--ink)}
+  .rung.base{border-color:var(--accent);background:var(--surface2)}
+  .injimpact{margin-top:10px;font-size:12.5px;line-height:1.45;color:var(--ink2)}
+  .injimpact b{color:var(--ink)}
   .winrow b{color:var(--ink);font-weight:700;font-size:13px}
   .winrow .smallsample{color:var(--amber);font-weight:700;white-space:nowrap;max-width:100%}
   .winrow .regtag{color:var(--ink3);font-weight:700;white-space:nowrap;border:1px solid var(--line2);border-radius:999px;padding:0 7px;font-size:10.5px;line-height:1.5;max-width:100%;min-height:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -218,6 +240,14 @@
   .rankbar .rseg button{border:0;background:transparent;border-radius:6px;font-weight:300;font-size:12px;color:var(--ink2);min-height:26px;padding:2px 10px;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent}
   .rankbar .rseg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow);font-weight:700}
   @media (max-width:600px){ .rankbar .rseg button{padding:2px 8px;min-height:24px} }
+  /* Info button beside the Signal/Classic switch (and in the Watchlist
+     pane, which follows the same setting): opens the shared #rankPop
+     definition popover — a small round outline "i", styled like the
+     Regression risk tag / Why? pill family. */
+  .rankinfo{flex:none;width:20px;height:20px;border-radius:999px;border:1px solid var(--line2);background:var(--surface);color:var(--ink3);font-size:11px;font-weight:700;line-height:1;cursor:pointer;font-family:inherit;padding:0;-webkit-tap-highlight-color:transparent}
+  .rankinfo:hover{border-color:var(--ink3);color:var(--ink2)}
+  .rankinfo[aria-expanded="true"]{background:var(--surface2);border-color:var(--ink3);color:var(--ink)}
+  .ranknote{font-size:12px;color:var(--ink3)}
   /* "Why?" tap target on Signal-mode prop cards: a small pill in the card
      foot that opens the shared #sigPop breakdown (a .regpop box). It is a
      real button carrying data-no-log, so its tap never opens the game-log
@@ -472,7 +502,7 @@
   .logtable td:first-child{color:var(--ink);font-weight:300}
   .logtitle{font-size:12px;font-weight:700;color:var(--ink2);background:var(--surface2);border-radius:8px;padding:6px 9px;margin:5px 0 3px;line-height:1.4}
   .seasontag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:var(--amber-soft);color:var(--amber);border-radius:999px;padding:1px 7px;margin-left:5px;white-space:nowrap}
-  /* ---------- Underdogs ---------- */
+  /* ---------- Risers ---------- */
   .ucard{cursor:pointer}
   .ucard:hover{border-color:var(--accent)}
   .ucmp{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--ink2)}
