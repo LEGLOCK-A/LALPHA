@@ -1,0 +1,36 @@
+name: Our Picks
+description: Post today's picks — the bot publishes them to the Our Picks page.
+title: "Our Picks: "
+labels: ["our-picks"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Post today's picks
+
+        Type your picks in the box below — **one pick per line** — and submit.
+        The bot publishes them to [leglock.online/our-picks](https://leglock.online/our-picks/)
+        within a minute or two, then comments here and closes this issue.
+
+        If a line doesn't parse, the bot comments the error on this issue and
+        nothing on the site changes — just **edit the issue** to fix the line
+        and it re-runs automatically.
+  - type: textarea
+    id: picks
+    attributes:
+      label: Picks
+      description: |
+        One pick per line, in this exact format:
+        League | Player | Pick | Note (optional)
+
+        League must be NBA, NFL or NHL. The note is optional — leave it off,
+        or end the line after the pick. Up to 20 picks. Examples:
+        NBA | Jayson Tatum | Over 26.5 Points | Celtics are 8-2 at home
+        NFL | Josh Allen | Over 1.5 Passing TDs
+        NHL | Connor McDavid | Over 1.5 Points
+      placeholder: |
+        NBA | Jayson Tatum | Over 26.5 Points | Celtics are 8-2 at home
+        NFL | Josh Allen | Over 1.5 Passing TDs
+        NHL | Connor McDavid | Over 1.5 Points
+    validations:
+      required: true
