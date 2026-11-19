@@ -1826,7 +1826,7 @@ function randPool(){
          the higher L10 hit rate). "Both" deals either; Over/Under deal only
          that side — the pool never pads with the other direction. */
       if (state.randDir && state.randDir !== "Both" && p.dir !== state.randDir) return;
-      var r = dirRate(p, "L10");
+      var r = dirRate(p, "L20");
       if (r != null && r >= min){
         /* NFL usage tier for deal weighting: 0 = usage rising, 1 = steady
            or no usage data, 2 = usage falling. Other leagues stay tier 1
@@ -1846,7 +1846,7 @@ function renderPoolNote(dealt, picks){
   }
   var pool = randPool(), want = +$("#randCount").value;
   var dirTxt = state.randDir === "Over" ? "Overs only" : (state.randDir === "Under" ? "Unders only" : "both directions");
-  var txt = '<b>' + pool.length + '</b> props at ' + $("#randMin").value + '%+ (L10) across ' + LEAGUES.filter(function(l){ return state.randLeagues[l]; }).join(", ") + ' · ' + dirTxt + ' · stats: ' + esc(randStatsSummary()) + '.';
+  var txt = '<b>' + pool.length + '</b> props at ' + $("#randMin").value + '%+ (L20) across ' + LEAGUES.filter(function(l){ return state.randLeagues[l]; }).join(", ") + ' · ' + dirTxt + ' · stats: ' + esc(randStatsSummary()) + '.';
   if (state.randNoHalf) txt += ' 0.5 lines are excluded from the pool.';
   var selGames = randSelectedGames();
   if (selGames.length) txt += ' Games filter on: ' + selGames.length + ' game' + (selGames.length > 1 ? 's' : '') + ' selected — the pool only deals players from those matchups.';
@@ -1992,6 +1992,7 @@ $$("#randDir button").forEach(function(b){
     renderPoolNote(null);
   });
 });
+$("#randMin").addEventListener("input", function(){ var v = $("#randMinVal"); if (v) v.textContent = $("#randMin").value + "%"; renderPoolNote(null); });
 $("#randMin").addEventListener("change", function(){ renderPoolNote(null); });
 $("#randCount").addEventListener("change", function(){ renderPoolNote(null); });
 function randToggleDay(dayStr){
