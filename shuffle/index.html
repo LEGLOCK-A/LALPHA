@@ -25,7 +25,7 @@
 <div class="wrap">
 
   <div class="brand">
-    <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="LegLock" width="1179" height="280" />
+    <a href="/" aria-label="LegLock home"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="LegLock" width="1179" height="280" /></a>
     <div class="tagline">Player-prop research · NBA · NFL · NHL</div>
   </div>
 
@@ -126,6 +126,12 @@
 
   <!-- ======= PROPS (Top Props / Streaks / Watchlist — one board, three cuts) ======= -->
   <section class="view" id="view-discover">
+    <div class="propsec open" id="secPlayer">
+      <button class="propsec-head" id="secPlayerHead" type="button" aria-expanded="true" aria-controls="secPlayerBody">
+        <span class="gf-title">Player Props</span>
+        <span class="gf-chev" aria-hidden="true"></span>
+      </button>
+      <div class="propsec-body" id="secPlayerBody">
     <div class="sechead">
       <h2 id="discoverTitle">Prop Board</h2>
       <span class="sub">Lines from last-10 averages · hit rates from game logs.</span>
@@ -184,6 +190,18 @@
       <div class="countline" id="watchCount"></div>
       <div class="wlist" id="watchGrid"></div>
     </div>
+      </div>
+    </div>
+    <div class="propsec" id="secTeam">
+      <button class="propsec-head" id="secTeamHead" type="button" aria-expanded="false" aria-controls="secTeamBody">
+        <span class="gf-title">Team Props</span>
+        <span class="gf-chev" aria-hidden="true"></span>
+      </button>
+      <div class="propsec-body" id="secTeamBody" hidden>
+        <div class="countline" id="teamPropCount"></div>
+        <div class="grid" id="teamPropGrid"></div>
+      </div>
+    </div>
   </section>
 
   <!-- ======= LIVE ======= -->
@@ -213,6 +231,17 @@
       <span class="sub">Random picks from the highest hit-rate props.</span>
     </div>
     <div class="randbar">
+      <div class="rrow">
+        <span class="rlabel">Games</span>
+        <div class="chips rscroll">
+          <button class="chip" id="randToday" type="button" aria-pressed="false">Today&rsquo;s games</button>
+          <button class="chip" id="randGamesClear" type="button" hidden>Clear</button>
+        </div>
+      </div>
+      <div class="rrow">
+        <span class="rlabel">Slate</span>
+        <div class="chips rscroll" id="randGames" role="group" aria-label="Filter shuffle by game"></div>
+      </div>
       <div class="rrow rrow-main">
         <div class="rfield">
           <label for="randCount">Picks</label>
@@ -607,6 +636,7 @@
 <script src="/assets/data-nfl-prev.js"></script>
 <script src="/assets/data-nhl.js"></script>
 <script src="/assets/data-nhl-prev.js"></script>
+<script src="/assets/data-teams.js"></script>
 <script src="/assets/data-merge.js"></script>
 <script src="/assets/nfl-usage.js"></script>
 <script src="/assets/images.js"></script>
