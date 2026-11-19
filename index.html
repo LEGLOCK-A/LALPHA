@@ -33,7 +33,7 @@
 <title>LegLock — Player Prop Hit Rates for NBA, NFL & NHL</title>
 <meta name="description" content="The LegLock prop board: L5, L10 and L20 hit rates for NBA, NFL and NHL player props, at research lines set from each player's own recent average." />
 <link rel="canonical" href="https://leglock.online/" />
-<link rel="stylesheet" href="/assets/site.css?v=3" />
+<link rel="stylesheet" href="/assets/site.css?v=4" />
 </head>
 <body>
 
@@ -142,21 +142,23 @@
   <!-- ======= PROPS (Top Props / Streaks / Watchlist — one board, three cuts) ======= -->
   <section class="view active" id="view-discover">
     <div class="propsec" id="secPlayer">
-      <button class="propsec-head" id="secPlayerHead" type="button" aria-expanded="false" aria-controls="secPlayerBody">
-        <span class="gf-title">Player Props</span>
-        <span class="gf-chev" aria-hidden="true"></span>
-      </button>
+      <div class="sechead propsec-headrow">
+        <button class="propsec-head" id="secPlayerHead" type="button" aria-expanded="false" aria-controls="secPlayerBody">
+          <span class="gf-titleblock">
+            <span class="gf-title">Player Props</span>
+            <span class="gf-sub">Lines from last-10 averages · hit rates from game logs.</span>
+          </span>
+          <span class="gf-chev" aria-hidden="true"></span>
+        </button>
+      </div>
       <div class="propsec-body" id="secPlayerBody" hidden>
-    <div class="sechead">
-      <h2 id="discoverTitle">Prop Board</h2>
-      <span class="sub">Lines from last-10 averages · hit rates from game logs.</span>
-    </div>
     <div class="chips" id="dsegChips" role="group" aria-label="Board view" style="margin:2px 0 12px">
       <button class="chip" data-dseg="props" aria-pressed="true">Top Props</button>
       <button class="chip" data-dseg="streaks" aria-pressed="false">Streaks</button>
       <button class="chip" data-dseg="watch" aria-pressed="false">Watchlist</button>
     </div>
     <div id="dseg-props">
+      <div class="boardrow boardrow-stats">
       <div class="statfold" id="statFold">
         <button class="statfold-head" id="statFoldHead" type="button" aria-expanded="false" aria-controls="statFoldBody">
           <span class="gf-title">Stats</span>
@@ -167,17 +169,19 @@
           <div class="statfilter" id="statChips" role="group" aria-label="Stat filter"></div>
         </div>
       </div>
+      <div class="xgfbar" id="qualBoardBar">
+        <span class="xgfnote">Min avg</span>
+        <div class="minavg" id="minAvgBoard"></div>
+      </div>
+      </div>
       <div class="xgfbar" id="xgfBoardBar" hidden>
         <button class="chip sortbtn sortXgfBtn" id="sortXgfBoard" type="button" aria-pressed="false">xGF%</button>
         <span class="xgfnote">xGF% data: MoneyPuck · 2026-27</span>
       </div>
+      <div class="boardrow boardrow-gr">
       <div class="xgfbar" id="winBoardBar">
         <span class="xgfnote">Games</span>
         <div class="chips" id="winChipsBoard"></div>
-      </div>
-      <div class="xgfbar" id="qualBoardBar">
-        <span class="xgfnote">Min avg</span>
-        <div class="minavg" id="minAvgBoard"></div>
       </div>
       <div class="rankbar" id="rankBoardBar">
         <span class="rlabel" id="rankModeLabel">Rank</span>
@@ -186,6 +190,7 @@
           <button type="button" data-rank="classic" aria-pressed="false">Classic</button>
         </div>
         <button type="button" class="rankinfo" data-rankinfo="1" aria-haspopup="true" aria-expanded="false" aria-controls="rankPop" aria-label="What Signal and Classic ranking mean">i</button>
+      </div>
       </div>
       <div class="countline" id="propCount"></div>
       <div class="grid" id="propGrid"></div>

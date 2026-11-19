@@ -175,6 +175,46 @@
   .propsec-head .sec-more{margin-left:auto;flex:none;font-size:14px;font-weight:600;color:var(--accent);white-space:nowrap}
   .propsec-head .sec-more + .gf-chev{margin-left:0}
   @media (prefers-reduced-motion: reduce){.propsec-head .gf-chev{transition:none}}
+  /* Merged Props board header (compact rows): the section head button
+     carries the title with the board subtitle under it, and the
+     JS-injected Filters duplicate rides on the same row — app.js
+     appends it into this .sechead container and inserts the collapsed
+     preview right after the head button, so flex order seats the
+     preview on its own full-width line below the row. While the
+     section is collapsed the duplicate hides: its tap only toggles
+     the Filters panel, so it must not offer Filters for a board that
+     is not on screen (the topbar Filters button stays available). */
+  .propsec-headrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:3px 0 5px}
+  .propsec-headrow .propsec-head{order:1;flex:1 1 auto;width:auto;min-width:0}
+  .propsec-headrow .filters-dup{order:2}
+  .propsec-headrow .secpreview{order:3;flex:1 1 100%;margin:2px 0}
+  #secPlayer:not(.open) .propsec-headrow .filters-dup{display:none}
+  #secPlayerHead .gf-titleblock{display:flex;flex-direction:column;gap:1px;min-width:0}
+  #secPlayerHead .gf-sub{font-size:12.5px;font-weight:300;color:var(--ink3)}
+  /* Compact control rows on the Props board: STATS fold + Min avg
+     share one row, Games window + Rank share the next. Scoped to the
+     new .boardrow wrappers inside #dseg-props so the shared .xgfbar /
+     .rankbar / .statfold styles — and every other page — stay put. */
+  #dseg-props .boardrow{display:flex;align-items:flex-start;gap:8px 12px}
+  #dseg-props .boardrow-stats{margin:8px 0 12px}
+  #dseg-props .boardrow-stats .statfold{flex:1 1 auto;min-width:0;margin:0}
+  #dseg-props .boardrow-stats #qualBoardBar{flex:none;flex-direction:column;flex-wrap:nowrap;align-items:flex-end;gap:3px;margin:0}
+  #dseg-props .boardrow-stats #qualBoardBar .xgfnote{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  #dseg-props .boardrow-gr{flex-wrap:wrap;margin:-4px 0 11px}
+  #dseg-props .boardrow-gr #winBoardBar{flex:none;flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:4px;margin:0}
+  #dseg-props .boardrow-gr #winBoardBar .xgfnote{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  #dseg-props .boardrow-gr #rankBoardBar{flex:none;margin:0 0 0 auto}
+  #dseg-props .boardrow-gr #rankBoardBar .rlabel{flex:1 1 100%}
+  @media (max-width:700px){
+    .propsec-headrow{gap:5px 8px;margin:2px 0 3px}
+    #secPlayerHead .gf-sub{font-size:10.5px}
+    #dseg-props .boardrow{gap:6px 8px}
+    #dseg-props .boardrow-stats{margin:4px 0 6px}
+    #dseg-props .boardrow-gr{margin:-2px 0 6px}
+    #dseg-props .boardrow-gr #winChipsBoard{gap:4px}
+    #dseg-props .boardrow-gr #winChipsBoard .chip{padding:3px 6px;font-size:10px;min-height:23px}
+    #dseg-props .boardrow-gr #rankSeg button{padding:2px 7px;font-size:11px;min-height:23px}
+  }
   /* Expanded Team Props grouped by team: the outer #teamPropGrid
      becomes a plain stack (the id rule overrides its .grid display)
      and each team gets a small header — modelled on .nmhead
