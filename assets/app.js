@@ -1732,9 +1732,12 @@ function nflWeekDayStrs(){
   }
   return days;
 }
+function etDayStrPlus(n){
+  return etDayStr(new Date(Date.now() + n * 864e5).toISOString());
+}
 function randSlateGames(lg){
   var all = ((window.__LL.LG || {})[lg]) || (DATA.leagues[lg] && DATA.leagues[lg].games) || [];
-  var days = lg === "NFL" ? nflWeekDayStrs() : [etDayStr(new Date().toISOString())];
+  var days = lg === "NFL" ? nflWeekDayStrs() : [etDayStr(new Date().toISOString()), etDayStrPlus(1)];
   var inDays = {};
   days.forEach(function(x){ inDays[x] = 1; });
   return stripGames(all.filter(function(g){ return g.state === "pre" && inDays[etDayStr(g.date)]; }));
@@ -1764,13 +1767,17 @@ function renderRandGames(){
     randSlateGames(lg).forEach(function(g){ valid[g.id] = 1; });
   });
   Object.keys(state.randGames).forEach(function(id){ if (!valid[id]) delete state.randGames[id]; });
-  var html = "", slateCount = 0, selCount = 0;
+  var html = "", selCount = 0;
+  var todayStr = etDayStr(new Date().toISOString()), tomorrowStr = etDayStrPlus(1);
+  var tCount = 0, tSel = 0, tmCount = 0, tmSel = 0;
   LEAGUES.forEach(function(lg){
     if (!state.randLeagues[lg]) return;
     randSlateGames(lg).forEach(function(g){
-      slateCount++;
       var on = !!state.randGames[g.id];
       if (on) selCount++;
+      var gd = etDayStr(g.date);
+      if (gd === todayStr){ tCount++; if (on) tSel++; }
+      else if (gd === tomorrowStr){ tmCount++; if (on) tmSel++; }
       html += '<button class="chip" data-rg="' + esc(g.id) + '" aria-pressed="' + (on ? "true" : "false") + '">'
         + esc(g.away.abbr) + ' @ ' + esc(g.home.abbr) + ' · ' + esc(gameStatusLine(g)) + '</button>';
     });
@@ -1785,7 +1792,9 @@ function renderRandGames(){
     });
   });
   var todayBtn = $("#randToday");
-  if (todayBtn) todayBtn.setAttribute("aria-pressed", slateCount > 0 && selCount === slateCount ? "true" : "false");
+  if (todayBtn) todayBtn.setAttribute("aria-pressed", tCount > 0 && tSel === tCount ? "true" : "false");
+  var tomorrowBtn = $("#randTomorrow");
+  if (tomorrowBtn) tomorrowBtn.setAttribute("aria-pressed", tmCount > 0 && tmSel === tmCount ? "true" : "false");
   var clearBtn = $("#randGamesClear");
   if (clearBtn) clearBtn.hidden = selCount === 0;
 }
@@ -1985,15 +1994,20 @@ $$("#randDir button").forEach(function(b){
 });
 $("#randMin").addEventListener("change", function(){ renderPoolNote(null); });
 $("#randCount").addEventListener("change", function(){ renderPoolNote(null); });
-$("#randToday").addEventListener("click", function(){
+function randToggleDay(dayStr){
   var ids = [];
-  LEAGUES.forEach(function(lg){ if (state.randLeagues[lg]) randSlateGames(lg).forEach(function(g){ ids.push(g.id); }); });
+  LEAGUES.forEach(function(lg){
+    if (!state.randLeagues[lg]) return;
+    randSlateGames(lg).forEach(function(g){ if (etDayStr(g.date) === dayStr) ids.push(g.id); });
+  });
   var allOn = ids.length > 0 && ids.every(function(id){ return state.randGames[id]; });
-  state.randGames = {};
-  if (!allOn) ids.forEach(function(id){ state.randGames[id] = 1; });
+  if (allOn) ids.forEach(function(id){ delete state.randGames[id]; });
+  else ids.forEach(function(id){ state.randGames[id] = 1; });
   renderRandGames();
   renderPoolNote(null);
-});
+}
+$("#randToday").addEventListener("click", function(){ randToggleDay(etDayStr(new Date().toISOString())); });
+$("#randTomorrow").addEventListener("click", function(){ randToggleDay(etDayStrPlus(1)); });
 $("#randGamesClear").addEventListener("click", function(){
   state.randGames = {};
   renderRandGames();
