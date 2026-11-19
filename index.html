@@ -33,7 +33,7 @@
 <title>LegLock — Player Prop Hit Rates for NBA, NFL & NHL</title>
 <meta name="description" content="The LegLock prop board: L5, L10 and L20 hit rates for NBA, NFL and NHL player props, at research lines set from each player's own recent average." />
 <link rel="canonical" href="https://leglock.online/" />
-<link rel="stylesheet" href="/assets/site.css?v=4" />
+<link rel="stylesheet" href="/assets/site.css?v=5" />
 </head>
 <body>
 
@@ -220,6 +220,30 @@
         <span class="gf-chev" aria-hidden="true"></span>
       </button>
       <div class="propsec-body" id="secTeamBody" hidden>
+        <div class="teamfrow">
+          <div class="statfold" id="teamStatFold">
+            <button class="statfold-head" id="teamStatFoldHead" type="button" aria-expanded="false" aria-controls="teamStatFoldBody">
+              <span class="gf-title">Stats</span>
+              <span class="gf-sum" id="teamStatFoldSum">&middot; All</span>
+              <span class="gf-chev" aria-hidden="true"></span>
+            </button>
+            <div class="statfold-body" id="teamStatFoldBody" hidden>
+              <div class="statfilter" id="teamStatChips" role="group" aria-label="Team stat filter"></div>
+            </div>
+          </div>
+          <div class="rankbar teamdirbar">
+            <span class="rlabel" id="teamDirLabel">Direction</span>
+            <div class="rseg" id="teamDirSeg" role="group" aria-labelledby="teamDirLabel">
+              <button type="button" data-tdir="Both" aria-pressed="true">Both</button>
+              <button type="button" data-tdir="Over" aria-pressed="false">Over</button>
+              <button type="button" data-tdir="Under" aria-pressed="false">Under</button>
+            </div>
+          </div>
+        </div>
+        <div class="teamratebar">
+          <label for="teamMinRate">Minimum hit rate (Last 10) &mdash; <span id="teamMinRateVal">0%</span></label>
+          <input type="range" id="teamMinRate" min="0" max="100" step="5" value="0" />
+        </div>
         <div class="countline" id="teamPropCount"></div>
         <div class="grid" id="teamPropGrid"></div>
       </div>
@@ -678,7 +702,7 @@
   var g=document.querySelector("img.deal-glow"); if(g) g.src=window.__IMG.dealGlow;
 })();
 </script>
-<script src="/assets/app.js?v=4"></script>
+<script src="/assets/app.js?v=5"></script>
 <script>if (window.showView) showView("discover");</script>
 <script src="/assets/consent.js" defer></script>
 </body>

@@ -11,6 +11,7 @@ var PRIMARY = { NBA:"points", NFL:"passingYards", NHL:"points" };
 var state = {
   league:"NBA", view:"discover", stat:"All", minRate:0, win:10, sortXgf:false, sortEfg:false, rankMode:"signal",
   teamOpen:{},
+  teamStatOff:{}, teamStatFoldOpen:false, teamMinRate:0, teamDir:"Both",
   minGames:0, minAvg:0, randNoHalf:false, gamesFoldOpen:false, statFoldOpen:false,
   secPlayer:false, secTeam:false,
   dirs:{Over:true, Under:true}, search:"", gameSel:null,
@@ -2820,16 +2821,26 @@ function renderTeamProps(){
   var td = window.TEAMS_DATA;
   var list = (td && td.leagues && td.leagues[state.league]) || [];
   var sorted = list.slice().sort(function(a, b){ return teamFeatured(b).rate - teamFeatured(a).rate; });
-  _teamList = sorted;
+  /* The section's own filters (stat fold / direction / min hit rate)
+     cut the ranked list before grouping; the collapsed preview reads
+     the same filtered _teamList, so it can never show a filtered-out
+     prop. Defaults (all stats on, Both, floor off) leave the list
+     exactly as it was. */
+  var shown = teamFiltered(sorted);
+  _teamList = shown;
+  renderTeamStatChips();
   count.textContent = sorted.length
-    ? sorted.length + " team props · " + state.league + " · sorted by L10 hit rate at the research line"
+    ? shown.length + " team props · " + state.league + " · sorted by L10 hit rate at the research line"
+      + (shown.length !== sorted.length ? " · filtered from " + sorted.length : "")
     : "";
   /* No display cap: the grouped grid shows every team's props
      (the data itself is bounded by teams x stats per league).
      The 500 slice is only a pathological-data safety bound. */
-  grid.innerHTML = sorted.length
-    ? teamGroupsHtml(sorted.slice(0, 500))
-    : '<div class="emptybox" style="grid-column:1/-1">No team props for the current slate.</div>';
+  grid.innerHTML = shown.length
+    ? teamGroupsHtml(shown.slice(0, 500))
+    : '<div class="emptybox" style="grid-column:1/-1">'
+      + (sorted.length ? "No team props match those filters." : "No team props for the current slate.")
+      + '</div>';
   renderTeamSecPreview();
 }
 window.__LL.renderTeamProps = renderTeamProps;
@@ -2853,6 +2864,88 @@ window.__LL.renderTeamProps = renderTeamProps;
     if (body) body.hidden = !open;
   });
 })();
+
+/* ---------- Team Props filters ----------
+   The Team Props section carries its own filter set, mirroring the
+   player board's idioms: a Stats fold (the stat types present in the
+   current league's team data, all on by default, toggleable \u2014 the
+   fold header reads "All", the one active stat, "N of M" or "None"),
+   a Both / Over / Under direction switch on the featured direction
+   (the side each card displays), and a Minimum hit rate slider.
+   Team props carry L5/L10/L20 counts only \u2014 no per-window rates \u2014
+   so the floor is tested against the featured-direction L10 rate,
+   the same rate the section sorts by and the cards headline.
+   Filter state is in-session only, keyed per league for the stats,
+   and the defaults reproduce the unfiltered board exactly. */
+function teamStatList(lg){
+  var seen = {}, out = [];
+  ((window.TEAMS_DATA && window.TEAMS_DATA.leagues && window.TEAMS_DATA.leagues[lg]) || []).forEach(function(p){
+    if (!seen[p.stat]){ seen[p.stat] = 1; out.push({ key:p.stat, label:p.statLabel }); }
+  });
+  return out;
+}
+function teamStatOn(lg, key){ return !state.teamStatOff[lg + ":" + key]; }
+function teamFiltered(list){
+  return list.filter(function(p){
+    if (!teamStatOn(state.league, p.stat)) return false;
+    var f = teamFeatured(p);
+    if (state.teamDir !== "Both" && f.dir !== state.teamDir) return false;
+    if (state.teamMinRate > 0 && f.rate < state.teamMinRate) return false;
+    return true;
+  });
+}
+function syncTeamStatFoldSum(){
+  var el = $("#teamStatFoldSum");
+  if (!el) return;
+  var stats = teamStatList(state.league);
+  var on = stats.filter(function(s){ return teamStatOn(state.league, s.key); });
+  el.textContent = "\u00b7 " + (on.length === stats.length ? "All"
+    : on.length === 0 ? "None"
+    : on.length === 1 ? on[0].label
+    : on.length + " of " + stats.length);
+}
+function syncTeamStatFold(){
+  var fold = $("#teamStatFold"), body = $("#teamStatFoldBody"), head = $("#teamStatFoldHead");
+  if (!fold || !body || !head) return;
+  var open = !!state.teamStatFoldOpen;
+  fold.classList.toggle("open", open);
+  body.hidden = !open;
+  head.setAttribute("aria-expanded", open ? "true" : "false");
+  syncTeamStatFoldSum();
+}
+function renderTeamStatChips(){
+  var el = $("#teamStatChips");
+  if (!el) return;
+  el.innerHTML = teamStatList(state.league).map(function(s){
+    var on = teamStatOn(state.league, s.key);
+    return '<button class="chip" data-tstat="' + esc(s.key) + '" aria-pressed="' + (on ? "true" : "false") + '">' + esc(s.label) + '</button>';
+  }).join("");
+  $$(".chip", el).forEach(function(c){
+    c.addEventListener("click", function(){
+      var k = state.league + ":" + c.getAttribute("data-tstat");
+      if (state.teamStatOff[k]) delete state.teamStatOff[k]; else state.teamStatOff[k] = true;
+      renderTeamProps();
+    });
+  });
+  syncTeamStatFoldSum();
+}
+var teamStatFoldHead = $("#teamStatFoldHead");
+if (teamStatFoldHead) teamStatFoldHead.addEventListener("click", function(){ state.teamStatFoldOpen = !state.teamStatFoldOpen; syncTeamStatFold(); });
+syncTeamStatFold();
+$$("#teamDirSeg button").forEach(function(b){
+  b.addEventListener("click", function(){
+    state.teamDir = b.getAttribute("data-tdir");
+    $$("#teamDirSeg button").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    renderTeamProps();
+  });
+});
+var teamRange = $("#teamMinRate");
+if (teamRange) teamRange.addEventListener("input", function(){
+  state.teamMinRate = +teamRange.value;
+  var v = $("#teamMinRateVal");
+  if (v) v.textContent = teamRange.value + "%";
+  renderTeamProps();
+});
 
 /* ---------- Min games / Min average ----------
    Min games lives only in the Filters panel's collapsible Games

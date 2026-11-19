@@ -125,8 +125,8 @@
 
   /* tabs */
   .tabs{display:flex;gap:3px;background:var(--surface2);border-radius:11px;padding:3px;margin:9px 0 11px;flex-wrap:wrap}
-  .tab{flex:1 1 0;border:0;background:transparent;color:var(--ink2);border-radius:8px;padding:7px 7px;font-weight:700;font-size:13px;white-space:nowrap;min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
-  @media (max-width:700px){.tab{flex:1 1 30%;font-size:12.5px}}
+  .tab{flex:1 1 0;border:0;background:transparent;color:var(--ink2);border-radius:8px;padding:7px 7px;font-weight:700;font-size:13px;font-family:'Moderniz','LegLockSans',sans-serif;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+  @media (max-width:700px){.tab{flex:1 1 auto;min-width:0;font-size:10.5px;padding:7px 2px;letter-spacing:.02em}}
   .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow);font-weight:700}
   .tab .n{background:var(--red);color:#fff;border-radius:999px;font-size:11px;padding:0 6px;font-weight:700}
   .view{display:none}
@@ -232,6 +232,15 @@
   .teamgroup.open .teamgroup-head .gf-chev{transform:rotate(45deg)}
   @media (prefers-reduced-motion: reduce){.teamgroup-head .gf-chev{transition:none}}
   .tgroup-body[hidden]{display:none}
+  /* Team Props filter rows: the section's own stat fold + direction
+     switch on one row, the min hit rate slider under it. The fold and
+     the segmented switch reuse the board's .statfold / .rankbar styles. */
+  .teamfrow{display:flex;align-items:flex-start;gap:8px 12px;flex-wrap:wrap;margin:8px 0 10px}
+  .teamfrow .statfold{flex:1 1 220px;min-width:0;margin:0}
+  .teamfrow .teamdirbar{flex:none;margin:0}
+  .teamratebar{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+  .teamratebar label{font-size:12.5px;color:var(--ink2);white-space:nowrap}
+  .teamratebar input[type="range"]{flex:1 1 auto;width:auto;min-width:0}
   /* team prop cards: the research layers ride on one sub-line */
   .tmeta{font-size:12px;color:var(--ink3);line-height:1.45}
   .tmeta b{color:var(--ink2);font-weight:600}
@@ -833,8 +842,8 @@
     .gamesfold-body{gap:6px 10px;padding:1px 0 5px}
     .chip{padding:3px 7px;font-size:10.5px;min-height:24px}
     select.sel{min-height:30px;padding:4px 7px;font-size:12px;max-width:100%}
-    .tabs{margin:7px 0 8px;padding:2px;gap:2px;border-radius:8px}
-    .tab{flex:1 1 23%;padding:4px 3px;font-size:10.5px;min-height:28px;border-radius:6px;gap:4px}
+    .tabs{margin:7px 0 8px;padding:2px;gap:2px;border-radius:8px;flex-wrap:nowrap}
+    .tab{flex:1 1 auto;min-width:0;padding:4px 1px;font-size:8.5px;letter-spacing:.01em;min-height:28px;border-radius:6px;gap:4px}
     .tab .n{font-size:9px;padding:0 4px}
     .sechead{gap:5px;margin:2px 0 3px}
     .sechead h2{font-size:15.5px}
