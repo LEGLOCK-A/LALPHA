@@ -1324,7 +1324,7 @@ function boardRate(lg, pid, key){
   return win.length ? Math.round(100 * hits / win.length) : null;
 }
 function udEtDay(iso){
-  try { return new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/New_York" }); } catch(e){ return ""; }
+  try { return etYMD(iso); } catch(e){ return ""; }
 }
 /* The team's next game from the page's schedule data (the same games the
    Discover strip and Live tab show), kept only when it falls today or
@@ -1961,8 +1961,19 @@ function randStatsSummary(){
    hit-rate floor, No 0.5 lines, stat picks, direction, NFL usage
    weighting, weighted draw, short-pool honesty) applies on top,
    unchanged. */
+function etYMD(iso){
+  var parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(iso));
+  var y = "", m = "", d = "";
+  for (var i = 0; i < parts.length; i++) {
+    if (parts[i].type === "year") y = parts[i].value;
+    else if (parts[i].type === "month") m = parts[i].value;
+    else if (parts[i].type === "day") d = parts[i].value;
+  }
+  if (!y) throw new Error("bad date");
+  return y + "-" + m + "-" + d;
+}
 function etDayStr(iso){
-  try { return new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/New_York" }); } catch (e) { return ""; }
+  try { return etYMD(iso); } catch (e) { return ""; }
 }
 function nflWeekDayStrs(){
   var d = new Date(etDayStr(new Date().toISOString()) + "T12:00:00Z");
@@ -3761,7 +3772,7 @@ function fetchJson(url){
    fetch for the following day is merged in by game id, so today's games
    (live, finals and upcoming) never drop out when next-day games are added */
 function etDayOf(iso){
-  try { return new Date(iso).toLocaleDateString("en-CA", { timeZone:"America/New_York" }); } catch(e){ return ""; }
+  try { return etYMD(iso); } catch(e){ return ""; }
 }
 function nextDayParam(games){
   var base = "";
