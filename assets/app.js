@@ -364,7 +364,7 @@ $$(".leagues .pill").forEach(function(b){ b.addEventListener("click", function()
 
 /* ---------- games strip + team head-to-head ---------- */
 function gameStatusText(g){
-  if (g.state === "in") return g.detail + (g.clockSec > 0 ? " · " + fmtClock(g.clockSec) : "");
+  if (g.state === "in") return String(g.detail || "").replace(/^\s*\d{1,2}:\d{2}\s*[-–—·]\s*/, "").replace(/\s*[-–—·]\s*\d{1,2}:\d{2}\s*$/, "") + (g.clockSec > 0 ? " · " + fmtClock(g.clockSec) : "");
   if (g.state === "post") return "Final";
   return fmtDT(g.date);
 }
@@ -385,13 +385,23 @@ function shortTeamName(name, abbr){
     if (diff === -1) return "Yesterday \u00B7 " + tm;
     return d.toLocaleDateString(undefined,{weekday:"short"}) + ", " + d.toLocaleDateString(undefined,{month:"short", day:"numeric"}) + " \u00B7 " + tm;
   }
+  /* the feed's status detail already embeds the game clock ("5:43 - 2nd
+     Quarter"); strip it at render so the only clock on a live card is the
+     appended one — in gameStatusHtml that is the span the 1-second ticker
+     keeps live — instead of the time showing twice on every live box */
+  function detailNoClock(g){
+    return String(g.detail || "")
+      .replace(/^\s*\d{1,2}:\d{2}\s*[-–—·]\s*/, "")
+      .replace(/\s*[-–—·]\s*\d{1,2}:\d{2}\s*$/, "")
+      .trim();
+  }
   function gameStatusLine(g){
-    if (g.state === "in") return g.detail + (g.clockSec > 0 ? " \u00B7 " + fmtClock(g.clockSec) : "");
+    if (g.state === "in") return detailNoClock(g) + (g.clockSec > 0 ? " \u00B7 " + fmtClock(g.clockSec) : "");
     if (g.state === "post") return "Final";
     return fmtGameWhen(g.date);
   }
   function gameStatusHtml(g){
-    if (g.state === "in" && g.clockSec > 0) return esc(g.detail) + ' \u00B7 <span data-clock="' + esc(g.id) + '">' + fmtClock(g.clockSec) + '</span>';
+    if (g.state === "in" && g.clockSec > 0) return esc(detailNoClock(g)) + ' \u00B7 <span data-clock="' + esc(g.id) + '">' + fmtClock(g.clockSec) + '</span>';
     return esc(gameStatusLine(g));
   }
   function gameBoxHtml(g, lg){
@@ -2751,16 +2761,19 @@ function gameCard(lg, g){
    stored here and renderLive never overrides it on the ~20s re-renders */
 var liveOpen = {}, liveOpenTouched = {};
 
-/* ---------- Live props tracker (inside the Live view) ----------
-   A sportsbook-style tracker for the games in progress in a league's
-   Live section: one row per tracked prop whose player appears in the
-   live box score, ranked by the prop's featured-direction L10 hit rate
-   (50% floor, max 10 per game, never padded with weaker props). Values,
-   player matching and outcomes reuse the Players to Watch machinery
-   (pwStatVal / pwOutcome), so the tracker can never disagree with the
-   game popup. The block exists only while the league has a game in
-   progress, and a game with no qualifying props gets no block. Lines
-   are the board's research lines, as everywhere else on the site. */
+/* ---------- Live props tracker (inside the game popup) ----------
+   A sportsbook-style tracker added at the bottom of the Players to
+   Watch popup for a game in progress: one row per tracked prop whose
+   player appears in that game's live box score, ranked by the prop's
+   featured-direction L10 hit rate (50% floor, max 10 per game, never
+   padded with weaker props). It sits below everything the popup
+   already shows — header, team sections and their prop rows are
+   untouched. Values, player matching and outcomes reuse the Players
+   to Watch machinery (pwStatVal / pwOutcome), so the tracker can
+   never disagree with the popup's own prop rows above it. The Live
+   page itself carries no tracker section. A game with no qualifying
+   props (or no box score yet) gets no block. Lines are the board's
+   research lines, as everywhere else on the site. */
 function lptRate(p){
   var r = (p.rates || {}).L10;
   if (!r) return null;
@@ -2807,7 +2820,7 @@ function lptRowHtml(lg, p, v, oc){
     +   '</div></div>'
     + '</div></div>';
 }
-function lptGameHtml(lg, g){
+function lptPopupHtml(lg, g){
   var box = BOX[g.id];
   if (!box) return "";
   var seen = {}, cands = [];
@@ -2839,16 +2852,7 @@ function lptGameHtml(lg, g){
     if (a.grp === 1 && a.ratio !== b.ratio) return b.ratio - a.ratio;
     return 0;
   });
-  var status = window.__LL.gameStatusHtml ? window.__LL.gameStatusHtml(g) : esc(g.detail || "");
-  var head = '<div class="lpt-ghead"><span class="lpt-match">' + esc(g.away.abbr) + ' ' + esc(g.away.score || "0") + ' at ' + esc(g.home.abbr) + ' ' + esc(g.home.score || "0") + '</span><span class="lpt-clock">' + status + '</span></div>';
-  return '<div class="lpt-game">' + head + cands.map(function(c){ return lptRowHtml(lg, c.p, c.v, c.oc); }).join("") + '</div>';
-}
-function lptSectionHtml(lg, games){
-  var live = (games || []).filter(function(g){ return g.state === "in"; });
-  if (!live.length) return "";
-  var blocks = live.map(function(g){ return lptGameHtml(lg, g); }).join("");
-  if (!blocks) return "";
-  return '<div class="lpt"><div class="lpt-title">Live props</div>' + blocks + '</div>';
+  return '<div class="lpt"><div class="lpt-title">Live props</div>' + cands.map(function(c){ return lptRowHtml(lg, c.p, c.v, c.oc); }).join("") + '</div>';
 }
 function renderLive(){
   var html = "", totalLive = 0;
@@ -2868,7 +2872,6 @@ function renderLive(){
       + '<div class="livesec-body">'
       + (games.length ? '<div class="lgrid">' + games.map(function(g){ return gameCard(lg, g); }).join("") + '</div>'
                       : '<div class="emptybox">No games today.</div>')
-      + lptSectionHtml(lg, games)
       + '</div></div>';
   });
   $("#liveWrap").innerHTML = html;
@@ -3154,6 +3157,17 @@ function renderPw(){
     body += '</div>';
   });
   if (started && !box) body += '<div style="color:var(--ink3);font-size:12.5px;margin-top:10px">Loading player stats for this game\u2026</div>';
+  /* in-progress games only: the bar-style Live props tracker goes at the
+     very bottom of the popup, below everything the popup already shows —
+     nothing above it changes. No qualifying props (or no box score yet)
+     means no block at all, never an empty heading. renderPw re-runs on
+     every live check while the popup is open (and once the on-open box
+     score fetch lands), so the block stays current on the same ~20s
+     cycle as the rest of the popup — no separate timer. */
+  if (g.state === "in"){
+    var lptHtml = lptPopupHtml(lg, g);
+    if (lptHtml) body += lptHtml;
+  }
   $("#pwBody").innerHTML = body;
   /* player heads + prop rows carry data-open-logs: the shared delegated
      handler opens the log popup on top, so live re-renders need no rebinding */

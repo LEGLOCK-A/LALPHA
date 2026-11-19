@@ -333,16 +333,11 @@
   @media (prefers-reduced-motion: reduce){.livesec-head .ls-chev{transition:none}}
   .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
   @media (max-width:760px){.lgrid{grid-template-columns:repeat(3,1fr)}}
-  /* Live props tracker: sportsbook-style live rows under the game grid,
-     shown only while the league has a game in progress */
+  /* Live props tracker: sportsbook-style live rows at the bottom of the
+     game popup, shown only for a game in progress */
   .lpt{margin-top:12px;border-top:1px solid var(--line);padding-top:9px}
   .lpt-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
-  .lpt-game{margin-top:6px}
-  .lpt-ghead{display:flex;align-items:baseline;gap:8px;padding:3px 0 1px}
-  .lpt-match{font-weight:700;font-size:13.5px}
-  .lpt-clock{margin-left:auto;color:var(--ink3);font-size:12px;white-space:nowrap}
   .lpt-row{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
-  .lpt-game .lpt-row:first-of-type{border-top:0}
   .lpt-disc{width:22px;height:22px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;margin-top:3px;background:var(--surface3);color:#fff}
   .lpt-disc svg{width:13px;height:13px}
   .lpt-disc.hi{background:var(--accent)}
