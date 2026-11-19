@@ -1,0 +1,69 @@
+# Data watchdog for LEGLOCK.online.
+#
+# The alarm for the self-updating pipeline: every 2 hours this checks
+# that the live site answers and that the board data stamp
+# (assets/data-merge.js fetchedAt) is no more than 90 minutes old. If
+# the data-refresh workflow ever stalls — the feed throttling GitHub's
+# runners, a script error, a stalled schedule — this run FAILS, and
+# GitHub notifies the repo owner about the failed scheduled workflow.
+# That notification is the whole point: no issues, no secrets, no
+# write permissions, just a read-only check that goes red when the
+# data goes stale.
+name: Data watchdog
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the site is up and its data is fresh
+        run: |
+          python3 - <<'PYEOF'
+          import re, sys, urllib.request
+          from datetime import datetime, timezone
+
+          MAX_AGE_MIN = 90
+
+          def fail(msg):
+              print(f"STALE: {msg}")
+              sys.exit(1)
+
+          def fetch(url):
+              req = urllib.request.Request(url, headers={"User-Agent": "LegLock-Watchdog"})
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  return resp.status, resp.read().decode("utf-8", "replace")
+
+          try:
+              status, _ = fetch("https://leglock.online/")
+          except Exception as e:
+              fail(f"homepage fetch failed: {e}")
+          if status != 200:
+              fail(f"homepage returned HTTP {status}")
+
+          try:
+              _, body = fetch("https://leglock.online/assets/data-merge.js")
+          except Exception as e:
+              fail(f"data-merge.js fetch failed: {e}")
+
+          m = re.search(r'fetchedAt:\s*"([^"]+)"', body)
+          if not m:
+              fail("no fetchedAt stamp found in data-merge.js")
+          raw = m.group(1)
+          try:
+              stamp = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+          except ValueError:
+              fail(f"unparseable fetchedAt stamp: {raw!r}")
+          if stamp.tzinfo is None:
+              stamp = stamp.replace(tzinfo=timezone.utc)
+          age = (datetime.now(timezone.utc) - stamp).total_seconds() / 60.0
+          if age > MAX_AGE_MIN:
+              fail(f"data stamp {raw} is {age:.0f} min old (limit {MAX_AGE_MIN})")
+          print(f"OK: data stamp {raw}, age {age:.0f} min; homepage 200")
+          PYEOF
