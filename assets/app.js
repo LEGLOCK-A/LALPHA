@@ -391,8 +391,8 @@ function shortTeamName(name, abbr){
      keeps live — instead of the time showing twice on every live box */
   function detailNoClock(g){
     return String(g.detail || "")
-      .replace(/^\s*\d{1,2}:\d{2}\s*[-–—·]\s*/, "")
-      .replace(/\s*[-–—·]\s*\d{1,2}:\d{2}\s*$/, "")
+      .replace(/^\s*(?:\d{1,2}:\d{2}|\d{1,2}\.\d{1,2})\s*[-–—·]\s*/, "")
+      .replace(/\s*[-–—·]\s*(?:\d{1,2}:\d{2}|\d{1,2}\.\d{1,2})\s*$/, "")
       .trim();
   }
   function gameStatusLine(g){
