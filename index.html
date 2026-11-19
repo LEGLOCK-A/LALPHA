@@ -36,6 +36,35 @@
 <link rel="stylesheet" href="/assets/site.css" />
 </head>
 <body>
+<div id="bootErr" style="display:block;background:#7a0d0d;color:#fff;font:12px/1.5 monospace;padding:8px 10px;white-space:pre-wrap;word-break:break-word">boot check: waiting…</div>
+<script>
+(function(){
+  var msgs = [];
+  function show(extra){
+    var el = document.getElementById('bootErr');
+    if (!el) return;
+    var cards = document.querySelectorAll('.card').length;
+    var status = 'chunks NBA:' + (typeof window.__DL_NBA !== 'undefined' ? 'ok' : 'MISSING') +
+      ' NFL:' + (typeof window.__DL_NFL !== 'undefined' ? 'ok' : 'MISSING') +
+      ' NHL:' + (typeof window.__DL_NHL !== 'undefined' ? 'ok' : 'MISSING') +
+      ' | DATA:' + (typeof DATA !== 'undefined' && DATA.leagues && DATA.leagues.NBA ? 'ok' : 'BAD') +
+      ' | app:' + (typeof window.__LL !== 'undefined' ? 'booted' : 'NOT BOOTED') +
+      ' | cards:' + cards;
+    el.textContent = 'boot check: ' + status + (msgs.length ? '\nerrors: ' + msgs.join(' | ') : '') + (extra ? '\n' + extra : '');
+  }
+  window.addEventListener('error', function(e){
+    if (e && e.target && e.target.tagName === 'SCRIPT' && e.target.src) msgs.push('FAILED TO LOAD ' + e.target.src);
+    else if (e && e.message) msgs.push(e.message + ' @' + (e.filename || '') + ':' + (e.lineno || ''));
+    show();
+  }, true);
+  window.addEventListener('unhandledrejection', function(e){
+    msgs.push('promise: ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason)));
+    show();
+  });
+  window.addEventListener('load', function(){ setTimeout(function(){ show('final'); }, 4000); });
+  setTimeout(function(){ show('early'); }, 2500);
+})();
+</script>
 <div class="wrap">
 
   <div class="brand">
