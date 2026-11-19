@@ -65,7 +65,9 @@ see README.md for the full list and the flagged uncertainties):
     do not carry — the per-game summary endpoint's boxscore. Props
     (team total, opponent total, win-by margin, first-half / first-
     period total, NBA team threes, NHL team shots) are built for
-    teams with a pre-game fixture in the slate window, at research
+    every team, framed against its next fixture — the earliest
+    pre-game game involving it, found by scanning dated scoreboards
+    day by day up to 14 days ahead — at research
     lines from the team's L10 average (venue L10 when the team has
     >= 5 games at the upcoming venue in its last 10), with L5/L10/L20
     hit counts for both directions and the research layers the card
@@ -1923,45 +1925,74 @@ def team_injury_note(lg, league, team_abbr):
     return " · ".join(notes) if notes else None
 
 
-def team_upcoming(lg, league, today_et):
-    """One entry per team with a pre-game fixture in the slate window
-    (today ET for NBA/NHL, the current Thu–Mon week for the NFL):
-    {team, opp, oppName, home, date (ET)}. Games already started or
-    finished never produce team props."""
-    if lg == "NFL":
-        games = slate_games_nfl_week(league, today_et)
-    else:
-        games = [g for g in league["games"] if game_et_date(g) == today_et]
-    out, seen = [], set()
-    for g in games:
-        if g.get("state") != "pre":
+# How far ahead (in ET days, today included) the team-prop fixture
+# search scans for a team's next game. 14 days covers an NFL bye
+# week plus the following game week, so every team is reached.
+TEAM_FIXTURE_HORIZON_DAYS = 14
+
+
+def team_next_fixtures(lg, today_et, want_teams):
+    """{team abbr: fixture} — every team's NEXT fixture: the earliest
+    pre-game game involving it, found by scanning dated scoreboards
+    day by day from today (ET) through today +
+    TEAM_FIXTURE_HORIZON_DAYS, fetching each day once and stopping
+    early once every team in want_teams has a fixture. A fixture is
+    {team, opp, oppName, home, date (ET)} — the shape build_team_props
+    consumes. Games already started or finished never count, and
+    neither do preseason games (season.type 2/3 only, like the team
+    logs). A day whose scoreboard pull fails is skipped — its games
+    are simply not seen; if NO fixture is found at all and at least
+    one day failed, FetchError is raised so the league degrades
+    loudly instead of publishing an empty slate."""
+    cfg = LEAGUES[lg]
+    base = f"{API}/site/v2/sports/{cfg['sport']}/{cfg['code']}"
+    fixtures = {}
+    failed_days = 0
+    for offset in range(TEAM_FIXTURE_HORIZON_DAYS + 1):
+        if want_teams and want_teams <= set(fixtures):
+            break
+        payload = _scoreboard_day(base, today_et + timedelta(days=offset))
+        if payload is None:
+            failed_days += 1
             continue
-        d = game_et_date(g)
-        home = (g.get("home") or {}).get("abbr")
-        away = (g.get("away") or {}).get("abbr")
-        if d is None or not home or not away:
-            continue
-        for team, opp, is_home in ((home, away, True), (away, home, False)):
-            if team in seen:
+        for ev in (payload or {}).get("events") or []:
+            if (ev.get("season") or {}).get("type") not in (2, 3):
                 continue
-            seen.add(team)
-            opp_side = (g.get("away") if is_home else g.get("home")) or {}
-            out.append({"team": team, "opp": opp,
-                        "oppName": opp_side.get("name") or opp,
-                        "home": is_home, "date": d.isoformat()})
-    return out
+            for g in parse_scoreboard({"events": [ev]}):
+                if g.get("state") != "pre":
+                    continue
+                d = game_et_date(g)
+                home = (g.get("home") or {}).get("abbr")
+                away = (g.get("away") or {}).get("abbr")
+                if d is None or not home or not away:
+                    continue
+                for team, opp, is_home in ((home, away, True), (away, home, False)):
+                    prev = fixtures.get(team)
+                    if prev and prev["date"] <= d.isoformat():
+                        continue
+                    opp_side = (g.get("away") if is_home else g.get("home")) or {}
+                    fixtures[team] = {"team": team, "opp": opp,
+                                      "oppName": opp_side.get("name") or opp,
+                                      "home": is_home, "date": d.isoformat()}
+    if not fixtures and failed_days:
+        raise FetchError(f"{lg}: next-fixture search found no games and "
+                         f"{failed_days} scoreboard days failed")
+    return fixtures
 
 
 def build_team_props(lg, league, team_logs, today_et):
-    """Team props for the slate window. Research line =
+    """Team props for every team, each framed against its next
+    fixture (see team_next_fixtures). Research line =
     floor(average) + 0.5 over the team's last 10 games for the stat —
     or over the venue subset of those 10 when the team has >= 5 games
     at the upcoming venue in them (lineBasis says which). Hit counts
     are exact counts for both directions over L5/L10/L20; `venue`
-    counts the team's last 10 games at the upcoming venue."""
+    counts the team's last 10 games at the upcoming venue. Returns
+    (props, fixtures) so the caller can report fixture coverage."""
     ranks = team_def_ranks(team_logs)
+    fixtures = team_next_fixtures(lg, today_et, set(team_logs))
     props = []
-    for up in team_upcoming(lg, league, today_et):
+    for up in sorted(fixtures.values(), key=lambda f: (f["date"], f["team"])):
         entry = team_logs.get(up["team"])
         if not entry or len(entry["rows"]) < 5:
             continue
@@ -2021,7 +2052,7 @@ def build_team_props(lg, league, team_logs, today_et):
                 "shortWeek": bool(lg == "NFL" and rest_days <= 4),
                 "injuryNote": note,
             })
-    return props
+    return props, fixtures
 
 
 def build_teams(league_objs, now_utc):
@@ -2034,10 +2065,13 @@ def build_teams(league_objs, now_utc):
     for lg in ("NBA", "NFL", "NHL"):
         try:
             logs = fetch_team_logs(lg, now_utc, today_et)
-            props = build_team_props(lg, league_objs[lg], logs, today_et)
+            props, fixtures = build_team_props(lg, league_objs[lg], logs, today_et)
             leagues[lg] = props
             info[lg] = {"teams": len(logs), "teamProps": len(props),
-                        "gamesLogged": sum(len(e["rows"]) for e in logs.values())}
+                        "gamesLogged": sum(len(e["rows"]) for e in logs.values()),
+                        "fixtureTeams": len(fixtures),
+                        "teamsWithProps": len({p["team"] for p in props}),
+                        "noFixture": sorted(set(logs) - set(fixtures))}
         except Exception as e:
             leagues[lg] = []
             info[lg] = {"teamProps": 0, "error": str(e)}
