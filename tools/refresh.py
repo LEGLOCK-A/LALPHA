@@ -52,6 +52,13 @@ see README.md for the full list and the flagged uncertainties):
     Under 0.5 prop on a rare-event stat (NBA steals/blocks/3PM, NHL
     goals, NFL TDs) lists only when the player's L20 average for the
     stat is >= 0.3.
+  * Results archive (archive/): the first run of an ET day before noon
+    snapshots the board the league pages publish that morning into
+    archive/pending.json (which lives in the repo tree so it persists
+    across CI checkouts); later runs grade pending entries against the
+    merged logs once their game date has passed and render
+    archive/<date>/ pages plus an archive index. Archive work never
+    fails the data publish — errors land in the report instead.
 
 Failure behaviour: a league whose ESPN pull fails wholesale (injuries /
 scoreboard error, or >15% gamelog failures) aborts that league — nothing
@@ -1051,27 +1058,33 @@ def nfl_week_window(today_et):
     return start, start + timedelta(days=4)
 
 
-def slate_teams_nfl_week(league, today_et):
-    """Teams playing in the current Thu–Mon NFL week (the board's NFL
+def slate_games_nfl_week(league, today_et):
+    """Parsed games for the current Thu–Mon NFL week (the board's NFL
     window). The baked games only cover today + tomorrow, so the week's
     scoreboards are pulled the same way build_league pulls them; on any
-    failure the teams in the baked games are used instead."""
+    failure the baked games are used instead."""
     start, end = nfl_week_window(today_et)
     cfg = LEAGUES["NFL"]
     base = f"{API}/site/v2/sports/{cfg['sport']}/{cfg['code']}"
-    teams = set()
+    games = []
     try:
         d = start
         while d <= end:
             payload = FETCH.get_json(f"{base}/scoreboard?dates={d.strftime('%Y%m%d')}")
-            for g in parse_scoreboard(payload):
-                teams |= game_teams(g)
+            games.extend(parse_scoreboard(payload))
             d += timedelta(days=1)
     except Exception:
-        teams = set()
-    if not teams:
-        for g in league["games"]:
-            teams |= game_teams(g)
+        games = []
+    if not games:
+        games = list(league["games"])
+    return games
+
+
+def slate_teams_nfl_week(league, today_et):
+    """Teams playing in the current Thu–Mon NFL week."""
+    teams = set()
+    for g in slate_games_nfl_week(league, today_et):
+        teams |= game_teams(g)
     return teams
 
 
@@ -1105,9 +1118,15 @@ def passes_rare_gate(lg, league, prop):
     return l20_average(league, prop) >= RARE_L20_MIN - 1e-9
 
 
-def build_league_page(lg, league, stamp, today_et, logo_uri):
-    cfg = PAGE_LEAGUES[lg]
-    slug = cfg["slug"]
+def select_page_props(lg, league, today_et):
+    """The selection the static league pages publish: injured players
+    excluded, the rare-event gate applied, and the slate-restricted
+    top 25 ranked by featured-direction L10 (tie-break L20, then L5).
+    Shared by build_league_page and the results-archive snapshot, so
+    the archive grades exactly what the pages showed. `window` is
+    "today" (NBA/NHL), "week" (NFL) or "fallback" when the league has
+    no games in its window (the pages then list the top 25 overall as
+    the next slate)."""
     injured = {i["name"] for i in league["injuries"]}
     props_all = [p for p in league["props"] if p["name"] not in injured]
     props = [p for p in props_all if passes_rare_gate(lg, league, p)]
@@ -1129,10 +1148,19 @@ def build_league_page(lg, league, stamp, today_et, logo_uri):
                                              -featured_pct(p, "L5"), p["name"]))[:25], "fallback"
 
     listed, window = top25(props)
+    return {"listed": listed, "window": window, "props_all": props_all,
+            "props": props, "top_all": top25(props_all)[0]}
+
+
+def build_league_page(lg, league, stamp, today_et, logo_uri):
+    cfg = PAGE_LEAGUES[lg]
+    slug = cfg["slug"]
+    sel = select_page_props(lg, league, today_et)
+    props_all, props = sel["props_all"], sel["props"]
+    listed, window = sel["listed"], sel["window"]
     heading = "Top props — next slate" if window == "fallback" else \
         ("Top props this week" if lg == "NFL" else "Top props today")
-    pre_gate_top = top25(props_all)[0]
-    gated_top = sum(1 for p in pre_gate_top if not passes_rare_gate(lg, league, p))
+    gated_top = sum(1 for p in sel["top_all"] if not passes_rare_gate(lg, league, p))
 
     # prop["streak"] is the true current streak: consecutive most-recent
     # games hitting in the featured direction (see build_prop).
@@ -1236,11 +1264,14 @@ SITEMAP_FALLBACK_URLS = [
 ]
 
 
-def build_sitemap(run_date):
+def build_sitemap(run_date, archive_lastmod=None):
     """The sitemap rewritten: the URLs already listed (read from the
     current file when available, else the known 16) plus the three
-    league pages. lastmod is refreshed to the run date for the homepage
-    and the league pages; every other entry carries over unchanged."""
+    league pages and the results archive index. lastmod is refreshed
+    to the run date for the homepage and the league pages; the archive
+    entry's lastmod is the newest graded archive date (or the run date
+    when nothing has graded yet); every other entry carries over
+    unchanged."""
     entries = []
     path = os.path.join(os.path.dirname(CURRENT_ASSETS), "sitemap.xml")
     try:
@@ -1263,6 +1294,12 @@ def build_sitemap(run_date):
             by_url[url][1] = run_date
         else:
             entries.append([url, run_date])
+    archive_url = f"{SITE_ORIGIN}/archive/"
+    archive_mod = archive_lastmod or run_date
+    if archive_url in by_url:
+        by_url[archive_url][1] = archive_mod
+    else:
+        entries.append([archive_url, archive_mod])
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for url, lastmod in entries:
@@ -1271,7 +1308,7 @@ def build_sitemap(run_date):
     return "\n".join(lines) + "\n"
 
 
-def generate_pages(league_objs, now_utc):
+def generate_pages(league_objs, now_utc, archive_lastmod=None):
     """Return ({repo-relative path: content}, per-league info)."""
     now_et = now_utc.astimezone(ET)
     stamp = fmt_stamp(now_et)
@@ -1281,8 +1318,367 @@ def generate_pages(league_objs, now_utc):
         page, pinfo = build_league_page(lg, league_objs[lg], stamp, now_et.date(), logo_uri)
         staged_root[f"{PAGE_LEAGUES[lg]['slug']}/index.html"] = page
         info[lg] = pinfo
-    staged_root["sitemap.xml"] = build_sitemap(now_et.strftime("%Y-%m-%d"))
+    staged_root["sitemap.xml"] = build_sitemap(now_et.strftime("%Y-%m-%d"), archive_lastmod)
     return staged_root, info
+
+
+# --------------------------------------------------------------------------
+# Results archive. The first run of an ET day before noon snapshots the
+# board the league pages publish that morning; later runs grade the
+# pending entries against the merged logs once their game date has
+# passed, and render archive/<gameDate>/ pages plus an index. State
+# lives in archive/pending.json IN THE REPO TREE (staging/archive/ in
+# staging mode) so it persists across ephemeral CI checkouts. Archive
+# work never fails the data publish — main() wraps it and reports.
+# --------------------------------------------------------------------------
+
+def archive_state_default():
+    return {"version": 1, "snapshots": [], "pending": [], "graded": {}}
+
+
+def load_archive_state(path):
+    """(state, corrupt). A missing file is a fresh state, not corrupt;
+    an unreadable or misshapen one is reported as corrupt and treated
+    as empty rather than crashing the run."""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            state = json.load(f)
+        if not isinstance(state, dict) or not isinstance(state.get("pending"), list):
+            raise ValueError("unexpected pending.json shape")
+        state.setdefault("version", 1)
+        state.setdefault("snapshots", [])
+        state.setdefault("graded", {})
+        return state, False
+    except FileNotFoundError:
+        return archive_state_default(), False
+    except (OSError, ValueError):
+        return archive_state_default(), True
+
+
+def team_game_info(lg, league, today_et):
+    """{team abbr: (ET date, opponent abbr)} for the team's game in
+    the window — today for NBA/NHL, the specific day inside the
+    Thu–Mon window for NFL."""
+    if lg == "NFL":
+        games = slate_games_nfl_week(league, today_et)
+    else:
+        games = [g for g in league["games"] if game_et_date(g) == today_et]
+    out = {}
+    for g in games:
+        d = game_et_date(g)
+        if d is None:
+            continue
+        home = (g.get("home") or {}).get("abbr")
+        away = (g.get("away") or {}).get("abbr")
+        if home and away:
+            out.setdefault(home, (d, away))
+            out.setdefault(away, (d, home))
+    return out
+
+
+def snapshot_entries_for_league(lg, league, today_et):
+    """Today's board for one league, as archive entries: exactly the
+    selection the league pages publish (see select_page_props), each
+    entry carrying the ET date of the player's game and the opponent.
+    Empty when the league has no games in its window. Entries whose
+    game is already played (an NFL Thursday game still in the window
+    on Friday) are skipped — their lines would have been set after
+    the game."""
+    sel = select_page_props(lg, league, today_et)
+    if sel["window"] == "fallback" or not sel["listed"]:
+        return []
+    info = team_game_info(lg, league, today_et)
+    entries = []
+    for p in sel["listed"]:
+        gd_opp = info.get(p["team"])
+        if gd_opp is None:
+            continue
+        gd, opp = gd_opp
+        if gd < today_et:
+            continue
+        entries.append({
+            "league": lg, "snapshotDate": today_et.isoformat(), "pid": p["pid"],
+            "name": p["name"], "team": p["team"], "key": p["key"], "stat": p["stat"],
+            "dir": p["dir"], "line": p["line"],
+            "l5": list(featured_counts(p, "L5")), "l10": list(featured_counts(p, "L10")),
+            "l20": list(featured_counts(p, "L20")), "gameDate": gd.isoformat(),
+            "opp": opp,
+        })
+    return entries
+
+
+def merged_rows_for(league, logs_prev, pid):
+    """Current-season log rows plus previous-season rows the current
+    season doesn't already cover — the merged logs the site shows."""
+    rows = list(league["logs"].get(pid) or [])
+    seen = {r["d"] for r in rows}
+    for r in (logs_prev or {}).get(pid) or []:
+        if r["d"] not in seen:
+            rows.append(r)
+    return rows
+
+
+def prop_value_from_row(key, row):
+    """A prop's value in one game, from the same series build_prop
+    rates: the NBA combo sums its three parts (missing parts count 0,
+    as in build_prop); any other stat absent from a played game's row
+    likewise counts 0."""
+    s = row["s"]
+    if key == "combo":
+        return s.get("points", 0) + s.get("totalRebounds", 0) + s.get("assists", 0)
+    return s.get(key, 0)
+
+
+def row_opp(row):
+    m = re.match(r"^(?:vs|@) (.+)$", row.get("opp") or "")
+    return m.group(1) if m else None
+
+
+def grade_pending(state, league_objs, logs_prev_objs, today_et):
+    """Grade every pending entry whose gameDate is before today (ET).
+
+    Matching a log row to the entry's game needs care: gameDate is an
+    ET date (from the schedule), but log rows carry the game's UTC
+    date — an evening ET game is dated the next UTC day. A game on ET
+    date G therefore appears in the logs dated G or G+1, so candidates
+    are the player's rows in that two-day window whose opponent
+    matches the entry's; rows are consumed in gameDate order so
+    back-to-backs against the same opponent resolve to the right
+    game. When no candidate exists but the logs already hold a row
+    dated after the window, the data has provably moved past the game
+    and the player simply did not play: DNP. When the logs have not
+    caught up yet, the entry stays pending and grades on a later run
+    instead of taking a false DNP.
+
+    An NFL game inside the window can be snapshotted on several days;
+    when duplicates of the same (league, player, stat, gameDate)
+    exist, only the freshest board (latest snapshotDate) counts — the
+    earlier copies are dropped with it. Returns ({gameDate: [graded
+    entries]}, n_graded). Mutates state."""
+    today_iso = today_et.isoformat()
+    due = [e for e in state["pending"] if e["gameDate"] < today_iso]
+    if not due:
+        return {}, 0
+    best = {}
+    for e in due:
+        k = (e["league"], e["pid"], e["key"], e["gameDate"])
+        if k not in best or e["snapshotDate"] > best[k]["snapshotDate"]:
+            best[k] = e
+
+    rows_cache = {}
+
+    def rows_for(e):
+        k = (e["league"], e["pid"])
+        if k not in rows_cache:
+            rows_cache[k] = merged_rows_for(league_objs[e["league"]],
+                                            logs_prev_objs.get(e["league"]), e["pid"])
+        return rows_cache[k]
+
+    consumed = {}
+    graded_by_date = {}
+    for e in sorted(best.values(), key=lambda x: (x["gameDate"], x["league"], x["name"])):
+        rows = rows_for(e)
+        gdate = datetime.strptime(e["gameDate"], "%Y-%m-%d").date()
+        window = {gdate.isoformat(), (gdate + timedelta(days=1)).isoformat()}
+        # A row may serve several entries for the SAME game (a player
+        # with two props in one game), but never two different games.
+        used = consumed.setdefault((e["league"], e["pid"]), {})
+        cand = [r for r in rows if r["d"] in window and row_opp(r) == e.get("opp")
+                and used.get(id(r), e["gameDate"]) == e["gameDate"]]
+        g = dict(e)
+        if cand:
+            row = min(cand, key=lambda r: r["d"])
+            used[id(row)] = e["gameDate"]
+            v = prop_value_from_row(e["key"], row)
+            g["value"] = v
+            if e["dir"] == "Over":
+                g["result"] = "HIT" if v > e["line"] else "MISS"
+            else:
+                g["result"] = "HIT" if v < e["line"] else "MISS"
+            graded_by_date.setdefault(e["gameDate"], []).append(g)
+        elif any(r["d"] > max(window) for r in rows):
+            g["value"] = None
+            g["result"] = "DNP"
+            graded_by_date.setdefault(e["gameDate"], []).append(g)
+        # else: the logs have not caught up with this game yet — the
+        # entry stays pending and grades on a later run.
+    graded_keys = {(e["league"], e["pid"], e["key"], e["gameDate"])
+                   for entries in graded_by_date.values() for e in entries}
+    state["pending"] = [
+        e for e in state["pending"]
+        if e["gameDate"] >= today_iso
+        or (e["league"], e["pid"], e["key"], e["gameDate"]) not in graded_keys]
+    for d, entries in graded_by_date.items():
+        state["graded"].setdefault(d, []).extend(entries)
+    return graded_by_date, sum(len(v) for v in graded_by_date.values())
+
+
+def archive_record(entries):
+    """(hits, misses, dnps) — DNPs are excluded from the record and
+    counted separately."""
+    h = sum(1 for e in entries if e["result"] == "HIT")
+    m = sum(1 for e in entries if e["result"] == "MISS")
+    d = sum(1 for e in entries if e["result"] == "DNP")
+    return h, m, d
+
+
+def fmt_date_long(iso_date):
+    dt = datetime.strptime(iso_date, "%Y-%m-%d")
+    return f"{dt.strftime('%B')} {dt.day}, {dt.year}"
+
+
+def archive_page_shell(title, description, canonical_path, h1, sub, body_html, logo_uri):
+    """The league pages' shell (same head snippets, tabs and footer)
+    for archive pages. No 'Updated' stamp: the content is a fixed
+    record, and a stamp would dirty the file on every run."""
+    logo_html = ('<div class="site-logo"><img src="{}" alt="LEGLOCK" /></div>'.format(logo_uri)
+                 if logo_uri else
+                 '<div class="site-logo"><span class="site-footer-brand">LEGLOCK</span></div>')
+    return f"""<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+{GA4_SNIPPET}
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+{ADS_SNIPPET}
+<meta name="apple-mobile-web-app-title" content="LEGLOCK" />
+<meta name="theme-color" content="#0b1220" />
+{THEME_PIN_SNIPPET}
+<title>{title}</title>
+<meta name="description" content="{description}" />
+<link rel="canonical" href="{SITE_ORIGIN}{canonical_path}" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Sofia+Sans+Condensed:wght@600;700&family=Sofia+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/leglock.css" />
+{PAGE_STYLE}
+</head>
+<body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{h1}</h1><p class="sub" style="margin:0 0 10px">{sub}</p><section class="content-body">
+{body_html}</section>{PAGE_FOOTER}</main>
+</body>
+</html>
+"""
+
+
+def _record_text(h, m, d):
+    txt = f"{h} hits, {m} misses"
+    if d:
+        txt += f" &middot; {d} did not play"
+    return txt
+
+
+def render_archive_date(game_date, entries, logo_uri):
+    long_date = fmt_date_long(game_date)
+    oh, om, od = archive_record(entries)
+    parts = [
+        f"<p>These are the top props the board published on the morning of {long_date}, "
+        "graded against the actual game logs once the games were played. Every line is a "
+        "research line set from the player's own recent average — not a sportsbook price — "
+        "and the L10 column is the hit count the prop carried when it was published.</p>",
+        f"<p><strong>Overall: {_record_text(oh, om, od)}</strong></p>",
+    ]
+    for lg in ("NBA", "NFL", "NHL"):
+        lg_entries = [e for e in entries if e["league"] == lg]
+        if not lg_entries:
+            continue
+        h, m, d = archive_record(lg_entries)
+        rows = []
+        for e in lg_entries:
+            actual = "&mdash;" if e["value"] is None else fmt_line(e["value"])
+            rows.append(
+                '<tr><td>{}</td><td>{}</td><td>{}</td><td class="num">{} {}</td>'
+                '<td class="num">{}</td><td>{}</td><td class="num">{}/{}</td></tr>'.format(
+                    html_escape(e["name"]), html_escape(e["team"]), html_escape(e["stat"]),
+                    e["dir"], fmt_line(e["line"]), actual, e["result"],
+                    e["l10"][0], e["l10"][1]))
+        parts.append(
+            f"<h2>{lg}</h2>\n<p>{lg} top props: {_record_text(h, m, d)}.</p>\n"
+            '<table class="props-table">\n'
+            "<thead><tr><th>Player</th><th>Team</th><th>Stat</th><th>Line</th>"
+            "<th>Actual</th><th>Result</th><th>L10</th></tr></thead>\n<tbody>\n"
+            + "\n".join(rows) + "\n</tbody>\n</table>")
+    others = " and ".join(
+        '<a href="/{}/">{} player prop hit rates today</a>'.format(PAGE_LEAGUES[o]["slug"], o)
+        for o in ("NBA", "NHL", "NFL"))
+    parts.append(
+        "<h2>More on LegLock</h2>\n"
+        f"<p>Browse the full <a href=\"/archive/\">results archive</a>, today's {others}, "
+        "the <a href=\"/\">interactive prop board</a>, or learn "
+        "<a href=\"/guides/how-hit-rates-work/\">how hit rates work</a>.</p>")
+    return archive_page_shell(
+        f"LegLock Results — {long_date}",
+        f"LegLock top prop results for {long_date}: the morning board's top 25 props per "
+        "league, graded hit or miss against the actual game logs.",
+        f"/archive/{game_date}/", f"Top Prop Results — {long_date}",
+        "The morning board, graded against the game logs", "\n".join(parts), logo_uri)
+
+
+def render_archive_index(state, logo_uri):
+    dates = sorted(state["graded"], reverse=True)
+    parts = [
+        "<p>Every morning the board's top props are recorded here and graded against the "
+        "game logs after the games are played — hits, misses and did-not-plays, nothing "
+        "removed. Lines are research lines set from each player's own recent average, not "
+        "sportsbook prices; this is a record of what the board showed, kept honest.</p>"
+    ]
+    if dates:
+        items = []
+        for d in dates:
+            h, m, dn = archive_record(state["graded"][d])
+            items.append(
+                f'<li><a href="/archive/{d}/">{fmt_date_long(d)}</a> — {_record_text(h, m, dn)}</li>')
+        parts.append('<ul class="streak-list">\n' + "\n".join(items) + "\n</ul>")
+    else:
+        parts.append("<p>No graded slates yet — the first results land the morning after "
+                     "the first recorded slate.</p>")
+    others = " and ".join(
+        '<a href="/{}/">{} player prop hit rates today</a>'.format(PAGE_LEAGUES[o]["slug"], o)
+        for o in ("NBA", "NHL", "NFL"))
+    parts.append(
+        "<h2>More on LegLock</h2>\n"
+        f"<p>See today's {others}, the <a href=\"/\">interactive prop board</a>, or learn "
+        "<a href=\"/guides/how-hit-rates-work/\">how hit rates work</a>.</p>")
+    return archive_page_shell(
+        "Results Archive — LegLock",
+        "The LegLock results archive: every day's top props from the board, graded hit or "
+        "miss against the actual game logs.",
+        "/archive/", "Results Archive",
+        "What the board published, graded after the games", "\n".join(parts), logo_uri)
+
+
+def run_archive(league_objs, logs_prev_objs, now_utc, state):
+    """Snapshot (first pre-noon ET run of the day) + grade + render.
+    Returns ({repo-relative path: content}, info). Mutates state. The
+    outputs always include archive/pending.json (hash comparison in
+    main() dedupes an unchanged state) and, once anything has graded,
+    every archive page — rendered content is deterministic, so
+    unchanged pages hash identically and are not re-committed."""
+    now_et = now_utc.astimezone(ET)
+    today_et = now_et.date()
+    info = {"archiveSnapshotted": 0, "archiveGraded": 0, "archivePagesWritten": []}
+
+    if now_et.hour < 12 and today_et.isoformat() not in state["snapshots"]:
+        added = []
+        for lg in ("NBA", "NFL", "NHL"):
+            added += snapshot_entries_for_league(lg, league_objs[lg], today_et)
+        state["pending"].extend(added)
+        state["snapshots"].append(today_et.isoformat())
+        info["archiveSnapshotted"] = len(added)
+
+    _, n_graded = grade_pending(state, league_objs, logs_prev_objs, today_et)
+    info["archiveGraded"] = n_graded
+
+    outputs = {}
+    if state["graded"]:
+        logo_uri = page_logo_uri()
+        for d in sorted(state["graded"]):
+            rel = f"archive/{d}/index.html"
+            outputs[rel] = render_archive_date(d, state["graded"][d], logo_uri)
+            info["archivePagesWritten"].append(rel)
+        outputs["archive/index.html"] = render_archive_index(state, logo_uri)
+        info["archivePagesWritten"].append("archive/index.html")
+    outputs["archive/pending.json"] = json.dumps(state, indent=1, ensure_ascii=False) + "\n"
+    return outputs, info
 
 
 # --------------------------------------------------------------------------
@@ -1306,7 +1702,8 @@ def main():
     else:
         out_dir = STAGING
         os.makedirs(out_dir, exist_ok=True)
-    report = {"fetchedAt": fetched_at, "leagues": {}, "errors": []}
+    report = {"fetchedAt": fetched_at, "leagues": {}, "errors": [],
+              "archiveSnapshotted": 0, "archiveGraded": 0, "archivePagesWritten": []}
 
     try:
         current = load_current()
@@ -1316,6 +1713,7 @@ def main():
 
     staged = {}
     league_objs = {}
+    logs_prev_objs = {}
     failed = False
     for lg in ("NBA", "NFL", "NHL"):
         try:
@@ -1325,6 +1723,7 @@ def main():
             failed = True
             continue
         league_objs[lg] = league
+        logs_prev_objs[lg] = logs_prev
         report["leagues"][lg] = lrep
         low = lg.lower()
         staged[f"data-{low}.js"] = f"window.__DL_{lg} = {js_dumps(league)};\n"
@@ -1357,17 +1756,42 @@ def main():
             "DATA.leagues.NHL = window.__DL_NHL; DATA.leagues.NHL.logsPrev = window.__DL_NHL_PREV;\n"
         )
 
+    # Results archive (snapshot + grade + render), from the same
+    # dataset. Wrapped separately: an archive failure is reported but
+    # never blocks the data publish. Runs before the pages so the
+    # sitemap can carry the newest graded date.
+    archive_outputs = {}
+    archive_lastmod = None
+    if not failed:
+        try:
+            if REPO_ROOT:
+                state_path = os.path.join(REPO_ROOT, "archive", "pending.json")
+            else:
+                state_path = os.path.join(HERE, "staging", "archive", "pending.json")
+            astate, corrupt = load_archive_state(state_path)
+            if corrupt:
+                report["archiveError"] = "archive/pending.json corrupt — treated as empty"
+                report["errors"].append("archive: pending.json corrupt, treated as empty")
+            archive_outputs, ainfo = run_archive(league_objs, logs_prev_objs, now_utc, astate)
+            report.update(ainfo)
+            if astate["graded"]:
+                archive_lastmod = max(astate["graded"])
+        except Exception as e:
+            report["archiveError"] = f"archive failed: {e}"
+            archive_outputs = {}
+
     # Static league pages + sitemap, from the same dataset. A failure
     # here is reported but never blocks the data publish — the pages
     # simply regenerate on the next successful run.
     staged_root = {}
     if not failed:
         try:
-            staged_root, page_info = generate_pages(league_objs, now_utc)
+            staged_root, page_info = generate_pages(league_objs, now_utc, archive_lastmod)
             report["pages"] = page_info
         except Exception as e:
             report["errors"].append(f"pages: {e}")
             staged_root = {}
+    staged_root.update(archive_outputs)
 
     changed, unchanged = [], []
     for name, content in sorted(staged.items()):
