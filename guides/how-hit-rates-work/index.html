@@ -1,6 +1,20 @@
 <!doctype html>
 <html lang="en" data-theme="light">
 <head>
+<!-- Consent Mode v2 defaults - must stay before the Google tag:
+     analytics and ad storage start denied; assets/consent.js applies
+     the visitor's stored choice (or region decision) as an update. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'analytics_storage': 'denied',
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJB3JWSKZB"></script>
 <script>
@@ -61,5 +75,6 @@ try{var _t=window.localStorage.getItem("lm-theme");document.documentElement.setA
         </ol>
         <p>If a prop survives all four questions, it&rsquo;s a well-researched prop &mdash; which is the most any honest tool can offer. The rest is the game.</p>
       </section><footer><div class="site-footer"><span class="site-footer-brand">LEGLOCK</span><nav class="site-footer-links" aria-label="Site information"><a href="/privacy/">Privacy Policy</a><a href="/about/">About</a><a href="/guides/">Guides</a><a href="/guides/responsible-play/">Responsible Play</a><a href="/contact/">Contact</a><a href="/our-picks/">Our Picks</a></nav></div></footer></main>
+<script src="/assets/consent.js" defer></script>
 </body>
 </html>

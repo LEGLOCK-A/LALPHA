@@ -1,6 +1,20 @@
 <!doctype html>
 <html lang="en" data-theme="light">
 <head>
+<!-- Consent Mode v2 defaults - must stay before the Google tag:
+     analytics and ad storage start denied; assets/consent.js applies
+     the visitor's stored choice (or region decision) as an update. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'analytics_storage': 'denied',
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJB3JWSKZB"></script>
 <script>
@@ -44,10 +58,15 @@ try{var _t=window.localStorage.getItem("lm-theme");document.documentElement.setA
         <p>Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to this website or other websites.</p>
         <p>Google&rsquo;s use of advertising cookies enables it and its partners to serve ads to users based on their visits to this site and other sites on the Internet.</p>
         <p>You may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google Ads Settings</a>. You can also opt out of some third-party vendors&rsquo; use of cookies for personalized advertising at <a href="https://www.aboutads.info" target="_blank" rel="noopener">www.aboutads.info</a>.</p>
+        <h3>Cookies and analytics</h3>
+        <p>LEGLOCK uses Google Analytics to see how the site is used &mdash; which pages get visited, which boards and props people open, and roughly where visits come from (country or region level). Google Analytics uses cookies to do this, and what LEGLOCK gets back is aggregate counts, not anything with your name on it.</p>
+        <p>If you are visiting from the European Union, the United Kingdom or Quebec, those analytics cookies stay off until you accept them on the cookie banner &mdash; nothing is measured before you choose. If you are elsewhere in Canada, this section is the notice that analytics runs as described, in line with Canadian privacy guidance.</p>
+        <p>Either way, you can opt out or change your mind at any time: the <b>Privacy choices</b> link in the footer of every page re-opens the banner, and choosing Reject turns analytics cookies off for your browser.</p>
         <h3>Other third parties</h3>
         <p>Player images load from ESPN&rsquo;s CDN, and the advertising script loads from Google. When your browser requests those files, those services may log the request (such as your IP address and browser type) under their own privacy policies.</p>
         <h3>Changes &amp; contact</h3>
         <p>If this policy changes, the updated version will be posted on this page with a new effective date. Questions about this policy can be sent via the <a href="/contact/">Contact</a> section.</p>
       </section><footer><div class="site-footer"><span class="site-footer-brand">LEGLOCK</span><nav class="site-footer-links" aria-label="Site information"><a href="/privacy/">Privacy Policy</a><a href="/about/">About</a><a href="/guides/">Guides</a><a href="/guides/responsible-play/">Responsible Play</a><a href="/contact/">Contact</a><a href="/our-picks/">Our Picks</a></nav></div></footer></main>
+<script src="/assets/consent.js" defer></script>
 </body>
 </html>

@@ -933,7 +933,25 @@ PAGE_LEAGUES = {
 }
 
 # Head snippets copied verbatim from the standalone guides pages.
-GA4_SNIPPET = """<!-- Google tag (gtag.js) -->
+CONSENT_DEFAULT_SNIPPET = """<!-- Consent Mode v2 defaults - must stay before the Google tag:
+     analytics and ad storage start denied; assets/consent.js applies
+     the visitor's stored choice (or region decision) as an update. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'analytics_storage': 'denied',
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'wait_for_update': 500
+  });
+</script>
+"""
+
+CONSENT_SCRIPT_SNIPPET = '<script src="/assets/consent.js" defer></script>'
+
+GA4_SNIPPET = CONSENT_DEFAULT_SNIPPET + """<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJB3JWSKZB"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -1250,6 +1268,7 @@ def build_league_page(lg, league, stamp, today_et, logo_uri):
 {streak_html}<h2>More on LegLock</h2>
 <p>See the {more_links}, or learn <a href="/guides/how-hit-rates-work/">how hit rates work</a> — what L5, L10 and L20 really measure, and how to read them without fooling yourself.</p>
 </section>{PAGE_FOOTER}</main>
+{CONSENT_SCRIPT_SNIPPET}
 </body>
 </html>
 """
@@ -1576,6 +1595,7 @@ def archive_page_shell(title, description, canonical_path, h1, sub, body_html, l
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{h1}</h1><p class="sub" style="margin:0 0 10px">{sub}</p><section class="content-body">
 {body_html}</section>{PAGE_FOOTER}</main>
+{CONSENT_SCRIPT_SNIPPET}
 </body>
 </html>
 """
