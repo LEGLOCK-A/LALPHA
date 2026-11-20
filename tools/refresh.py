@@ -221,6 +221,7 @@ class Fetcher:
     def __init__(self, workers=6):
         self.workers = workers
         self.count_429 = 0
+        self.count_403 = 0
         self.lock = threading.Lock()
         self.aborted = False
 
@@ -244,6 +245,21 @@ class Fetcher:
                     if n > 8:
                         self.aborted = True
                         raise FetchError("aborted: repeated HTTP 429 from ESPN")
+                    time.sleep(2.0)
+                    continue
+                if e.code == 403:
+                    # ESPN 403s from datacenter IPs are usually burst
+                    # throttling, not a hard block: in the 2026-11-20
+                    # failures, most requests in the same run succeeded.
+                    # Pause and retry like a 429 instead of failing the
+                    # request (and possibly the whole league) instantly;
+                    # a run-wide cap still aborts early on a hard block.
+                    with self.lock:
+                        self.count_403 += 1
+                        n403 = self.count_403
+                    if n403 > 60:
+                        self.aborted = True
+                        raise FetchError("aborted: repeated HTTP 403 from ESPN")
                     time.sleep(2.0)
                     continue
                 if e.code >= 500:
@@ -963,30 +979,6 @@ GA4_SNIPPET = CONSENT_DEFAULT_SNIPPET + """<!-- Google tag (gtag.js) -->
 
 ADS_SNIPPET = '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1221762448386445" crossorigin="anonymous"></script>'
 
-ADSTERRA_BANNER_SLOT = (
-    '<!-- Adsterra banner (320x50 mobile / 728x90 desktop) -->\n'
-    '<div class="ll-ad-banner" style="display:flex;justify-content:center;margin:12px auto 4px;max-width:100%;overflow:hidden" aria-label="Advertisement"><div class="ll-ad-m"><script>\n'
-    '  atOptions = {\n'
-    "    'key' : '41511eddd1de1947044b7cc781c75331',\n"
-    "    'format' : 'iframe',\n"
-    "    'height' : 50,\n"
-    "    'width' : 320,\n"
-    "    'params' : {}\n"
-    '  };\n'
-    '</script>\n'
-    '<script src="https://bauval.org/22/41511eddd1de1947044b7cc781c75331"></script></div><div class="ll-ad-d"><script>\n'
-    '  atOptions = {\n'
-    "    'key' : '96057d5b2a021c3090b1ab5615230461',\n"
-    "    'format' : 'iframe',\n"
-    "    'height' : 90,\n"
-    "    'width' : 728,\n"
-    "    'params' : {}\n"
-    '  };\n'
-    '</script>\n'
-    '<script src="https://bauval.org/22/96057d5b2a021c3090b1ab5615230461"></script></div></div>\n'
-    '<style>.ll-ad-d{display:none}@media (min-width:760px){.ll-ad-d{display:block}.ll-ad-m{display:none}}</style>\n'
-)
-
 THEME_PIN_SNIPPET = """<script>
 try{var _t=window.localStorage.getItem("lm-theme");document.documentElement.setAttribute("data-theme",_t==="dark"?"dark":"light");}catch(e){document.documentElement.setAttribute("data-theme","light");}
 </script>"""
@@ -1278,7 +1270,7 @@ def build_league_page(lg, league, stamp, today_et, logo_uri):
 <link rel="stylesheet" href="/assets/leglock.css" />
 {PAGE_STYLE}
 </head>
-<body><main>{logo_html}{PAGE_TABS}{ADSTERRA_BANNER_SLOT}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{cfg['h1']}</h1><p class="sub" style="margin:0 0 10px">{cfg['sub']}</p><section class="content-body">
+<body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{cfg['h1']}</h1><p class="sub" style="margin:0 0 10px">{cfg['sub']}</p><section class="content-body">
 <p class="content-byline">Updated {stamp}</p>
 <p>{lg} player prop hit rates, ranked by how often each prop has cashed over the last 10 games. Every rate below is counted from actual game logs, and every line is a research line set from the player's own recent average — not a sportsbook price. This page is a static snapshot of the board; the full <a href="/">interactive prop board</a> covers every player and prop, and the <a href="/live/">live page</a> tracks games in progress.</p>
 <h2>{heading}</h2>
@@ -1617,7 +1609,7 @@ def archive_page_shell(title, description, canonical_path, h1, sub, body_html, l
 <link rel="stylesheet" href="/assets/leglock.css" />
 {PAGE_STYLE}
 </head>
-<body><main>{logo_html}{PAGE_TABS}{ADSTERRA_BANNER_SLOT}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{h1}</h1><p class="sub" style="margin:0 0 10px">{sub}</p><section class="content-body">
+<body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{h1}</h1><p class="sub" style="margin:0 0 10px">{sub}</p><section class="content-body">
 {body_html}</section>{PAGE_FOOTER}</main>
 {CONSENT_SCRIPT_SNIPPET}
 </body>
