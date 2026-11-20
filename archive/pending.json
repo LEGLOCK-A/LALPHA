@@ -733,31 +733,6 @@
   {
    "league": "NHL",
    "snapshotDate": "2026-11-19",
-   "pid": "5272307",
-   "name": "Braeden Bowman",
-   "team": "VGK",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    10,
-    10
-   ],
-   "l20": [
-    18,
-    20
-   ],
-   "gameDate": "2026-11-19",
-   "opp": "DAL"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-19",
    "pid": "3025540",
    "name": "Casey DeSmith",
    "team": "DAL",
@@ -3219,6 +3194,33 @@
     "gameDate": "2026-11-19",
     "opp": "CHI",
     "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-19",
+    "pid": "5272307",
+    "name": "Braeden Bowman",
+    "team": "VGK",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     10,
+     10
+    ],
+    "l20": [
+     18,
+     20
+    ],
+    "gameDate": "2026-11-19",
+    "opp": "DAL",
+    "value": 1,
     "result": "MISS"
    }
   ]
