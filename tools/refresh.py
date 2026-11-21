@@ -93,6 +93,7 @@ import sys
 import tempfile
 import threading
 import time
+import unicodedata
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -1199,7 +1200,7 @@ def select_page_props(lg, league, today_et):
             "props": props, "top_all": top25(props_all)[0]}
 
 
-def build_league_page(lg, league, stamp, today_et, logo_uri):
+def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None):
     cfg = PAGE_LEAGUES[lg]
     slug = cfg["slug"]
     sel = select_page_props(lg, league, today_et)
@@ -1219,12 +1220,18 @@ def build_league_page(lg, league, stamp, today_et, logo_uri):
     gated_streaks = sum(1 for p in streak_list(props_all)
                         if not passes_rare_gate(lg, league, p))
 
+    def name_link(p):
+        nm = html_escape(p["name"])
+        if slugs and p["pid"] in slugs:
+            return f'<a href="/{slug}/player/{slugs[p["pid"]]}/">{nm}</a>'
+        return nm
+
     rows = []
     for p in listed:
         rows.append(
             '<tr><td>{}</td><td>{}</td><td>{}</td><td class="num">{} {}</td>'
             '<td class="num">{}</td><td class="num">{}</td><td class="num">{}</td></tr>'.format(
-                html_escape(p["name"]), html_escape(p["team"]), html_escape(p["stat"]),
+                name_link(p), html_escape(p["team"]), html_escape(p["stat"]),
                 p["dir"], fmt_line(p["line"]),
                 fmt_counts(p, "L5"), fmt_counts(p, "L10"), fmt_counts(p, "L20")))
 
@@ -1235,7 +1242,7 @@ def build_league_page(lg, league, stamp, today_et, logo_uri):
             items.append(
                 "<li><strong>{}</strong> ({}) — {}, {} {} — {}-game hit streak "
                 "&middot; L10 {}</li>".format(
-                    html_escape(p["name"]), html_escape(p["team"]), html_escape(p["stat"]),
+                    name_link(p), html_escape(p["team"]), html_escape(p["stat"]),
                     p["dir"], fmt_line(p["line"]), p["streak"], fmt_counts(p, "L10")))
         streak_html = ("<h2>On a streak</h2>\n"
                        "<p>Props whose featured side has cashed in at least five straight games:</p>\n"
@@ -1294,6 +1301,241 @@ def build_league_page(lg, league, stamp, today_et, logo_uri):
     return page, info
 
 
+# ---------------------------------------------------------------------------
+# Player pages + Daily Highlights. One static page per pooled player under
+# /<league>/player/<slug>/ — inside the league folders so the refresh
+# workflow's commit step (which adds the league directories) publishes
+# them with no workflow change — plus a Daily Highlights page under
+# /archive/highlights/ (the archive directory is in the same commit
+# step), built from the same selections the league pages publish.
+# Rendered from the same in-memory dataset as everything else.
+# ---------------------------------------------------------------------------
+
+def player_slug(name, pid, taken):
+    base = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode()
+    base = re.sub(r"[^a-z0-9]+", "-", base.lower()).strip("-") or f"player-{pid}"
+    slug = base
+    if slug in taken and taken[slug] != pid:
+        slug = f"{base}-{pid}"
+    taken[slug] = pid
+    return slug
+
+
+def player_slugs(league):
+    """{pid: slug} for a league, assigned in sorted-pid order so the
+    mapping is stable across runs."""
+    taken, out = {}, {}
+    for pid in sorted(league["players"]):
+        out[pid] = player_slug(league["players"][pid]["name"], pid, taken)
+    return out
+
+
+def _prop_series(league, prop):
+    """The prop stat's values from the player's current-season log rows,
+    most recent first — the same series build_prop rates. The NBA combo
+    stat is summed from its components."""
+    rows = league["logs"].get(prop["pid"]) or []
+    vals = []
+    for r in rows:
+        s = r["s"]
+        if prop["key"] == "combo":
+            if all(k in s for k in ("points", "totalRebounds", "assists")):
+                vals.append(s["points"] + s["totalRebounds"] + s["assists"])
+        elif prop["key"] in s:
+            vals.append(s[prop["key"]])
+    return vals
+
+
+def _season_counts(league, prop):
+    vals = _prop_series(league, prop)
+    if not vals:
+        return (0, 0)
+    if prop["dir"] == "Over":
+        hits = sum(1 for v in vals if v > prop["line"])
+    else:
+        hits = sum(1 for v in vals if v < prop["line"])
+    return (hits, len(vals))
+
+
+def _fmt_num(v):
+    if isinstance(v, float) and v == int(v):
+        return str(int(v))
+    return str(v)
+
+
+def _fmt_short_date(iso):
+    try:
+        dt = datetime.strptime(iso, "%Y-%m-%d")
+    except (ValueError, TypeError):
+        return iso or ""
+    return f"{dt.strftime('%b')} {dt.day}"
+
+
+def build_player_page(lg, league, pid, stamp, logo_uri, slugs):
+    cfg = PAGE_LEAGUES[lg]
+    lslug = cfg["slug"]
+    player = league["players"][pid]
+    name = player["name"]
+    pslug = slugs[pid]
+    props = [p for p in league["props"] if p["pid"] == pid]
+    rows_log = league["logs"].get(pid) or []
+    inj = next((i for i in league["injuries"] if i["name"] == name), None)
+    team_full = player.get("teamName") or player["team"]
+
+    stat_names = ", ".join(p["stat"] for p in props[:3]) or "every tracked stat"
+    title = f"{name} Prop Hit Rates & Game Log — {lg} | LegLock"
+    description = (f"{name} ({team_full}) player prop hit rates: L5, L10, L20 and season "
+                   f"rates for {stat_names} at research lines set from recent game logs, "
+                   f"plus the full {lg} game log on LegLock.")
+
+    parts = [f'<p class="content-byline">Updated {stamp}</p>']
+    img = player.get("img")
+    if img:
+        parts.append(f'<p><img src="{html_escape(img)}" alt="{html_escape(name)}" '
+                     'width="84" height="84" loading="lazy" style="border-radius:12px" /></p>')
+    intro = (f"{html_escape(name)} — {html_escape(player.get('pos') or '')}, "
+             f"{html_escape(team_full)} ({html_escape(player['team'])})")
+    if player.get("jersey"):
+        intro += f" &middot; #{html_escape(player['jersey'])}"
+    parts.append(f"<p>{intro}.</p>")
+    if inj:
+        parts.append(f"<p><strong>On the injury report:</strong> "
+                     f"{html_escape(inj.get('status') or 'Listed')}"
+                     + (f" ({html_escape(inj['date'])})" if inj.get("date") else "")
+                     + ". Props for injured players are held off the board until they return.</p>")
+    parts.append("<p>Every rate below is counted from actual game logs, and every line is a "
+                 "research line set from the player's own recent average — not a sportsbook price.</p>")
+
+    if props:
+        rows = []
+        for p in props:
+            sh, sn = _season_counts(league, p)
+            rows.append(
+                '<tr><td>{}</td><td class="num">{} {}</td><td class="num">{}</td>'
+                '<td class="num">{}</td><td class="num">{}</td><td class="num">{}/{}</td>'
+                '<td class="num">{}</td></tr>'.format(
+                    html_escape(p["stat"]), p["dir"], fmt_line(p["line"]),
+                    fmt_counts(p, "L5"), fmt_counts(p, "L10"), fmt_counts(p, "L20"),
+                    sh, sn, _fmt_num(p["l10avg"])))
+        parts.append(
+            "<h2>Prop hit rates</h2>\n"
+            '<table class="props-table">\n'
+            "<thead><tr><th>Stat</th><th>Line</th><th>L5</th><th>L10</th><th>L20</th>"
+            "<th>Season</th><th>L10 avg</th></tr></thead>\n<tbody>\n"
+            + "\n".join(rows) + "\n</tbody>\n</table>\n"
+            '<p class="props-note">Rates read as hits/games in each prop\'s featured '
+            "direction — the side (Over or Under) with the higher L10 rate. Season counts "
+            "every current-season game in the log.</p>")
+        hot = [p for p in props if p["streak"] >= 5]
+        if hot:
+            items = "\n".join(
+                "<li><strong>{}</strong> {} {} — {}-game hit streak &middot; L10 {}</li>".format(
+                    html_escape(p["stat"]), p["dir"], fmt_line(p["line"]), p["streak"],
+                    fmt_counts(p, "L10"))
+                for p in hot)
+            parts.append(f'<h2>On a streak</h2>\n<ul class="streak-list">\n{items}\n</ul>')
+
+    if rows_log:
+        defs = list(league["statDefs"])
+        has_min = any("minutes" in r["s"] for r in rows_log)
+        cols = ([{"k": "minutes", "label": "Min"}] if has_min else []) + defs
+        head = "".join(f"<th>{html_escape(d['label'])}</th>" for d in cols)
+        body_rows = []
+        for r in rows_log:
+            cells = "".join(
+                f'<td class="num">{_fmt_num(r["s"][d["k"]]) if d["k"] in r["s"] else "&mdash;"}</td>'
+                for d in cols)
+            body_rows.append(
+                f'<tr><td>{_fmt_short_date(r["d"])}</td><td>{html_escape(r["opp"])}</td>'
+                f'<td>{html_escape(r["res"])}</td>{cells}</tr>')
+        parts.append(
+            "<h2>Game log — this season</h2>\n"
+            '<table class="props-table">\n'
+            f"<thead><tr><th>Date</th><th>Opp</th><th>Result</th>{head}</tr></thead>\n<tbody>\n"
+            + "\n".join(body_rows) + "\n</tbody>\n</table>")
+
+    parts.append(
+        "<h2>More on LegLock</h2>\n"
+        f'<p>Back to <a href="/{lslug}/">{lg} player prop hit rates today</a>, the full '
+        '<a href="/">interactive prop board</a>, or learn '
+        '<a href="/guides/how-hit-rates-work/">how hit rates work</a>.</p>')
+    crumbs = {"@context": "https://schema.org", "@type": "BreadcrumbList",
+              "itemListElement": [
+                  {"@type": "ListItem", "position": 1, "name": "LegLock",
+                   "item": SITE_ORIGIN + "/"},
+                  {"@type": "ListItem", "position": 2, "name": f"{lg} Prop Hit Rates",
+                   "item": f"{SITE_ORIGIN}/{lslug}/"},
+                  {"@type": "ListItem", "position": 3, "name": name,
+                   "item": f"{SITE_ORIGIN}/{lslug}/player/{pslug}/"}]}
+    parts.append(f'<script type="application/ld+json">{json.dumps(crumbs)}</script>')
+    return archive_page_shell(
+        title, description, f"/{lslug}/player/{pslug}/", name,
+        f"{team_full} &middot; {lg} prop hit rates and game log",
+        "\n".join(parts), logo_uri)
+
+
+def build_highlights_page(league_objs, stamp, today_et, logo_uri, graded_ctx, slugs_by_league):
+    parts = [
+        f'<p class="content-byline">Updated {stamp}</p>',
+        "<p>The board at a glance: yesterday's published top props graded, today's highest "
+        "hit-rate props, and the longest active hit streaks across the NBA, NFL and NHL. "
+        "Every line is a research line set from the player's own recent average — not a "
+        "sportsbook price.</p>",
+    ]
+    if graded_ctx:
+        parts.append(
+            "<h2>Yesterday's board, graded</h2>\n"
+            f"<p>The top props published on {fmt_date_long(graded_ctx['date'])} finished "
+            f"<strong>{_record_text(graded_ctx['hits'], graded_ctx['misses'], graded_ctx['dnp'])}</strong>. "
+            f'Full grading: <a href="/archive/{graded_ctx["date"]}/">results for '
+            f'{fmt_date_long(graded_ctx["date"])}</a> &middot; '
+            '<a href="/archive/">results archive</a>.</p>')
+    all_streaks = []
+    for lg in ("NBA", "NFL", "NHL"):
+        league = league_objs[lg]
+        sel = select_page_props(lg, league, today_et)
+        slugs = slugs_by_league[lg]
+        lslug = PAGE_LEAGUES[lg]["slug"]
+        top = sel["listed"][:5]
+        if top:
+            items = []
+            for p in top:
+                items.append(
+                    '<li><strong><a href="/{}/player/{}/">{}</a></strong> ({}) — {}, {} {} '
+                    "&middot; L10 {} &middot; L20 {}</li>".format(
+                        lslug, slugs[p["pid"]], html_escape(p["name"]),
+                        html_escape(p["team"]), html_escape(p["stat"]), p["dir"],
+                        fmt_line(p["line"]), fmt_counts(p, "L10"), fmt_counts(p, "L20")))
+            heading = "Top props this week" if lg == "NFL" else "Top props today"
+            parts.append(f"<h2>{lg} — {heading}</h2>\n"
+                         '<ul class="streak-list">\n' + "\n".join(items) + "\n</ul>")
+        all_streaks.extend((lg, p) for p in sel["props"] if p["streak"] >= 5)
+    all_streaks.sort(key=lambda t: (-t[1]["streak"], -featured_pct(t[1], "L10"), t[1]["name"]))
+    if all_streaks:
+        items = []
+        for lg, p in all_streaks[:10]:
+            lslug = PAGE_LEAGUES[lg]["slug"]
+            items.append(
+                '<li><strong><a href="/{}/player/{}/">{}</a></strong> ({}, {}) — {}, {} {} '
+                "— {}-game hit streak &middot; L10 {}</li>".format(
+                    lslug, slugs_by_league[lg][p["pid"]], html_escape(p["name"]),
+                    html_escape(p["team"]), lg, html_escape(p["stat"]), p["dir"],
+                    fmt_line(p["line"]), p["streak"], fmt_counts(p, "L10")))
+        parts.append("<h2>Longest active streaks</h2>\n"
+                     '<ul class="streak-list">\n' + "\n".join(items) + "\n</ul>")
+    parts.append(
+        "<h2>More on LegLock</h2>\n"
+        '<p>Open the full <a href="/">interactive prop board</a>, check the '
+        '<a href="/live/">live page</a>, or browse the '
+        '<a href="/archive/">results archive</a>.</p>')
+    return archive_page_shell(
+        "Daily Highlights — LegLock",
+        "LegLock daily highlights: yesterday's top props graded, today's highest player "
+        "prop hit rates and the longest active hit streaks across the NBA, NFL and NHL.",
+        "/archive/highlights/", "Daily Highlights",
+        "Top props, streaks and yesterday's grade", "\n".join(parts), logo_uri)
+
+
 SITEMAP_FALLBACK_URLS = [
     "https://leglock.online/",
     "https://leglock.online/live/",
@@ -1315,7 +1557,7 @@ SITEMAP_FALLBACK_URLS = [
 ]
 
 
-def build_sitemap(run_date, archive_lastmod=None):
+def build_sitemap(run_date, archive_lastmod=None, player_urls=None):
     """The sitemap rewritten: the URLs already listed (read from the
     current file when available, else the known 16) plus the three
     league pages and the results archive index. lastmod is refreshed
@@ -1354,6 +1596,22 @@ def build_sitemap(run_date, archive_lastmod=None):
         by_url[archive_url][1] = archive_mod
     else:
         entries.append([archive_url, archive_mod])
+    hl_url = f"{SITE_ORIGIN}/archive/highlights/"
+    if hl_url in by_url:
+        by_url[hl_url][1] = run_date
+    else:
+        entries.append([hl_url, run_date])
+    if player_urls is not None:
+        keep = set(player_urls)
+        entries = [e for e in entries if "/player/" not in e[0] or e[0] in keep]
+        by_url = {e[0]: e for e in entries}
+        for url in player_urls:
+            if url in by_url:
+                by_url[url][1] = run_date
+            else:
+                entry = [url, run_date]
+                entries.append(entry)
+                by_url[url] = entry
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for url, lastmod in entries:
@@ -1362,17 +1620,36 @@ def build_sitemap(run_date, archive_lastmod=None):
     return "\n".join(lines) + "\n"
 
 
-def generate_pages(league_objs, now_utc, archive_lastmod=None):
+def generate_pages(league_objs, now_utc, archive_lastmod=None, graded_ctx=None):
     """Return ({repo-relative path: content}, per-league info)."""
     now_et = now_utc.astimezone(ET)
     stamp = fmt_stamp(now_et)
     logo_uri = page_logo_uri()
     staged_root, info = {}, {}
+    slugs_by_league, player_urls = {}, []
     for lg in ("NBA", "NFL", "NHL"):
-        page, pinfo = build_league_page(lg, league_objs[lg], stamp, now_et.date(), logo_uri)
+        league = league_objs[lg]
+        slugs = player_slugs(league)
+        slugs_by_league[lg] = slugs
+        page, pinfo = build_league_page(lg, league, stamp, now_et.date(), logo_uri, slugs)
         staged_root[f"{PAGE_LEAGUES[lg]['slug']}/index.html"] = page
         info[lg] = pinfo
-    staged_root["sitemap.xml"] = build_sitemap(now_et.strftime("%Y-%m-%d"), archive_lastmod)
+        count = 0
+        for pid in sorted(league["players"]):
+            if not league["logs"].get(pid) and \
+                    not any(p["pid"] == pid for p in league["props"]):
+                continue
+            staged_root[f"{PAGE_LEAGUES[lg]['slug']}/player/{slugs[pid]}/index.html"] = \
+                build_player_page(lg, league, pid, stamp, logo_uri, slugs)
+            player_urls.append(
+                f"{SITE_ORIGIN}/{PAGE_LEAGUES[lg]['slug']}/player/{slugs[pid]}/")
+            count += 1
+        info[lg]["playerPages"] = count
+    staged_root["archive/highlights/index.html"] = build_highlights_page(
+        league_objs, stamp, now_et.date(), logo_uri, graded_ctx, slugs_by_league)
+    info["highlights"] = True
+    staged_root["sitemap.xml"] = build_sitemap(
+        now_et.strftime("%Y-%m-%d"), archive_lastmod, player_urls)
     return staged_root, info
 
 
@@ -1693,7 +1970,8 @@ def render_archive_index(state, logo_uri):
         for o in ("NBA", "NHL", "NFL"))
     parts.append(
         "<h2>More on LegLock</h2>\n"
-        f"<p>See today's {others}, the <a href=\"/\">interactive prop board</a>, or learn "
+        f"<p>See today's {others}, the <a href=\"/archive/highlights/\">daily highlights</a>, "
+        "the <a href=\"/\">interactive prop board</a>, or learn "
         "<a href=\"/guides/how-hit-rates-work/\">how hit rates work</a>.</p>")
     return archive_page_shell(
         "Results Archive — LegLock",
@@ -2210,6 +2488,7 @@ def main():
     # sitemap can carry the newest graded date.
     archive_outputs = {}
     archive_lastmod = None
+    graded_ctx = None
     if not failed:
         try:
             if REPO_ROOT:
@@ -2224,6 +2503,9 @@ def main():
             report.update(ainfo)
             if astate["graded"]:
                 archive_lastmod = max(astate["graded"])
+                _gh, _gm, _gd = archive_record(astate["graded"][archive_lastmod])
+                graded_ctx = {"date": archive_lastmod, "hits": _gh,
+                              "misses": _gm, "dnp": _gd}
         except Exception as e:
             report["archiveError"] = f"archive failed: {e}"
             archive_outputs = {}
@@ -2234,7 +2516,7 @@ def main():
     staged_root = {}
     if not failed:
         try:
-            staged_root, page_info = generate_pages(league_objs, now_utc, archive_lastmod)
+            staged_root, page_info = generate_pages(league_objs, now_utc, archive_lastmod, graded_ctx)
             report["pages"] = page_info
         except Exception as e:
             report["errors"].append(f"pages: {e}")
