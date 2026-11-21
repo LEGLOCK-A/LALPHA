@@ -757,131 +757,6 @@
    "opp": "VGK"
   },
   {
-   "league": "NBA",
-   "snapshotDate": "2026-11-20",
-   "pid": "4684740",
-   "name": "Amen Thompson",
-   "team": "HOU",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    13,
-    15
-   ],
-   "gameDate": "2026-11-20",
-   "opp": "DEN"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-20",
-   "pid": "4684740",
-   "name": "Amen Thompson",
-   "team": "HOU",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-20",
-   "opp": "DEN"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-20",
-   "pid": "4432639",
-   "name": "Jabari Smith Jr.",
-   "team": "HOU",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-20",
-   "opp": "DEN"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-20",
-   "pid": "3138196",
-   "name": "Cameron Johnson",
-   "team": "DEN",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    8,
-    10
-   ],
-   "gameDate": "2026-11-20",
-   "opp": "HOU"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-20",
-   "pid": "3936299",
-   "name": "Jamal Murray",
-   "team": "DEN",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    10,
-    13
-   ],
-   "gameDate": "2026-11-20",
-   "opp": "HOU"
-  },
-  {
    "league": "NFL",
    "snapshotDate": "2026-11-20",
    "pid": "4379399",
@@ -5139,6 +5014,141 @@
     "gameDate": "2026-11-20",
     "opp": "OKC",
     "value": 4,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-20",
+    "pid": "4684740",
+    "name": "Amen Thompson",
+    "team": "HOU",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     13,
+     15
+    ],
+    "gameDate": "2026-11-20",
+    "opp": "DEN",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-20",
+    "pid": "4684740",
+    "name": "Amen Thompson",
+    "team": "HOU",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-20",
+    "opp": "DEN",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-20",
+    "pid": "3138196",
+    "name": "Cameron Johnson",
+    "team": "DEN",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     8,
+     10
+    ],
+    "gameDate": "2026-11-20",
+    "opp": "HOU",
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-20",
+    "pid": "4432639",
+    "name": "Jabari Smith Jr.",
+    "team": "HOU",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-20",
+    "opp": "DEN",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-20",
+    "pid": "3936299",
+    "name": "Jamal Murray",
+    "team": "DEN",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     13
+    ],
+    "gameDate": "2026-11-20",
+    "opp": "HOU",
+    "value": 0,
     "result": "HIT"
    }
   ]
