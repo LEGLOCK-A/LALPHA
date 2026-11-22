@@ -1249,7 +1249,8 @@ def select_page_props(lg, league, today_et):
             "props": props, "top_all": top25(props_all)[0]}
 
 
-def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None):
+def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None,
+                      team_links=None):
     cfg = PAGE_LEAGUES[lg]
     slug = cfg["slug"]
     sel = select_page_props(lg, league, today_et)
@@ -1300,6 +1301,15 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None):
                        "<p>Props whose featured side has cashed in at least five straight games:</p>\n"
                        '<ul class="streak-list">\n' + "\n".join(items) + "\n</ul>\n")
 
+    team_html = ""
+    if team_links:
+        tlinks = ", ".join(
+            '<a href="/{}/team/{}/">{}</a>'.format(slug, ts, html_escape(tn))
+            for tn, ts in team_links)
+        team_html = ("<h2>Team props by team</h2>\n"
+                     "<p>Every {} team's props, hit rates and recent results: "
+                     "{}.</p>\n".format(lg, tlinks))
+
     others = [o for o in ("NBA", "NHL", "NFL") if o != lg]
     more_links = " and ".join(
         '<a href="/{}/">{} player prop hit rates today</a>'.format(PAGE_LEAGUES[o]["slug"], o)
@@ -1339,7 +1349,7 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None):
 </tbody>
 </table>
 <p class="props-note">Rates read as hits/games in each prop's featured direction — the side (Over or Under) with the higher L10 rate. Players on the injury report are left out, the same rule the board uses. Unders list only when the player's recent average is within reach of the line, and each top list shows at most half Unders.</p>
-{streak_html}<h2>More on LegLock</h2>
+{streak_html}{team_html}<h2>More on LegLock</h2>
 <p>See the {more_links}, or learn <a href="/guides/how-hit-rates-work/">how hit rates work</a> — what L5, L10 and L20 really measure, and how to read them without fooling yourself.</p>
 </section>{PAGE_FOOTER}</main>
 {CONSENT_SCRIPT_SNIPPET}
@@ -1612,7 +1622,8 @@ SITEMAP_FALLBACK_URLS = [
 ]
 
 
-def build_sitemap(run_date, archive_lastmod=None, player_urls=None):
+def build_sitemap(run_date, archive_lastmod=None, player_urls=None,
+                  team_urls=None):
     """The sitemap rewritten: the URLs already listed (read from the
     current file when available, else the known 16) plus the three
     league pages and the results archive index. lastmod is refreshed
@@ -1667,6 +1678,17 @@ def build_sitemap(run_date, archive_lastmod=None, player_urls=None):
                 entry = [url, run_date]
                 entries.append(entry)
                 by_url[url] = entry
+    if team_urls is not None:
+        keep = set(team_urls)
+        entries = [e for e in entries if "/team/" not in e[0] or e[0] in keep]
+        by_url = {e[0]: e for e in entries}
+        for url in team_urls:
+            if url in by_url:
+                by_url[url][1] = run_date
+            else:
+                entry = [url, run_date]
+                entries.append(entry)
+                by_url[url] = entry
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for url, lastmod in entries:
@@ -1675,18 +1697,164 @@ def build_sitemap(run_date, archive_lastmod=None, player_urls=None):
     return "\n".join(lines) + "\n"
 
 
-def generate_pages(league_objs, now_utc, archive_lastmod=None, graded_ctx=None):
+
+
+def _team_featured(prop):
+    """(dir, {window: (hits, n)}) — the featured direction exactly as
+    the app computes it: the side with more L10 hits (Over wins ties),
+    with each window's hits counted in that direction."""
+    counts = prop.get("counts") or {}
+    c10 = counts.get("L10") or {"o": 0, "u": 0, "n": 0}
+    fdir = "Over" if c10.get("o", 0) >= c10.get("u", 0) else "Under"
+    out = {}
+    for w in ("L5", "L10", "L20"):
+        c = counts.get(w) or {"o": 0, "u": 0, "n": 0}
+        out[w] = (c.get("o", 0) if fdir == "Over" else c.get("u", 0), c.get("n", 0))
+    return fdir, out
+
+
+def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug):
+    cfg = PAGE_LEAGUES[lg]
+    lslug = cfg["slug"]
+    first = team_props[0]
+    team_name = first["teamName"]
+    stat_names = ", ".join(p["statLabel"] for p in team_props)
+    title = f"{team_name} Team Props & Hit Rates — {lg} | LegLock"
+    description = (f"{team_name} team prop hit rates: L5, L10 and L20 rates for "
+                   f"{stat_names} at research lines set from recent team game logs, "
+                   f"plus recent results and the next matchup on LegLock.")
+
+    parts = [f'<p class="content-byline">Updated {stamp}</p>']
+    intro = (f"{html_escape(team_name)} ({html_escape(abbr)}) — next game: "
+             f"{'vs' if first.get('home') else 'at'} {html_escape(first.get('oppName') or '')} "
+             f"&middot; {fmt_date_long(first.get('gameDate') or '')}")
+    if first.get("b2b"):
+        intro += " &middot; on a back-to-back"
+    elif first.get("shortWeek"):
+        intro += f" &middot; short week ({first.get('restDays')} days rest)"
+    elif first.get("restDays") is not None:
+        intro += f" &middot; {first.get('restDays')} days rest"
+    parts.append(f"<p>{intro}.</p>")
+    parts.append("<p>Every rate below is counted from actual team game logs, and every line "
+                 "is a research line set from the team's own recent average — not a "
+                 "sportsbook price.</p>")
+
+    rows = []
+    for p in team_props:
+        fdir, fc = _team_featured(p)
+        rows.append(
+            '<tr><td>{}</td><td class="num">{} {}</td><td class="num">{}/{}</td>'
+            '<td class="num">{}/{}</td><td class="num">{}/{}</td>'
+            '<td class="num">{}</td></tr>'.format(
+                html_escape(p["statLabel"]), fdir, fmt_line(p["line"]),
+                fc["L5"][0], fc["L5"][1], fc["L10"][0], fc["L10"][1],
+                fc["L20"][0], fc["L20"][1], _fmt_num(p.get("avg"))))
+    parts.append(
+        "<h2>Team prop hit rates</h2>\n"
+        '<table class="props-table">\n'
+        "<thead><tr><th>Stat</th><th>Line</th><th>L5</th><th>L10</th><th>L20</th>"
+        "<th>Average</th></tr></thead>\n<tbody>\n"
+        + "\n".join(rows) + "\n</tbody>\n</table>\n"
+        '<p class="props-note">Rates read as hits/games in each prop\'s featured '
+        "direction — the side (Over or Under) with the higher L10 rate.</p>")
+
+    notes = []
+    for p in team_props:
+        fdir, _ = _team_featured(p)
+        bits = []
+        v = p.get("venue") or {}
+        if v.get("n"):
+            vh = v.get("o", 0) if fdir == "Over" else v.get("u", 0)
+            bits.append(f"{'Home' if p.get('home') else 'Away'} L10: {vh}/{v['n']} "
+                        f"{fdir.lower()}")
+        if p.get("lineBasis") == "venue" and p.get("venueAvg") is not None:
+            bits.append(f"venue average {_fmt_num(p['venueAvg'])}")
+        if p.get("oppDefRank") is not None:
+            bits.append(f"opponent defence #{p['oppDefRank']} "
+                        f"({_fmt_num(p.get('oppDefAvg'))} allowed L10)")
+        if p.get("injuryNote"):
+            bits.append(html_escape(p["injuryNote"]))
+        if bits:
+            notes.append(f"<li><strong>{html_escape(p['statLabel'])}</strong> — "
+                         + " &middot; ".join(bits) + "</li>")
+    if notes:
+        parts.append('<h2>Matchup notes</h2>\n<ul class="streak-list">\n'
+                     + "\n".join(notes) + "\n</ul>")
+
+    rows_log = (rows_entry or {}).get("rows") or []
+    if rows_log:
+        extras = {"NBA": (("1H", "fh"), ("3PM", "threes")),
+                  "NFL": (("1H", "fh"),),
+                  "NHL": (("P1", "p1"), ("Shots", "shots"))}[lg]
+        head = "".join(f"<th>{lab}</th>" for lab, _ in extras)
+        body_rows = []
+        for r in rows_log:
+            cells = "".join(
+                f'<td class="num">{_fmt_num(r[k]) if r.get(k) is not None else "&mdash;"}</td>'
+                for _, k in extras)
+            result = "W" if r["margin"] > 0 else ("L" if r["margin"] < 0 else "T")
+            body_rows.append(
+                f'<tr><td>{_fmt_short_date(r["d"])}</td>'
+                f'<td>{"vs" if r["home"] else "@"} {html_escape(r["opp"])}</td>'
+                f'<td class="num">{r["pf"]}&ndash;{r["pa"]}</td><td>{result}</td>{cells}</tr>')
+        parts.append(
+            "<h2>Recent results</h2>\n"
+            '<table class="props-table">\n'
+            f"<thead><tr><th>Date</th><th>Opp</th><th>Score</th><th>Result</th>{head}</tr></thead>\n<tbody>\n"
+            + "\n".join(body_rows) + "\n</tbody>\n</table>")
+
+    parts.append(
+        "<h2>More on LegLock</h2>\n"
+        f'<p>Back to <a href="/{lslug}/">{lg} player prop hit rates today</a>, the full '
+        '<a href="/">interactive prop board</a> (team props included), or learn '
+        '<a href="/guides/how-hit-rates-work/">how hit rates work</a>.</p>')
+    crumbs = {"@context": "https://schema.org", "@type": "BreadcrumbList",
+              "itemListElement": [
+                  {"@type": "ListItem", "position": 1, "name": "LegLock",
+                   "item": SITE_ORIGIN + "/"},
+                  {"@type": "ListItem", "position": 2, "name": f"{lg} Prop Hit Rates",
+                   "item": f"{SITE_ORIGIN}/{lslug}/"},
+                  {"@type": "ListItem", "position": 3, "name": team_name,
+                   "item": f"{SITE_ORIGIN}/{lslug}/team/{tslug}/"}]}
+    parts.append(f'<script type="application/ld+json">{json.dumps(crumbs)}</script>')
+    return archive_page_shell(
+        title, description, f"/{lslug}/team/{tslug}/", team_name,
+        f"{lg} team props, hit rates and recent results",
+        "\n".join(parts), logo_uri)
+
+
+def generate_pages(league_objs, now_utc, archive_lastmod=None, graded_ctx=None,
+                   team_data=None):
     """Return ({repo-relative path: content}, per-league info)."""
     now_et = now_utc.astimezone(ET)
     stamp = fmt_stamp(now_et)
     logo_uri = page_logo_uri()
     staged_root, info = {}, {}
     slugs_by_league, player_urls = {}, []
+    # Team pages pre-pass: group each league's team props by team and
+    # assign slugs once, so the league pages' team links and the team
+    # pages themselves always agree on URLs.
+    team_by_league, team_links_by_league, team_slugs_by_league = {}, {}, {}
+    team_urls = []
+    if team_data:
+        for _lg in ("NBA", "NFL", "NHL"):
+            _by_team = {}
+            for _p in (team_data.get("props") or {}).get(_lg) or []:
+                _by_team.setdefault(_p["team"], []).append(_p)
+            _taken, _slugs, _links = {}, {}, []
+            for _ab in sorted(_by_team):
+                _ts = player_slug(_by_team[_ab][0]["teamName"], _ab, _taken)
+                _slugs[_ab] = _ts
+                _links.append((_by_team[_ab][0]["teamName"], _ts))
+            team_by_league[_lg] = _by_team
+            team_slugs_by_league[_lg] = _slugs
+            team_links_by_league[_lg] = _links
     for lg in ("NBA", "NFL", "NHL"):
         league = league_objs[lg]
         slugs = player_slugs(league)
         slugs_by_league[lg] = slugs
-        page, pinfo = build_league_page(lg, league, stamp, now_et.date(), logo_uri, slugs)
+        page, pinfo = build_league_page(lg, league, stamp, now_et.date(), logo_uri, slugs,
+                                        team_links_by_league.get(lg))
         staged_root[f"{PAGE_LEAGUES[lg]['slug']}/index.html"] = page
         info[lg] = pinfo
         count = 0
@@ -1700,11 +1868,21 @@ def generate_pages(league_objs, now_utc, archive_lastmod=None, graded_ctx=None):
                 f"{SITE_ORIGIN}/{PAGE_LEAGUES[lg]['slug']}/player/{slugs[pid]}/")
             count += 1
         info[lg]["playerPages"] = count
+        tcount = 0
+        tlogs = ((team_data or {}).get("logs") or {}).get(lg) or {}
+        for ab, plist in sorted((team_by_league.get(lg) or {}).items()):
+            ts = team_slugs_by_league[lg][ab]
+            staged_root[f"{PAGE_LEAGUES[lg]['slug']}/team/{ts}/index.html"] = \
+                build_team_page(lg, plist, ab, tlogs.get(ab), stamp, logo_uri, ts)
+            team_urls.append(f"{SITE_ORIGIN}/{PAGE_LEAGUES[lg]['slug']}/team/{ts}/")
+            tcount += 1
+        info[lg]["teamPages"] = tcount
     staged_root["archive/highlights/index.html"] = build_highlights_page(
         league_objs, stamp, now_et.date(), logo_uri, graded_ctx, slugs_by_league)
     info["highlights"] = True
     staged_root["sitemap.xml"] = build_sitemap(
-        now_et.strftime("%Y-%m-%d"), archive_lastmod, player_urls)
+        now_et.strftime("%Y-%m-%d"), archive_lastmod, player_urls,
+        team_urls if team_data else None)
     return staged_root, info
 
 
@@ -2429,12 +2607,19 @@ def build_teams(league_objs, now_utc):
     that league (with the error in the info) rather than failing the
     run or wiping the other leagues' team props."""
     today_et = now_utc.astimezone(ET).date()
-    leagues, info = {}, {}
+    leagues, info, team_logs = {}, {}, {}
     for lg in ("NBA", "NFL", "NHL"):
         try:
             logs = fetch_team_logs(lg, now_utc, today_et)
             props, fixtures = build_team_props(lg, league_objs[lg], logs, today_et)
             leagues[lg] = props
+            team_logs[lg] = {
+                ab: {"name": e.get("name") or ab,
+                     "rows": [{k: r.get(k) for k in ("d", "opp", "home", "pf", "pa",
+                                                      "margin", "fh", "p1", "threes",
+                                                      "shots")}
+                              for r in e.get("rows") or []]}
+                for ab, e in logs.items()}
             info[lg] = {"teams": len(logs), "teamProps": len(props),
                         "gamesLogged": sum(len(e["rows"]) for e in logs.values()),
                         "fixtureTeams": len(fixtures),
@@ -2443,7 +2628,7 @@ def build_teams(league_objs, now_utc):
         except Exception as e:
             leagues[lg] = []
             info[lg] = {"teamProps": 0, "error": str(e)}
-    return leagues, info
+    return leagues, info, team_logs
 
 
 # --------------------------------------------------------------------------
@@ -2476,6 +2661,7 @@ def main():
         print(json.dumps({"fetchedAt": fetched_at, "errors": [f"cannot load current data: {e}"]}))
         return 1
 
+    team_data = None
     staged = {}
     league_objs = {}
     logs_prev_objs = {}
@@ -2527,7 +2713,8 @@ def main():
     # part of the same all-or-nothing publish set as the other data
     # files (staged here, moved only on full success in repo mode).
     if not failed:
-        team_leagues, team_info = build_teams(league_objs, now_utc)
+        team_leagues, team_info, team_logs = build_teams(league_objs, now_utc)
+        team_data = {"props": team_leagues, "logs": team_logs}
         staged["data-teams.js"] = "window.__TEAMS_DATA = " + js_dumps(
             {"fetchedAt": fetched_at, "leagues": team_leagues}) + ";\n"
         report["teams"] = team_info
@@ -2570,7 +2757,8 @@ def main():
     staged_root = {}
     if not failed:
         try:
-            staged_root, page_info = generate_pages(league_objs, now_utc, archive_lastmod, graded_ctx)
+            staged_root, page_info = generate_pages(league_objs, now_utc, archive_lastmod,
+                                                    graded_ctx, team_data)
             report["pages"] = page_info
         except Exception as e:
             report["errors"].append(f"pages: {e}")
