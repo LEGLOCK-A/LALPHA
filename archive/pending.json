@@ -1433,56 +1433,6 @@
    "opp": "POR"
   },
   {
-   "league": "NBA",
-   "snapshotDate": "2026-11-21",
-   "pid": "5142620",
-   "name": "Darius Acuff Jr.",
-   "team": "SAC",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Under",
-   "line": 3.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-21",
-   "opp": "BOS"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-21",
-   "pid": "3155942",
-   "name": "Domantas Sabonis",
-   "team": "SAC",
-   "key": "combo",
-   "stat": "Pts+Reb+Ast",
-   "dir": "Over",
-   "line": 28.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    11,
-    14
-   ],
-   "gameDate": "2026-11-21",
-   "opp": "BOS"
-  },
-  {
    "league": "NFL",
    "snapshotDate": "2026-11-21",
    "pid": "4379399",
@@ -2156,81 +2106,6 @@
    ],
    "gameDate": "2026-11-21",
    "opp": "CHI"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-21",
-   "pid": "5302535",
-   "name": "Maxim Shabanov",
-   "team": "MIN",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    10,
-    10
-   ],
-   "l20": [
-    16,
-    20
-   ],
-   "gameDate": "2026-11-21",
-   "opp": "VAN"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4755729",
-   "name": "Ben Meyers",
-   "team": "SEA",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    14,
-    17
-   ],
-   "gameDate": "2026-11-21",
-   "opp": "SJ"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4755729",
-   "name": "Ben Meyers",
-   "team": "SEA",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    14,
-    17
-   ],
-   "gameDate": "2026-11-21",
-   "opp": "SJ"
   },
   {
    "league": "NBA",
@@ -7108,6 +6983,141 @@
     ],
     "gameDate": "2026-11-21",
     "opp": "NYI",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-21",
+    "pid": "5142620",
+    "name": "Darius Acuff Jr.",
+    "team": "SAC",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Under",
+    "line": 3.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-21",
+    "opp": "BOS",
+    "value": 2,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-21",
+    "pid": "3155942",
+    "name": "Domantas Sabonis",
+    "team": "SAC",
+    "key": "combo",
+    "stat": "Pts+Reb+Ast",
+    "dir": "Over",
+    "line": 28.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     11,
+     14
+    ],
+    "gameDate": "2026-11-21",
+    "opp": "BOS",
+    "value": 36,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-21",
+    "pid": "4755729",
+    "name": "Ben Meyers",
+    "team": "SEA",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     14,
+     17
+    ],
+    "gameDate": "2026-11-21",
+    "opp": "SJ",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-21",
+    "pid": "4755729",
+    "name": "Ben Meyers",
+    "team": "SEA",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     14,
+     17
+    ],
+    "gameDate": "2026-11-21",
+    "opp": "SJ",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-21",
+    "pid": "5302535",
+    "name": "Maxim Shabanov",
+    "team": "MIN",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     10,
+     10
+    ],
+    "l20": [
+     16,
+     20
+    ],
+    "gameDate": "2026-11-21",
+    "opp": "VAN",
     "value": 0,
     "result": "HIT"
    }
