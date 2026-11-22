@@ -1170,11 +1170,44 @@ def l20_average(league, prop):
 
 
 def passes_rare_gate(lg, league, prop):
-    if prop["dir"] != "Under" or prop["line"] != 0.5:
+    """Jay's Under rules for the published top lists (2026-11-22, his
+    U2 pick). Overs always pass. An Under 0.5 lists only when the
+    player's L20 average is at least RARE_L20_MIN (0.3) — any stat, any
+    league; this replaced the per-stat RARE_EVENT_KEYS list, which is
+    kept above for reference. Any other Under lists only when the L20
+    average reaches at least half the line, so an Under 1.5 on a
+    0.7-a-game stat never lists."""
+    if prop["dir"] != "Under":
         return True
-    if prop["key"] not in RARE_EVENT_KEYS.get(lg, ()):
-        return True
-    return l20_average(league, prop) >= RARE_L20_MIN - 1e-9
+    avg = l20_average(league, prop)
+    if prop["line"] == 0.5:
+        return avg >= RARE_L20_MIN - 1e-9
+    return avg >= prop["line"] / 2.0 - 1e-9
+
+
+def cap_unders(ranked, limit, max_unders, dir_of):
+    """Take up to `limit` items from a ranked list with at most
+    `max_unders` Unders (Jay's split, approved 2026-11-22): ranked by
+    featured hit rate, the top lists structurally drown in Unders
+    because the research line is built from the player's own average,
+    so the composition is capped and the freed slots go to the best
+    Overs. If Overs run out, skipped Unders backfill in rank order so
+    the list still fills. Callers re-sort the result by their rank
+    key so display order stays by merit."""
+    picked, skipped, unders = [], [], 0
+    for p in ranked:
+        if len(picked) >= limit:
+            break
+        if dir_of(p) == "Under" and unders >= max_unders:
+            skipped.append(p)
+            continue
+        picked.append(p)
+        unders += (dir_of(p) == "Under")
+    for p in skipped:
+        if len(picked) >= limit:
+            break
+        picked.append(p)
+    return picked
 
 
 def select_page_props(lg, league, today_et):
@@ -1195,16 +1228,21 @@ def select_page_props(lg, league, today_et):
     else:
         teams = slate_teams_today(league, today_et)
 
+    def rank_key(p):
+        return (-featured_pct(p, "L10"), -featured_pct(p, "L20"),
+                -featured_pct(p, "L5"), p["name"])
+
     def top25(source):
         pool = [p for p in source if p["team"] in teams] if teams else []
         if pool:
-            return sorted(pool, key=lambda p: (-featured_pct(p, "L10"), -featured_pct(p, "L20"),
-                                               -featured_pct(p, "L5"), p["name"]))[:25], \
-                ("week" if lg == "NFL" else "today")
+            picked = cap_unders(sorted(pool, key=rank_key), 25, 13, lambda p: p["dir"])
+            picked.sort(key=rank_key)
+            return picked, ("week" if lg == "NFL" else "today")
         # No games in the window: the league's top 25 overall, honestly
         # labelled as the next slate rather than today's.
-        return sorted(source, key=lambda p: (-featured_pct(p, "L10"), -featured_pct(p, "L20"),
-                                             -featured_pct(p, "L5"), p["name"]))[:25], "fallback"
+        picked = cap_unders(sorted(source, key=rank_key), 25, 13, lambda p: p["dir"])
+        picked.sort(key=rank_key)
+        return picked, "fallback"
 
     listed, window = top25(props)
     return {"listed": listed, "window": window, "props_all": props_all,
@@ -1224,8 +1262,11 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None):
     # prop["streak"] is the true current streak: consecutive most-recent
     # games hitting in the featured direction (see build_prop).
     def streak_list(source):
-        return sorted((p for p in source if p["streak"] >= 5),
-                      key=lambda p: (-p["streak"], -featured_pct(p, "L10"), p["name"]))[:10]
+        skey = lambda p: (-p["streak"], -featured_pct(p, "L10"), p["name"])
+        picked = cap_unders(sorted((p for p in source if p["streak"] >= 5), key=skey),
+                            10, 5, lambda p: p["dir"])
+        picked.sort(key=skey)
+        return picked
 
     streaks = streak_list(props)
     gated_streaks = sum(1 for p in streak_list(props_all)
@@ -1297,7 +1338,7 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None):
 {chr(10).join(rows)}
 </tbody>
 </table>
-<p class="props-note">Rates read as hits/games in each prop's featured direction — the side (Over or Under) with the higher L10 rate. Players on the injury report are left out, the same rule the board uses.</p>
+<p class="props-note">Rates read as hits/games in each prop's featured direction — the side (Over or Under) with the higher L10 rate. Players on the injury report are left out, the same rule the board uses. Unders list only when the player's recent average is within reach of the line, and each top list shows at most half Unders.</p>
 {streak_html}<h2>More on LegLock</h2>
 <p>See the {more_links}, or learn <a href="/guides/how-hit-rates-work/">how hit rates work</a> — what L5, L10 and L20 really measure, and how to read them without fooling yourself.</p>
 </section>{PAGE_FOOTER}</main>
@@ -1506,7 +1547,9 @@ def build_highlights_page(league_objs, stamp, today_et, logo_uri, graded_ctx, sl
         sel = select_page_props(lg, league, today_et)
         slugs = slugs_by_league[lg]
         lslug = PAGE_LEAGUES[lg]["slug"]
-        top = sel["listed"][:5]
+        top = cap_unders(sel["listed"], 5, 3, lambda p: p["dir"])
+        top.sort(key=lambda p: (-featured_pct(p, "L10"), -featured_pct(p, "L20"),
+                                -featured_pct(p, "L5"), p["name"]))
         if top:
             items = []
             for p in top:
@@ -1521,9 +1564,11 @@ def build_highlights_page(league_objs, stamp, today_et, logo_uri, graded_ctx, sl
                          '<ul class="streak-list">\n' + "\n".join(items) + "\n</ul>")
         all_streaks.extend((lg, p) for p in sel["props"] if p["streak"] >= 5)
     all_streaks.sort(key=lambda t: (-t[1]["streak"], -featured_pct(t[1], "L10"), t[1]["name"]))
+    all_streaks = cap_unders(all_streaks, 10, 5, lambda t: t[1]["dir"])
+    all_streaks.sort(key=lambda t: (-t[1]["streak"], -featured_pct(t[1], "L10"), t[1]["name"]))
     if all_streaks:
         items = []
-        for lg, p in all_streaks[:10]:
+        for lg, p in all_streaks:
             lslug = PAGE_LEAGUES[lg]["slug"]
             items.append(
                 '<li><strong><a href="/{}/player/{}/">{}</a></strong> ({}, {}) — {}, {} {} '
