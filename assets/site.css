@@ -734,6 +734,10 @@
   .modal.open{display:block}
   #pwModal{z-index:900}
   #logModal{z-index:1000}
+  #teamModal{z-index:1000}
+  .card.tcard{cursor:pointer}
+  .tpop-prop{padding:10px 0;border-bottom:1px solid var(--line)}
+  .tpop-prop .linebox{margin-bottom:6px}
   .modal .backdrop{position:absolute;inset:0;background:rgba(6,10,8,.55)}
   .modal .sheet{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:880px;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg);border-radius:16px 16px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.35);padding:0 13px 22px}
   .modal .sheet{border:2px solid var(--accent);outline:2px solid var(--accent);outline-offset:-2px;box-shadow:0 0 0 2px var(--accent),0 -12px 40px rgba(0,0,0,.35)}

@@ -33,7 +33,7 @@
 <title>Risers — LegLock</title>
 <meta name="description" content="LegLock Risers: players whose recent form is beating their longer-term baseline, ranked by consistency, streak and opportunity." />
 <link rel="canonical" href="https://leglock.online/underdogs/" />
-<link rel="stylesheet" href="/assets/site.css?v=5" />
+<link rel="stylesheet" href="/assets/site.css?v=6" />
 </head>
 <body>
 <div class="wrap">
@@ -587,6 +587,26 @@
     <p>LegLock is a small project, so replies can take a few days and shorter, specific messages get answered fastest. Corrections that check out are fixed in the data as quickly as the refresh cycle allows, and they genuinely improve the board for everyone — thank you for sending them.</p>
   </section>
 
+<!-- Adsterra banner - bottom of page -->
+<div class="ll-ad-banner" style="display:flex;justify-content:center;margin:12px auto 4px;max-width:100%;overflow:hidden" aria-label="Advertisement"><div class="ll-ad-m"><script>
+  atOptions = {
+    'key' : '41511eddd1de1947044b7cc781c75331',
+    'format' : 'iframe',
+    'height' : 50,
+    'width' : 320,
+    'params' : {}
+  };
+</script>
+<script src="https://bauval.org/22/41511eddd1de1947044b7cc781c75331"></script></div><div class="ll-ad-d"><script>
+  atOptions = {
+    'key' : '96057d5b2a021c3090b1ab5615230461',
+    'format' : 'iframe',
+    'height' : 90,
+    'width' : 728,
+    'params' : {}
+  };
+</script>
+<script src="https://bauval.org/22/96057d5b2a021c3090b1ab5615230461"></script></div></div>
   <footer>
     <nav class="footlinks" aria-label="Site information">
       <button data-page="privacy">Privacy Policy</button>
@@ -667,6 +687,17 @@
   </div>
 
   <!-- ======= REGRESSION RISK DEFINITION POPOVER (one shared tooltip, floated above the board) ======= -->
+  <div class="modal" id="teamModal" role="dialog" aria-modal="true" aria-label="Team props">
+    <div class="backdrop" data-close-team></div>
+    <div class="sheet">
+      <div class="sheetgrab" aria-hidden="true"><span></span></div>
+      <div class="sheethead">
+        <div class="lghtitle"><h3 id="teamPopTitle">Team Props</h3><div class="sub" id="teamPopSub"></div></div>
+        <button class="xbtn" id="teamClose" aria-label="Close team props">&times;</button>
+      </div>
+      <div id="teamPopBody"></div>
+    </div>
+  </div>
   <div class="regpop" id="regPop" role="tooltip" hidden><b>Regression risk</b> — Hot over the short window, but the last-20 record is much weaker. Rates like this usually cool back toward the longer-term average.</div>
   <div class="regpop" id="sigPop" role="tooltip" hidden></div>
   <div class="regpop" id="rankPop" role="tooltip" hidden><p style="margin:0 0 7px"><b>Signal</b> — Ranks by Signal Score — the hit rate adjusted for sample size, how far the player&rsquo;s average clears the line, and how meaningful the line is. A perfect 9-for-9 on a rare stat won&rsquo;t outrank a proven 80% over 20 games.</p><p style="margin:0"><b>Classic</b> — Ranks by raw hit rate over the selected games window, highest first, no adjustments — the original LegLock ordering.</p></div>
@@ -694,7 +725,7 @@
   var g=document.querySelector("img.deal-glow"); if(g) g.src=window.__IMG.dealGlow;
 })();
 </script>
-<script src="/assets/app.js?v=6"></script>
+<script src="/assets/app.js?v=7"></script>
 <script>if (window.showView) showView("underdogs");</script>
 <script src="/assets/consent.js" defer></script>
 </body>

@@ -2845,7 +2845,7 @@ function teamPropCard(p){
   if (p.b2b) meta.push('<span><b>On a back-to-back</b></span>');
   else if (p.shortWeek) meta.push('<span><b>Short week</b> · ' + p.restDays + ' days rest</span>');
   if (p.injuryNote) meta.push('<span><b>' + esc(p.injuryNote) + '</b></span>');
-  return '<article class="card teamcard tcard">'
+  return '<article class="card teamcard tcard" data-teampop="' + esc(p.team) + '" role="button" tabindex="0" aria-label="' + esc(p.teamName + " — all team props") + '">'
     + '<div class="cardtop"><div class="who"><div class="nm">' + esc(p.teamName) + '</div>'
     + '<div class="tm">' + (p.home ? "vs " : "at ") + esc(p.oppName) + ' · ' + esc(fmtD(p.gameDate)) + ' · ' + esc(p.league) + '</div></div></div>'
     + '<div class="linebox"><span class="dir ' + (f.dir === "Over" ? "over" : "under") + '">' + f.dir + ' ' + fmtVal(p.line) + '</span>'
@@ -2853,7 +2853,7 @@ function teamPropCard(p){
     + '<span class="avg">L10 avg <b>' + fmtVal(p.avg) + '</b>' + (p.lineBasis === "venue" && p.venueAvg != null ? '<br>Venue avg <b>' + fmtVal(p.venueAvg) + '</b>' : '') + '</span></div>'
     + '<div class="rates">' + teamRateCell(p, "L5") + teamRateCell(p, "L10") + teamRateCell(p, "L20") + '</div>'
     + (meta.length ? '<div class="tmeta">' + meta.join(' · ') + '</div>' : '')
-    + '<div class="cardfoot"><span class="note">Research line from the team&rsquo;s last-10 average · hit rates vs this line</span></div>'
+    + '<div class="cardfoot"><span class="note">Research line from the team&rsquo;s last-10 average · hit rates vs this line · Tap for all of this team&rsquo;s props</span></div>'
     + '</article>';
 }
 /* Expanded Team Props grid only: the SAME ranked list, grouped
@@ -2930,6 +2930,84 @@ window.__LL.renderTeamProps = renderTeamProps;
     if (wrap) wrap.classList.toggle("open", open);
     var body = wrap ? wrap.querySelector(".tgroup-body") : null;
     if (body) body.hidden = !open;
+  });
+})();
+
+/* ---------- Team prop popup ----------
+   Tapping a team card opens a popup in the player popup's shell with
+   every prop for that team in the current league: featured line and
+   L5/L10/L20 rates, venue and opponent-defence context, and a link to
+   the team's full page. Data is TEAMS_DATA only — no new fetches. */
+function teamSlugJS(name){
+  return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+function teamPopMeta(p){
+  var f = teamFeatured(p), bits = [];
+  if (p.venue && p.venue.n){
+    var vh = f.dir === "Over" ? p.venue.o : p.venue.u;
+    bits.push((p.home ? "Home" : "Away") + " L10: <b>" + vh + "/" + p.venue.n + "</b> " + f.dir.toLowerCase());
+  }
+  if (p.lineBasis === "venue" && p.venueAvg != null) bits.push("Venue avg <b>" + fmtVal(p.venueAvg) + "</b>");
+  if (p.oppDefRank != null) bits.push("Opp defence <b>#" + p.oppDefRank + "</b> (" + fmtVal(p.oppDefAvg) + " allowed L10)");
+  if (p.b2b) bits.push("<b>On a back-to-back</b>");
+  else if (p.shortWeek) bits.push("<b>Short week</b> &middot; " + p.restDays + " days rest");
+  else if (p.restDays != null) bits.push(p.restDays + " days rest");
+  if (p.injuryNote) bits.push("<b>" + esc(p.injuryNote) + "</b>");
+  return bits.length ? '<div class="tmeta">' + bits.join(" &middot; ") + "</div>" : "";
+}
+function teamPopPropHtml(p){
+  var f = teamFeatured(p);
+  return '<div class="tpop-prop">'
+    + '<div class="linebox"><span class="dir ' + (f.dir === "Over" ? "over" : "under") + '">' + f.dir + " " + fmtVal(p.line) + "</span>"
+    + '<span class="stat">' + esc(p.statLabel) + "</span>"
+    + '<span class="avg">L10 avg <b>' + fmtVal(p.avg) + "</b></span></div>"
+    + '<div class="rates">' + teamRateCell(p, "L5") + teamRateCell(p, "L10") + teamRateCell(p, "L20") + "</div>"
+    + teamPopMeta(p)
+    + "</div>";
+}
+function openTeamPop(abbr){
+  var m = $("#teamModal"); if (!m) return;
+  var list = ((window.TEAMS_DATA && window.TEAMS_DATA.leagues && window.TEAMS_DATA.leagues[state.league]) || [])
+    .filter(function(p){ return p.team === abbr; });
+  if (!list.length) return;
+  list.sort(function(a, b){ return teamFeatured(b).rate - teamFeatured(a).rate; });
+  var first = list[0];
+  $("#teamPopTitle").textContent = first.teamName || abbr;
+  $("#teamPopSub").textContent = state.league + " · Next: " + (first.home ? "vs " : "at ") + (first.oppName || "") + " · " + fmtD(first.gameDate);
+  $("#teamPopBody").innerHTML = list.map(teamPopPropHtml).join("")
+    + '<div class="cardfoot" style="margin-top:10px"><span class="note">Research lines from the team&rsquo;s last-10 average &middot; hit rates vs this line</span></div>'
+    + '<p style="margin:12px 0 0"><a href="/' + state.league.toLowerCase() + "/team/" + teamSlugJS(first.teamName) + '/">See the full ' + esc(first.teamName) + " team page &rarr;</a></p>";
+  m.classList.add("open");
+  document.body.classList.add("modal-open");
+  if (window.__LL.lockScroll) window.__LL.lockScroll();
+  var s = m.querySelector(".sheet"); if (s) s.scrollTop = 0;
+  var c = $("#teamClose"); if (c) c.focus();
+}
+function closeTeamPop(){
+  var m = $("#teamModal"); if (!m) return;
+  var was = m.classList.contains("open");
+  m.classList.remove("open");
+  var other = ($("#logModal") && $("#logModal").classList.contains("open")) || ($("#pwModal") && $("#pwModal").classList.contains("open"));
+  if (!other) document.body.classList.remove("modal-open");
+  if (was && window.__LL.unlockScroll) window.__LL.unlockScroll();
+}
+window.__LL.openTeamPop = openTeamPop;
+(function(){
+  var m = $("#teamModal"); if (!m) return;
+  $("#teamClose").addEventListener("click", closeTeamPop);
+  m.querySelector(".backdrop").addEventListener("click", closeTeamPop);
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && m.classList.contains("open")) closeTeamPop();
+  });
+  document.addEventListener("click", function(e){
+    var c = e.target && e.target.closest ? e.target.closest("[data-teampop]") : null;
+    if (c) openTeamPop(c.getAttribute("data-teampop"));
+  });
+  document.addEventListener("keydown", function(e){
+    if ((e.key === "Enter" || e.key === " ") && e.target && e.target.getAttribute && e.target.getAttribute("data-teampop")){
+      e.preventDefault();
+      openTeamPop(e.target.getAttribute("data-teampop"));
+    }
   });
 })();
 
