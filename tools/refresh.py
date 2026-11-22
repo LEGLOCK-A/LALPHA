@@ -985,14 +985,12 @@ try{var _t=window.localStorage.getItem("lm-theme");document.documentElement.setA
 </script>"""
 
 PAGE_TABS = ('<nav class="tabs" aria-label="Main views">'
-             '<a href="/"><span class="tab-label">Discover</span></a>'
-             '<a href="/live/"><span class="tab-label">Live</span></a>'
-             '<a href="/prop-watch/"><span class="tab-label">Prop Watch</span></a>'
-             '<a href="/workstation/"><span class="tab-label">Workstation</span></a>'
-             '<a href="/cheatsheet/"><span class="tab-label">Cheatsheet</span></a>'
-             '<a href="/logs/"><span class="tab-label">Logs</span></a>'
-             '<a href="/make-me-a-lay/"><span class="tab-label">Shuffle</span></a>'
-             '<a href="/injuries/"><span class="tab-label">Injuries</span></a></nav>')
+             '<a class="tab" href="/">Props</a>'
+             '<a class="tab" href="/live/">Live</a>'
+             '<a class="tab" href="/underdogs/">Risers</a>'
+             '<a class="tab" href="/shuffle/">Shuffle</a>'
+             '<a class="tab" href="/game-logs/">Game Logs</a>'
+             '<a class="tab" href="/injuries/">Injuries</a></nav>')
 
 PAGE_FOOTER = ('<footer><div class="site-footer"><span class="site-footer-brand">LEGLOCK</span>'
                '<nav class="site-footer-links" aria-label="Site information">'
@@ -1005,14 +1003,27 @@ PAGE_FOOTER = ('<footer><div class="site-footer"><span class="site-footer-brand"
                '— not gambling advice. No bets are taken here.</p></footer>')
 
 PAGE_STYLE = """<style>
-.props-table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0 4px}
-.props-table th,.props-table td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
-.props-table th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
+main{max-width:1180px;margin:0 auto;padding:0 14px 40px}
+.display{font-family:'LegLockSans',sans-serif;font-weight:700;letter-spacing:.01em}
+.sub{color:var(--ink2)}
+.content-body{font-size:14.5px;line-height:1.55}
+.content-body h2{font-size:19px;margin:22px 0 6px}
+.content-body a{color:var(--accent-ink);font-weight:600;text-decoration:none}
+.content-body a:hover{text-decoration:underline}
+.content-byline{color:var(--ink3);font-size:12.5px;margin:2px 0 10px}
+.props-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;border-collapse:separate;border-spacing:0;font-size:14px;margin:12px 0 6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.props-table th,.props-table td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.props-table tr:last-child td{border-bottom:0}
+.props-table th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);background:var(--surface2);white-space:nowrap}
 .props-table td.num,.props-table th.num{white-space:nowrap}
 .streak-list{margin:8px 0;padding-left:20px}
-.streak-list li{margin:4px 0}
-.props-note{font-size:12.5px;color:var(--dim)}
-.site-footer-note{font-size:12.5px;color:var(--dim);margin:6px 0 0}
+.streak-list li{margin:5px 0}
+.props-note{font-size:12.5px;color:var(--ink3)}
+.site-footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);text-align:center}
+.site-footer-brand{font-family:'Moderniz','LegLockSans',sans-serif;color:var(--accent);letter-spacing:.03em;font-size:15px}
+.site-footer-links{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;margin-top:8px}
+.site-footer-links a{color:var(--ink2);text-decoration:none;font-weight:600;font-size:13.5px}
+.site-footer-note{font-size:12.5px;color:var(--ink3);margin:6px 0 0;text-align:center}
 </style>"""
 
 
@@ -1252,11 +1263,13 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None):
     more_links = " and ".join(
         '<a href="/{}/">{} player prop hit rates today</a>'.format(PAGE_LEAGUES[o]["slug"], o)
         for o in others)
-    logo_html = ('<div class="site-logo"><a href="/" aria-label="LegLock home">'
-                 '<img src="{}" alt="LEGLOCK" /></a></div>'.format(logo_uri)
+    logo_html = ('<div class="brand"><a href="/" aria-label="LegLock home">'
+                 '<img src="{}" alt="LegLock" /></a>'
+                 '<div class="tagline">Player-prop research &middot; NBA &middot; NFL &middot; NHL</div></div>'.format(logo_uri)
                  if logo_uri else
-                 '<div class="site-logo"><a href="/" aria-label="LegLock home">'
-                 '<span class="site-footer-brand">LEGLOCK</span></a></div>')
+                 '<div class="brand"><a href="/" aria-label="LegLock home">'
+                 '<span class="site-footer-brand">LEGLOCK</span></a>'
+                 '<div class="tagline">Player-prop research &middot; NBA &middot; NFL &middot; NHL</div></div>')
 
     page = f"""<!doctype html>
 <html lang="en" data-theme="light">
@@ -1267,14 +1280,11 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 {ADS_SNIPPET}
 <meta name="apple-mobile-web-app-title" content="LEGLOCK" />
-<meta name="theme-color" content="#0b1220" />
-{THEME_PIN_SNIPPET}
+<meta name="color-scheme" content="light dark" />
 <title>{cfg['title']}</title>
 <meta name="description" content="{cfg['description']}" />
 <link rel="canonical" href="{SITE_ORIGIN}/{slug}/" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Sofia+Sans+Condensed:wght@600;700&family=Sofia+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/assets/leglock.css" />
+<link rel="stylesheet" href="/assets/site.css?v=5" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{cfg['h1']}</h1><p class="sub" style="margin:0 0 10px">{cfg['sub']}</p><section class="content-body">
@@ -1862,11 +1872,13 @@ def archive_page_shell(title, description, canonical_path, h1, sub, body_html, l
     """The league pages' shell (same head snippets, tabs and footer)
     for archive pages. No 'Updated' stamp: the content is a fixed
     record, and a stamp would dirty the file on every run."""
-    logo_html = ('<div class="site-logo"><a href="/" aria-label="LegLock home">'
-                 '<img src="{}" alt="LEGLOCK" /></a></div>'.format(logo_uri)
+    logo_html = ('<div class="brand"><a href="/" aria-label="LegLock home">'
+                 '<img src="{}" alt="LegLock" /></a>'
+                 '<div class="tagline">Player-prop research &middot; NBA &middot; NFL &middot; NHL</div></div>'.format(logo_uri)
                  if logo_uri else
-                 '<div class="site-logo"><a href="/" aria-label="LegLock home">'
-                 '<span class="site-footer-brand">LEGLOCK</span></a></div>')
+                 '<div class="brand"><a href="/" aria-label="LegLock home">'
+                 '<span class="site-footer-brand">LEGLOCK</span></a>'
+                 '<div class="tagline">Player-prop research &middot; NBA &middot; NFL &middot; NHL</div></div>')
     return f"""<!doctype html>
 <html lang="en" data-theme="light">
 <head>
@@ -1876,14 +1888,11 @@ def archive_page_shell(title, description, canonical_path, h1, sub, body_html, l
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 {ADS_SNIPPET}
 <meta name="apple-mobile-web-app-title" content="LEGLOCK" />
-<meta name="theme-color" content="#0b1220" />
-{THEME_PIN_SNIPPET}
+<meta name="color-scheme" content="light dark" />
 <title>{title}</title>
 <meta name="description" content="{description}" />
 <link rel="canonical" href="{SITE_ORIGIN}{canonical_path}" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Sofia+Sans+Condensed:wght@600;700&family=Sofia+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="/assets/leglock.css" />
+<link rel="stylesheet" href="/assets/site.css?v=5" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{h1}</h1><p class="sub" style="margin:0 0 10px">{sub}</p><section class="content-body">
