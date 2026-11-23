@@ -1335,7 +1335,7 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None,
 <title>{cfg['title']}</title>
 <meta name="description" content="{cfg['description']}" />
 <link rel="canonical" href="{SITE_ORIGIN}/{slug}/" />
-<link rel="stylesheet" href="/assets/site.css?v=9" />
+<link rel="stylesheet" href="/assets/site.css?v=10" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{cfg['h1']}</h1><p class="sub" style="margin:0 0 10px">{cfg['sub']}</p><section class="content-body">
@@ -2030,15 +2030,29 @@ def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug,
 
     rows_log = rows
     if rows_log:
-        extras = {"NBA": (("1H", "fh"), ("3PM", "threes")),
-                  "NFL": (("1H", "fh"),),
-                  "NHL": (("P1", "p1"), ("Shots", "shots"))}[lg]
-        head = "".join(f"<th>{lab}</th>" for lab, _ in extras)
+        extras = {"NBA": (("1H", "fh", "num"), ("3PM", "threes", "num"), ("Reb", "reb", "num"),
+                          ("Ast", "ast", "num"), ("FG%", "fgp", "pct"), ("3P%", "tpp", "pct")),
+                  "NFL": (("1H", "fh", "num"), ("Tot Yds", "tyds", "num"), ("Pass Yds", "pyds", "num"),
+                          ("Rush Yds", "ryds", "num"), ("TO", "tov", "num")),
+                  "NHL": (("P1", "p1", "num"), ("P2", "p2", "num"), ("P3", "p3", "num"),
+                          ("Shots", "shots", "num"), ("Saves", "saves", "num"), ("Save %", "svp", "frac"))}[lg]
+        head = "".join(f"<th>{lab}</th>" for lab, _, _ in extras)
+
+        def _cell(r, k, kind):
+            v = r.get(k)
+            if v is None:
+                return '<td class="num">&mdash;</td>'
+            if kind == "pct":
+                txt = f"{v * 100:.1f}%" if v <= 1.5 else f"{_fmt_num(v)}%"
+            elif kind == "frac":
+                txt = f"{v:.3f}".lstrip("0") if 0 < v < 1 else _fmt_num(v)
+            else:
+                txt = _fmt_num(v)
+            return f'<td class="num">{txt}</td>'
+
         body_rows = []
         for r in rows_log:
-            cells = "".join(
-                f'<td class="num">{_fmt_num(r[k]) if r.get(k) is not None else "&mdash;"}</td>'
-                for _, k in extras)
+            cells = "".join(_cell(r, k, kind) for _, k, kind in extras)
             result = "W" if r["margin"] > 0 else ("L" if r["margin"] < 0 else "T")
             body_rows.append(
                 f'<tr><td>{_fmt_short_date(r["d"])}</td>'
@@ -2572,7 +2586,7 @@ def archive_page_shell(title, description, canonical_path, h1, sub, body_html, l
 <title>{title}</title>
 <meta name="description" content="{description}" />
 <link rel="canonical" href="{SITE_ORIGIN}{canonical_path}" />
-<link rel="stylesheet" href="/assets/site.css?v=9" />
+<link rel="stylesheet" href="/assets/site.css?v=10" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{h1}</h1><p class="sub" style="margin:0 0 10px">{sub}</p><section class="content-body">
@@ -2794,6 +2808,31 @@ def _nhl_game_shots(eid):
     return eid, out
 
 
+def _nfl_game_stats(eid):
+    """{abbr: {tyds, pyds, ryds, tov}} from one game's summary
+    boxscore — the NFL scoreboard carries no team statistics, so the
+    Recent results enrichment reads them here. Display-only: a failed
+    or stat-less summary just leaves the row's fields None."""
+    cfg = LEAGUES["NFL"]
+    url = f"{API}/site/v2/sports/{cfg['sport']}/{cfg['code']}/summary?event={eid}"
+    try:
+        payload = FETCH.get_json(url, allow_404=True)
+    except FetchError:
+        return eid, {}
+    out = {}
+    for t in ((payload or {}).get("boxscore") or {}).get("teams") or []:
+        abbr = (t.get("team") or {}).get("abbreviation") or ""
+        if not abbr:
+            continue
+        out[abbr] = {
+            "tyds": _espn_stat(t, "totalYards"),
+            "pyds": _espn_stat(t, "netPassingYards"),
+            "ryds": _espn_stat(t, "rushingYards"),
+            "tov": _espn_stat(t, "turnovers"),
+        }
+    return eid, out
+
+
 def fetch_team_logs(lg, now_utc, today_et):
     """{team abbr: {"name": display name, "rows": [...]}} — rows most
     recent first: {d (ET date), opp, home, pf, pa, margin, fh
@@ -2849,6 +2888,15 @@ def fetch_team_logs(lg, now_utc, today_et):
                 "p1": _period_points(c, (1,)) if lg == "NHL" else None,
                 "threes": _espn_stat(c, "threePointFieldGoalsMade") if lg == "NBA" else None,
                 "shots": None, "eid": eid,
+                "reb": _espn_stat(c, "rebounds") if lg == "NBA" else None,
+                "ast": _espn_stat(c, "assists") if lg == "NBA" else None,
+                "fgp": _espn_stat(c, "fieldGoalPct") if lg == "NBA" else None,
+                "tpp": _espn_stat(c, "threePointPct") if lg == "NBA" else None,
+                "p2": _period_points(c, (2,)) if lg == "NHL" else None,
+                "p3": _period_points(c, (3,)) if lg == "NHL" else None,
+                "saves": _espn_stat(c, "saves") if lg == "NHL" else None,
+                "svp": _espn_stat(c, "savePct") if lg == "NHL" else None,
+                "tyds": None, "pyds": None, "ryds": None, "tov": None,
             }
             entry = teams.setdefault(abbr, {"name": t.get("displayName") or abbr, "rows": []})
             entry["rows"].append(row)
@@ -2864,6 +2912,15 @@ def fetch_team_logs(lg, now_utc, today_et):
         for abbr, entry in teams.items():
             for r in entry["rows"]:
                 r["shots"] = (results.get(r["eid"]) or {}).get(abbr)
+
+    if lg == "NFL" and teams:
+        eids = sorted({r["eid"] for e in teams.values() for r in e["rows"]})
+        results = dict(FETCH.map(_nfl_game_stats, eids))
+        for abbr, entry in teams.items():
+            for r in entry["rows"]:
+                st = (results.get(r["eid"]) or {}).get(abbr)
+                if st:
+                    r.update(st)
     return teams
 
 
