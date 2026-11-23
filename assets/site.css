@@ -1093,3 +1093,7 @@
 .edgebar label{display:flex;gap:6px;align-items:center;color:var(--namesub)}
 .edgebar input{width:78px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit}
 .edgebar b{color:var(--ink)}
+
+/* popup titles link to the full player / team page */
+.popname{color:var(--accent);text-decoration:none}
+.popname:hover,.popname:focus{text-decoration:underline;text-underline-offset:3px}

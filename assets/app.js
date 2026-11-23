@@ -733,6 +733,15 @@ window.__LL.modelFor = function(lg, pid, key){
     if (list[i].pid === pid && list[i].key === key) return modelFor(lg, list[i]);
   return null;
 };
+/* Page slug for a player or team name — mirrors the bot's
+   player_slug (NFKD, strip accents, non-alphanumerics to dashes).
+   The bot suffixes a same-name collision with the player id; that
+   case cannot be detected here, so a duplicated name in one league
+   may link to the other player's page. */
+window.__LL.nameSlug = function(name){
+  return String(name || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+};
 var _edgeOdds = "-110";
 window.__LL.setEdgeOdds = function(v){ _edgeOdds = String(v || "-110"); };
 window.__LL.edgeVerdict = function(lg, pid, key, line, dir, oddsStr){
@@ -3538,7 +3547,10 @@ function renderTeamPop(){
   if (!list.length) return;
   var rows = tpLogs(_tpAbbr);
   var first = list[0];
-  $("#teamPopTitle").textContent = first.teamName || _tpAbbr;
+  var tslug2 = window.__LL && window.__LL.nameSlug ? window.__LL.nameSlug(first.teamName || "") : "";
+  $("#teamPopTitle").innerHTML = tslug2
+    ? '<a class="popname" href="/' + state.league.toLowerCase() + "/team/" + tslug2 + '/">' + esc(first.teamName || _tpAbbr) + "</a>"
+    : esc(first.teamName || _tpAbbr);
   $("#teamPopSub").textContent = state.league + " · Next: " + (first.home ? "vs " : "at ") + (first.oppName || "") + " · " + fmtD(first.gameDate);
   var body = "";
   if (rows){
@@ -4107,7 +4119,14 @@ function renderWorkstation(){
     if (p.img) av.innerHTML = '<img src="' + esc(p.img) + '" alt="" onerror="this.parentNode.textContent=\'' + esc((p.name || "P").charAt(0)) + '\'">';
     else av.textContent = (p.name || "P").charAt(0);
   }
-  var lt = $("#logTitle"); if (lt) lt.textContent = p.name || "Game Log";
+  var lt = $("#logTitle");
+  if (lt){
+    var pnm = p.name || "Game Log";
+    var pslug = window.__LL && window.__LL.nameSlug ? window.__LL.nameSlug(pnm) : "";
+    lt.innerHTML = pslug
+      ? '<a class="popname" href="/' + String(lg).toLowerCase() + "/player/" + pslug + '/">' + esc(pnm) + "</a>"
+      : esc(pnm);
+  }
   var sub = esc(p.team || "") + (p.pos ? ' · ' + esc(p.pos) : '') + (p.jersey ? ' · #' + esc(p.jersey) : '') + ' · ' + lg;
   if (lg === "NHL" && p.xgf != null && !isNaN(p.xgf)) sub += ' · xGF% ' + (+p.xgf).toFixed(1) + ' · MoneyPuck';
   if (lg === "NBA" && p.efg != null && !isNaN(p.efg)) sub += ' · eFG% ' + (+p.efg).toFixed(1);
