@@ -1408,31 +1408,6 @@
    "opp": "SA"
   },
   {
-   "league": "NBA",
-   "snapshotDate": "2026-11-21",
-   "pid": "3136195",
-   "name": "Karl-Anthony Towns",
-   "team": "NY",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-21",
-   "opp": "POR"
-  },
-  {
    "league": "NFL",
    "snapshotDate": "2026-11-21",
    "pid": "4379399",
@@ -7120,6 +7095,33 @@
     "opp": "VAN",
     "value": 0,
     "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-21",
+    "pid": "3136195",
+    "name": "Karl-Anthony Towns",
+    "team": "NY",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-21",
+    "opp": "POR",
+    "value": null,
+    "result": "DNP"
    }
   ]
  }
