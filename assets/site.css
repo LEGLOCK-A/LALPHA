@@ -1040,3 +1040,49 @@
   .consent-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 22px;font-weight:700;font-size:14px;min-height:44px;cursor:pointer}
   .consent-btn.consent-accept{background:var(--accent);border-color:var(--accent);color:#fff}
   .consent-choices{cursor:pointer}
+
+/* ---------- Team props depth (pages + popup) ---------- */
+.tform{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+.tform>span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-right:2px}
+.tchip{font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink2);white-space:nowrap}
+.tchip.tw{background:var(--accent-soft);color:var(--accent-ink);border-color:transparent;font-weight:600}
+.tcontrols{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:12px 0}
+.twtog{display:inline-flex;gap:4px}
+.twtog button{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink2);font:inherit;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:999px;cursor:pointer}
+.twtog button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tsortlab{font-size:12.5px;color:var(--ink2)}
+.tsortlab select{font:inherit;font-size:12.5px;margin-left:4px;padding:4px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.tprop{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:0 0 10px;overflow:hidden}
+.tprop-head{display:flex;width:100%;align-items:center;gap:10px;padding:11px 12px;background:none;border:0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;flex-wrap:wrap}
+.tprop-stat{font-weight:700;font-size:14.5px}
+.tprop-rate{margin-left:auto;text-align:right}
+.tprop-rate b{font-size:17px;color:var(--accent-ink)}
+.tprop-rate small{display:block;color:var(--ink3);font-size:11px}
+.tstreak{font-size:11.5px;font-weight:700;background:var(--accent-soft);color:var(--accent-ink);padding:3px 8px;border-radius:999px;white-space:nowrap}
+.tprop-body{border-top:1px solid var(--line);padding:10px 12px 12px}
+.tstats{font-size:12.5px;color:var(--ink2);margin-bottom:8px}
+.tstats b{color:var(--ink)}
+.tstrip{position:relative;display:flex;align-items:flex-end;gap:2px;height:64px;border-bottom:1px solid var(--line2);margin:6px 0 4px;padding:0 1px}
+.tstrip i{flex:1;min-width:3px;border-radius:2px 2px 0 0;background:var(--ink3);opacity:.85}
+.tstrip i.hit{background:var(--accent);opacity:1}
+.tstrip i.miss{background:#cf6a62;opacity:.75}
+.tstrip .tline{position:absolute;left:0;right:0;border-top:1.5px dashed var(--ink2);font-size:10px;color:var(--ink2);pointer-events:none}
+.tstrip .tline{height:0}
+.tstrip-lab{font-size:11px;color:var(--ink3);margin:2px 0 8px}
+.tsplits{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.tsplits>div{background:var(--surface2);border-radius:9px;padding:7px 9px;font-size:12px;color:var(--ink2)}
+.tsplits>div span{display:block;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);margin-bottom:2px}
+.tlad,.tnotes{font-size:12.5px;color:var(--ink2);margin-top:6px}
+.tlad span,.tnotes span{font-weight:700;color:var(--ink)}
+.tlad b{color:var(--accent-ink)}
+@media (max-width:560px){.tsplits{grid-template-columns:1fr}}
+.tpop-more{appearance:none;background:none;border:0;font:inherit;font-size:12.5px;font-weight:700;color:var(--accent-ink);cursor:pointer;padding:4px 0 0}
+.tpop-det{padding:6px 0 2px}
+.tpop-big{margin-left:auto;text-align:right}
+.tpop-big b{font-size:19px;color:var(--accent-ink)}
+.tpop-big small{display:block;color:var(--ink3);font-size:11px}
+.rates .rate.sel .lab b{color:var(--accent-ink)}
+.rates .rate.sel .bar{outline:1.5px solid var(--accent);outline-offset:1px}
+.topp{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:12px;background:var(--surface)}
+.topp h4{margin:0 0 4px;font-size:13.5px}
+.topp p{margin:4px 0 0;font-size:12.5px;color:var(--ink2)}

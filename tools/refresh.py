@@ -1335,7 +1335,7 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None,
 <title>{cfg['title']}</title>
 <meta name="description" content="{cfg['description']}" />
 <link rel="canonical" href="{SITE_ORIGIN}/{slug}/" />
-<link rel="stylesheet" href="/assets/site.css?v=5" />
+<link rel="stylesheet" href="/assets/site.css?v=7" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{cfg['h1']}</h1><p class="sub" style="margin:0 0 10px">{cfg['sub']}</p><section class="content-body">
@@ -1713,11 +1713,261 @@ def _team_featured(prop):
     return fdir, out
 
 
-def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug):
+TEAM_LADDER_STEP = {"total": 3.0, "oppTotal": 3.0, "winBy": 2.5,
+                    "firstHalf": 2.5, "firstPeriod": 0.5,
+                    "teamThrees": 1.5, "teamShots": 2.5}
+
+
+def _t_series(prop, rows):
+    """The prop's stat value in each logged game, newest first,
+    skipping games where the stat is missing."""
+    vals = []
+    for r in rows or []:
+        v = team_stat_value(prop.get("stat"), r)
+        if v is not None:
+            vals.append(v)
+    return vals
+
+
+def _t_oc(vals, line, n=None):
+    seg = vals if n is None else vals[:n]
+    o = sum(1 for v in seg if v > line)
+    u = sum(1 for v in seg if v < line)
+    return o, u, len(seg)
+
+
+def _t_median(vals):
+    if not vals:
+        return None
+    sv = sorted(vals)
+    m = len(sv) // 2
+    return sv[m] if len(sv) % 2 else (sv[m - 1] + sv[m]) / 2.0
+
+
+def _t_std(vals):
+    if len(vals) < 2:
+        return None
+    mu = sum(vals) / len(vals)
+    return (sum((v - mu) ** 2 for v in vals) / len(vals)) ** 0.5
+
+
+def _t_streak(vals, line, fdir):
+    n = 0
+    for v in vals:
+        if (v > line) if fdir == "Over" else (v < line):
+            n += 1
+        else:
+            break
+    return n
+
+
+def _t_form_chips(rows, n=5):
+    chips = []
+    for r in (rows or [])[:n]:
+        res = "W" if r["margin"] > 0 else ("L" if r["margin"] < 0 else "T")
+        cls = "tw" if res == "W" else ("tl" if res == "L" else "")
+        chips.append(
+            f'<span class="tchip {cls}">{res} {r["pf"]}&ndash;{r["pa"]} '
+            f'{"vs" if r["home"] else "@"} {html_escape(r["opp"])}</span>')
+    return "".join(chips)
+
+
+def _t_strip(vals, line, fdir, n=15):
+    """Last-n values as bars, oldest to newest, coloured by whether
+    each game hit the featured direction, with the line marked."""
+    seg = list(reversed(vals[:n]))
+    if not seg:
+        return ""
+    mx = max(max(seg), line)
+    mn = min(min(seg), line)
+    span = (mx - mn) or 1
+
+    def hgt(v):
+        return 16 + int(64 * (v - mn) / span)
+
+    bars = []
+    for v in seg:
+        hit = v > line if fdir == "Over" else v < line
+        diff = v - line
+        bars.append(
+            f'<i class="{"hit" if hit else "miss"}" style="height:{hgt(v)}%" '
+            f'title="{fmt_line(v)} ({diff:+.1f} vs the line)"></i>')
+    return (f'<div class="tstrip"><span class="tline" style="bottom:{hgt(line)}%">'
+            f'line {fmt_line(line)}</span>' + "".join(bars) + "</div>")
+
+
+TEAM_PAGE_JS = """
+<script>
+(function(){
+  var D = null;
+  try { D = JSON.parse(document.getElementById("tdata").textContent); } catch (e) {}
+  if (!D) return;
+  var W = {"L5": 5, "L10": 10, "L20": 20, "S": 0};
+  var win = "L10";
+  function rate(p, w){
+    var n = W[w], seg = n ? p.vals.slice(0, n) : p.vals.slice();
+    if (!seg.length) return null;
+    var h = 0;
+    for (var i = 0; i < seg.length; i++){
+      if (p.dir === "Over" ? seg[i] > p.line : seg[i] < p.line) h++;
+    }
+    return {h: h, n: seg.length, r: Math.round(100 * h / seg.length)};
+  }
+  function paint(){
+    D.props.forEach(function(p, i){
+      var card = document.querySelector('.tprop[data-i="' + i + '"]');
+      if (!card) return;
+      var rt = rate(p, win);
+      var b = card.querySelector(".trate"), s = card.querySelector(".thits");
+      if (rt){ b.textContent = rt.r + "%"; s.textContent = rt.h + "/" + rt.n + " \\u00b7 " + (win === "S" ? "Season" : win); }
+      card.setAttribute("data-rate", rt ? rt.r : -1);
+    });
+  }
+  var tog = document.querySelectorAll(".twtog button");
+  for (var i = 0; i < tog.length; i++){
+    tog[i].addEventListener("click", function(){
+      win = this.getAttribute("data-w");
+      for (var j = 0; j < tog.length; j++) tog[j].classList.toggle("on", tog[j] === this);
+      paint();
+    });
+  }
+  var sel = document.getElementById("tsort");
+  if (sel) sel.addEventListener("change", function(){
+    var wrap = document.getElementById("tprops");
+    var cards = Array.prototype.slice.call(wrap.querySelectorAll(".tprop"));
+    var key = sel.value;
+    cards.sort(function(a, b){
+      if (key === "streak") return (+b.getAttribute("data-streak") || 0) - (+a.getAttribute("data-streak") || 0);
+      if (key === "name") return a.getAttribute("data-name").localeCompare(b.getAttribute("data-name"));
+      return (+b.getAttribute("data-rate") || 0) - (+a.getAttribute("data-rate") || 0);
+    });
+    cards.forEach(function(c){ wrap.appendChild(c); });
+  });
+  document.querySelectorAll(".tprop-head").forEach(function(h){
+    h.addEventListener("click", function(){
+      var card = h.parentNode, body = card.querySelector(".tprop-body");
+      var open = card.classList.toggle("open");
+      body.hidden = !open;
+      h.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  });
+  paint();
+})();
+</script>
+"""
+
+
+def _t_prop_card(p, rows, idx, opp_abbr, opp_name):
+    fdir, _fc = _team_featured(p)
+    line = p["line"]
+    vals = _t_series(p, rows)
+    o10, u10, n10 = _t_oc(vals, line, 10)
+    hits10 = o10 if fdir == "Over" else u10
+    rate10 = round(100 * hits10 / n10) if n10 else 0
+    streak = _t_streak(vals, line, fdir)
+    med = _t_median(vals[:20])
+    std = _t_std(vals[:20])
+    avg = p.get("avg")
+    margin = (avg - line) if avg is not None else None
+    os_, us_, ns_ = _t_oc(vals, line)
+    season_hits = os_ if fdir == "Over" else us_
+    season_rate = round(100 * season_hits / ns_) if ns_ else None
+
+    def _split(seg):
+        if not seg:
+            return "&mdash;"
+        o, u, n = _t_oc(seg, line)
+        h = o if fdir == "Over" else u
+        return (f"avg {_fmt_num(sum(seg) / len(seg))} &middot; {h}/{n} "
+                f"{fdir.lower()}")
+
+    hv = [v for v in (team_stat_value(p["stat"], r) for r in rows if r.get("home"))
+          if v is not None]
+    av = [v for v in (team_stat_value(p["stat"], r) for r in rows if not r.get("home"))
+          if v is not None]
+    h2h = [v for v in (team_stat_value(p["stat"], r) for r in rows
+                       if r.get("opp") == opp_abbr) if v is not None]
+
+    step = TEAM_LADDER_STEP.get(p.get("stat"), 2.5)
+    lad = []
+    for k in (-2, -1, 1, 2):
+        ll = line + k * step
+        o, u, n = _t_oc(vals, ll, 20)
+        if n:
+            h = o if fdir == "Over" else u
+            lad.append(f'{fdir} {fmt_line(ll)}: <b>{round(100 * h / n)}%</b> ({h}/{n})')
+
+    bits = []
+    v = p.get("venue") or {}
+    if v.get("n"):
+        vh = v.get("o", 0) if fdir == "Over" else v.get("u", 0)
+        bits.append(f"{'Home' if p.get('home') else 'Away'} L10: {vh}/{v['n']} "
+                    f"{fdir.lower()}")
+    if p.get("lineBasis") == "venue" and p.get("venueAvg") is not None:
+        bits.append(f"venue average {_fmt_num(p['venueAvg'])}")
+    if p.get("oppDefRank") is not None:
+        bits.append(f"opponent defence #{p['oppDefRank']} "
+                    f"({_fmt_num(p.get('oppDefAvg'))} allowed L10)")
+    if p.get("b2b"):
+        bits.append("on a back-to-back")
+    elif p.get("shortWeek"):
+        bits.append(f"short week &middot; {p.get('restDays')} days rest")
+    elif p.get("restDays") is not None:
+        bits.append(f"{p.get('restDays')} days rest")
+    if p.get("injuryNote"):
+        bits.append(html_escape(p["injuryNote"]))
+
+    stats = [f"Median (L20) <b>{_fmt_num(med)}</b>",
+             f"L10 average <b>{_fmt_num(avg)}</b>"]
+    if margin is not None:
+        stats.append(f"Avg margin vs line <b>{margin:+.1f}</b>")
+    if std is not None:
+        stats.append(f"Consistency (std dev) <b>{_fmt_num(std)}</b>")
+    if season_rate is not None:
+        stats.append(f"Season rate <b>{season_rate}%</b> ({season_hits}/{ns_})")
+
+    detail = ['<div class="tstats">' + " &middot; ".join(stats) + "</div>"]
+    strip = _t_strip(vals, line, fdir)
+    if strip:
+        detail.append(strip)
+        detail.append('<p class="tstrip-lab">Last 15 games, oldest to newest &middot; '
+                      'green hit the featured side of the line.</p>')
+    detail.append(
+        '<div class="tsplits"><div><span>Home</span>' + _split(hv) + '</div>'
+        '<div><span>Away</span>' + _split(av) + '</div>'
+        '<div><span>vs ' + html_escape(opp_name or opp_abbr or "opp") + '</span>'
+        + ("games: " + ", ".join(fmt_line(x) for x in h2h) if h2h
+           else "no meetings yet this season") + '</div></div>')
+    if lad:
+        detail.append('<div class="tlad"><span>Alt lines (L20)</span>'
+                      + " &middot; ".join(lad) + "</div>")
+    if bits:
+        detail.append('<div class="tnotes">' + " &middot; ".join(bits) + "</div>")
+
+    streak_html = (f'<span class="tstreak">{streak} straight {fdir.lower()}s</span>'
+                   if streak >= 3 else "")
+    return (
+        f'<div class="tprop" data-i="{idx}" data-rate="{rate10}" '
+        f'data-streak="{streak}" data-name="{html_escape(p["statLabel"])}">'
+        f'<button type="button" class="tprop-head" aria-expanded="false">'
+        f'<span class="tprop-stat">{html_escape(p["statLabel"])}</span>'
+        f'<span class="dir {"over" if fdir == "Over" else "under"}">{fdir} {fmt_line(line)}</span>'
+        f'<span class="tprop-rate"><b class="trate">{rate10}%</b> '
+        f'<small class="thits">{hits10}/{n10} &middot; L10</small></span>'
+        + streak_html +
+        '<span class="gf-chev" aria-hidden="true"></span></button>'
+        f'<div class="tprop-body" hidden>' + "".join(detail) + "</div></div>")
+
+
+def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug,
+                    opp_entry=None):
     cfg = PAGE_LEAGUES[lg]
     lslug = cfg["slug"]
     first = team_props[0]
     team_name = first["teamName"]
+    rows = (rows_entry or {}).get("rows") or []
+    opp_abbr = first.get("opp")
+    opp_name = first.get("oppName") or opp_abbr or ""
     stat_names = ", ".join(p["statLabel"] for p in team_props)
     title = f"{team_name} Team Props & Hit Rates — {lg} | LegLock"
     description = (f"{team_name} team prop hit rates: L5, L10 and L20 rates for "
@@ -1726,7 +1976,7 @@ def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug):
 
     parts = [f'<p class="content-byline">Updated {stamp}</p>']
     intro = (f"{html_escape(team_name)} ({html_escape(abbr)}) — next game: "
-             f"{'vs' if first.get('home') else 'at'} {html_escape(first.get('oppName') or '')} "
+             f"{'vs' if first.get('home') else 'at'} {html_escape(opp_name)} "
              f"&middot; {fmt_date_long(first.get('gameDate') or '')}")
     if first.get("b2b"):
         intro += " &middot; on a back-to-back"
@@ -1735,53 +1985,50 @@ def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug):
     elif first.get("restDays") is not None:
         intro += f" &middot; {first.get('restDays')} days rest"
     parts.append(f"<p>{intro}.</p>")
+    if rows:
+        parts.append('<div class="tform"><span>Recent form</span>'
+                     + _t_form_chips(rows, 5) + "</div>")
     parts.append("<p>Every rate below is counted from actual team game logs, and every line "
                  "is a research line set from the team's own recent average — not a "
-                 "sportsbook price.</p>")
+                 "sportsbook price. Tap any prop for its game-by-game strip, splits "
+                 "and alternate lines.</p>")
 
-    rows = []
-    for p in team_props:
-        fdir, fc = _team_featured(p)
-        rows.append(
-            '<tr><td>{}</td><td class="num">{} {}</td><td class="num">{}/{}</td>'
-            '<td class="num">{}/{}</td><td class="num">{}/{}</td>'
-            '<td class="num">{}</td></tr>'.format(
-                html_escape(p["statLabel"]), fdir, fmt_line(p["line"]),
-                fc["L5"][0], fc["L5"][1], fc["L10"][0], fc["L10"][1],
-                fc["L20"][0], fc["L20"][1], _fmt_num(p.get("avg"))))
+    cards = []
+    payload = []
+    for i, p in enumerate(team_props):
+        cards.append(_t_prop_card(p, rows, i, opp_abbr, opp_name))
+        fdir, _ = _team_featured(p)
+        payload.append({"stat": p["statLabel"], "line": p["line"], "dir": fdir,
+                        "vals": _t_series(p, rows)[:30]})
     parts.append(
         "<h2>Team prop hit rates</h2>\n"
-        '<table class="props-table">\n'
-        "<thead><tr><th>Stat</th><th>Line</th><th>L5</th><th>L10</th><th>L20</th>"
-        "<th>Average</th></tr></thead>\n<tbody>\n"
-        + "\n".join(rows) + "\n</tbody>\n</table>\n"
-        '<p class="props-note">Rates read as hits/games in each prop\'s featured '
+        '<div class="tcontrols"><div class="twtog" role="group" aria-label="Games window">'
+        '<button type="button" data-w="L5">L5</button>'
+        '<button type="button" data-w="L10" class="on">L10</button>'
+        '<button type="button" data-w="L20">L20</button>'
+        '<button type="button" data-w="S">Season</button></div>'
+        '<label class="tsortlab">Sort <select id="tsort">'
+        '<option value="rate">Hit rate</option>'
+        '<option value="streak">Streak</option>'
+        '<option value="name">Stat name</option></select></label></div>\n'
+        '<div id="tprops">\n' + "\n".join(cards) + "\n</div>\n"
+        '<p class="props-note">Rates are counted in each prop\'s featured '
         "direction — the side (Over or Under) with the higher L10 rate.</p>")
 
-    notes = []
-    for p in team_props:
-        fdir, _ = _team_featured(p)
-        bits = []
-        v = p.get("venue") or {}
-        if v.get("n"):
-            vh = v.get("o", 0) if fdir == "Over" else v.get("u", 0)
-            bits.append(f"{'Home' if p.get('home') else 'Away'} L10: {vh}/{v['n']} "
-                        f"{fdir.lower()}")
-        if p.get("lineBasis") == "venue" and p.get("venueAvg") is not None:
-            bits.append(f"venue average {_fmt_num(p['venueAvg'])}")
-        if p.get("oppDefRank") is not None:
-            bits.append(f"opponent defence #{p['oppDefRank']} "
-                        f"({_fmt_num(p.get('oppDefAvg'))} allowed L10)")
-        if p.get("injuryNote"):
-            bits.append(html_escape(p["injuryNote"]))
-        if bits:
-            notes.append(f"<li><strong>{html_escape(p['statLabel'])}</strong> — "
-                         + " &middot; ".join(bits) + "</li>")
-    if notes:
-        parts.append('<h2>Matchup notes</h2>\n<ul class="streak-list">\n'
-                     + "\n".join(notes) + "\n</ul>")
+    orows = (opp_entry or {}).get("rows") or []
+    if orows and opp_name:
+        l10 = orows[:10]
+        scored = sum(r["pf"] for r in l10) / len(l10)
+        allowed = sum(r["pa"] for r in l10) / len(l10)
+        parts.append(
+            f"<h2>Opponent snapshot — {html_escape(opp_name)}</h2>\n"
+            '<div class="tform"><span>Recent form</span>'
+            + _t_form_chips(orows, 5) + "</div>"
+            f"<p>Over their last 10, {html_escape(opp_name)} score "
+            f"<b>{_fmt_num(scored)}</b> and allow <b>{_fmt_num(allowed)}</b> "
+            "per game.</p>")
 
-    rows_log = (rows_entry or {}).get("rows") or []
+    rows_log = rows
     if rows_log:
         extras = {"NBA": (("1H", "fh"), ("3PM", "threes")),
                   "NFL": (("1H", "fh"),),
@@ -1817,11 +2064,13 @@ def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug):
                   {"@type": "ListItem", "position": 3, "name": team_name,
                    "item": f"{SITE_ORIGIN}/{lslug}/team/{tslug}/"}]}
     parts.append(f'<script type="application/ld+json">{json.dumps(crumbs)}</script>')
+    tdata = json.dumps({"props": payload}).replace("</", "<\\/")
+    parts.append(f'<script type="application/json" id="tdata">{tdata}</script>')
+    parts.append(TEAM_PAGE_JS)
     return archive_page_shell(
         title, description, f"/{lslug}/team/{tslug}/", team_name,
         f"{lg} team props, hit rates and recent results",
         "\n".join(parts), logo_uri)
-
 
 def generate_pages(league_objs, now_utc, archive_lastmod=None, graded_ctx=None,
                    team_data=None):
@@ -1873,7 +2122,8 @@ def generate_pages(league_objs, now_utc, archive_lastmod=None, graded_ctx=None,
         for ab, plist in sorted((team_by_league.get(lg) or {}).items()):
             ts = team_slugs_by_league[lg][ab]
             staged_root[f"{PAGE_LEAGUES[lg]['slug']}/team/{ts}/index.html"] = \
-                build_team_page(lg, plist, ab, tlogs.get(ab), stamp, logo_uri, ts)
+                build_team_page(lg, plist, ab, tlogs.get(ab), stamp, logo_uri, ts,
+                                tlogs.get((plist[0] or {}).get("opp")))
             team_urls.append(f"{SITE_ORIGIN}/{PAGE_LEAGUES[lg]['slug']}/team/{ts}/")
             tcount += 1
         info[lg]["teamPages"] = tcount
@@ -2115,7 +2365,7 @@ def archive_page_shell(title, description, canonical_path, h1, sub, body_html, l
 <title>{title}</title>
 <meta name="description" content="{description}" />
 <link rel="canonical" href="{SITE_ORIGIN}{canonical_path}" />
-<link rel="stylesheet" href="/assets/site.css?v=5" />
+<link rel="stylesheet" href="/assets/site.css?v=7" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{h1}</h1><p class="sub" style="margin:0 0 10px">{sub}</p><section class="content-body">
@@ -2601,6 +2851,26 @@ def build_team_props(lg, league, team_logs, today_et):
     return props, fixtures
 
 
+_APP_LOG_FIELDS = {"NBA": ("d", "opp", "home", "pf", "pa", "fh", "threes"),
+                   "NFL": ("d", "opp", "home", "pf", "pa", "fh"),
+                   "NHL": ("d", "opp", "home", "pf", "pa", "p1", "shots")}
+
+
+def _app_team_logs(team_logs):
+    """The team logs as shipped to the app in data-teams.js: per-league
+    fields only (margin is pf-pa, derivable), last 25 games per team.
+    Powers the team popup's game strips, splits and window toggle."""
+    out = {}
+    for lg, teams in (team_logs or {}).items():
+        fields = _APP_LOG_FIELDS.get(lg, ("d", "opp", "home", "pf", "pa"))
+        out[lg] = {
+            ab: {"name": e.get("name") or ab,
+                 "rows": [{k: r.get(k) for k in fields}
+                          for r in (e.get("rows") or [])[:25]]}
+            for ab, e in (teams or {}).items()}
+    return out
+
+
 def build_teams(league_objs, now_utc):
     """({league: [team props]}, {league: info}) for data-teams.js. A
     league whose team pull fails degrades to an empty prop list for
@@ -2716,7 +2986,8 @@ def main():
         team_leagues, team_info, team_logs = build_teams(league_objs, now_utc)
         team_data = {"props": team_leagues, "logs": team_logs}
         staged["data-teams.js"] = "window.__TEAMS_DATA = " + js_dumps(
-            {"fetchedAt": fetched_at, "leagues": team_leagues}) + ";\n"
+            {"fetchedAt": fetched_at, "leagues": team_leagues,
+             "logs": _app_team_logs(team_logs)}) + ";\n"
         report["teams"] = team_info
         report["teamProps"] = {lg: len(team_leagues[lg]) for lg in team_leagues}
         for lg, tinfo in team_info.items():

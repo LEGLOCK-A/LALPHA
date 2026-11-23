@@ -2955,28 +2955,212 @@ function teamPopMeta(p){
   if (p.injuryNote) bits.push("<b>" + esc(p.injuryNote) + "</b>");
   return bits.length ? '<div class="tmeta">' + bits.join(" &middot; ") + "</div>" : "";
 }
-function teamPopPropHtml(p){
+/* ---------- Team popup deep stats ----------
+   When data-teams.js carries the team's game logs, the popup computes
+   everything from the logs themselves: a games-window toggle
+   (L5/L10/L20/Season), per-prop game strips, median/margin/consistency,
+   home/away and head-to-head splits, streaks and an alt-line ladder,
+   plus an opponent snapshot. Without logs it falls back to the
+   counts-based rendering. */
+var _tpWin = "L10", _tpAbbr = null, _tpOpen = {};
+var TP_WN = { L5: 5, L10: 10, L20: 20, S: 0 };
+var TP_STEP = { total: 3, oppTotal: 3, winBy: 2.5, firstHalf: 2.5,
+                firstPeriod: 0.5, teamThrees: 1.5, teamShots: 2.5 };
+function tpLogs(abbr){
+  var td = window.TEAMS_DATA;
+  var lg = td && td.logs && td.logs[state.league];
+  return (lg && lg[abbr] && lg[abbr].rows) || null;
+}
+function tpVal(key, r){
+  if (key === "total") return r.pf;
+  if (key === "oppTotal") return r.pa;
+  if (key === "winBy") return (r.pf != null && r.pa != null) ? r.pf - r.pa : null;
+  if (key === "firstHalf") return r.fh;
+  if (key === "firstPeriod") return r.p1;
+  if (key === "teamThrees") return r.threes;
+  if (key === "teamShots") return r.shots;
+  return null;
+}
+function tpSeries(p, rows){
+  var out = [];
+  (rows || []).forEach(function(r){
+    var v = tpVal(p.stat, r);
+    if (v != null) out.push(v);
+  });
+  return out;
+}
+function tpCounts(vals, line, n){
+  var seg = n ? vals.slice(0, n) : vals.slice();
+  var o = 0, u = 0;
+  seg.forEach(function(v){ if (v > line) o++; else if (v < line) u++; });
+  return { o: o, u: u, n: seg.length };
+}
+function tpRate(p, vals, w){
+  var c = tpCounts(vals, p.line, TP_WN[w]);
+  var dir = teamFeatured(p).dir;
+  var h = dir === "Over" ? c.o : c.u;
+  return { hits: h, n: c.n, rate: c.n ? Math.round(100 * h / c.n) : 0, dir: dir };
+}
+function tpMedian(vals){
+  if (!vals.length) return null;
+  var s = vals.slice().sort(function(a, b){ return a - b; });
+  var m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function tpStd(vals){
+  if (vals.length < 2) return null;
+  var mu = vals.reduce(function(a, b){ return a + b; }, 0) / vals.length;
+  return Math.sqrt(vals.reduce(function(a, b){ return a + (b - mu) * (b - mu); }, 0) / vals.length);
+}
+function tpStreak(vals, line, dir){
+  var n = 0;
+  for (var i = 0; i < vals.length; i++){
+    if (dir === "Over" ? vals[i] > line : vals[i] < line) n++; else break;
+  }
+  return n;
+}
+function tpStrip(vals, line, dir){
+  var seg = vals.slice(0, 15).reverse();
+  if (!seg.length) return "";
+  var mx = Math.max.apply(null, seg.concat([line]));
+  var mn = Math.min.apply(null, seg.concat([line]));
+  var span = (mx - mn) || 1;
+  function h(v){ return 16 + Math.round(64 * (v - mn) / span); }
+  var bars = seg.map(function(v){
+    var hit = dir === "Over" ? v > line : v < line;
+    var d = v - line;
+    return '<i class="' + (hit ? "hit" : "miss") + '" style="height:' + h(v) + '%" title="'
+      + fmtVal(v) + " (" + (d > 0 ? "+" : "") + d.toFixed(1) + ' vs the line)"></i>';
+  }).join("");
+  return '<div class="tstrip"><span class="tline" style="bottom:' + h(line) + '%"></span>' + bars + "</div>"
+    + '<p class="tstrip-lab">Last ' + seg.length + ' games, oldest to newest &middot; green hit the featured side.</p>';
+}
+function tpFormChips(rows, n){
+  return (rows || []).slice(0, n).map(function(r){
+    var res = r.pf > r.pa ? "W" : (r.pf < r.pa ? "L" : "T");
+    return '<span class="tchip ' + (res === "W" ? "tw" : (res === "L" ? "tl" : "")) + '">'
+      + res + " " + r.pf + "&ndash;" + r.pa + " " + (r.home ? "vs " : "@ ") + esc(r.opp) + "</span>";
+  }).join("");
+}
+function tpRateCellW(p, vals, w){
+  var r = tpRate(p, vals, w);
+  var lab = w === "S" ? "Season" : w;
+  if (!r.n) return '<div class="rate"><div class="lab"><span>' + lab + '</span><b>&mdash;</b></div><div class="bar"><i style="width:0%"></i></div></div>';
+  return '<div class="rate' + (w === _tpWin ? " sel" : "") + '"><div class="lab"><span>' + lab + " &middot; " + r.n
+    + 'g</span><b>' + r.rate + '%</b></div><div class="bar"><i class="' + barClass(r.rate)
+    + '" style="width:' + r.rate + '%"></i></div></div>';
+}
+function tpDetail(p, rows, vals){
+  var dir = teamFeatured(p).dir, line = p.line;
+  var med = tpMedian(vals.slice(0, 20)), std = tpStd(vals.slice(0, 20));
+  var streak = tpStreak(vals, line, dir);
+  var stats = [];
+  if (med != null) stats.push("Median (L20) <b>" + fmtVal(med) + "</b>");
+  stats.push("L10 average <b>" + fmtVal(p.avg) + "</b>");
+  if (p.avg != null) stats.push("Avg margin vs line <b>" + (p.avg - line > 0 ? "+" : "") + (p.avg - line).toFixed(1) + "</b>");
+  if (std != null) stats.push("Consistency (std dev) <b>" + fmtVal(Math.round(std * 10) / 10) + "</b>");
+  if (streak >= 2) stats.push("<b>" + streak + " straight " + dir.toLowerCase() + "s</b>");
+  function split(segRows, lab){
+    var seg = tpSeries(p, segRows);
+    if (!seg.length) return "<div><span>" + lab + "</span>&mdash;</div>";
+    var c = tpCounts(seg, line, 0);
+    var h = dir === "Over" ? c.o : c.u;
+    var avg = seg.reduce(function(a, b){ return a + b; }, 0) / seg.length;
+    return "<div><span>" + lab + "</span>avg " + fmtVal(Math.round(avg * 10) / 10) + " &middot; " + h + "/" + c.n + " " + dir.toLowerCase() + "</div>";
+  }
+  var h2hVals = tpSeries(p, (rows || []).filter(function(r){ return r.opp === p.opp; }));
+  var h2h = h2hVals.length
+    ? "games: " + h2hVals.map(function(v){ return fmtVal(v); }).join(", ")
+    : "no meetings yet this season";
+  var step = TP_STEP[p.stat] || 2.5, lad = [];
+  [-2, -1, 1, 2].forEach(function(k){
+    var ll = line + k * step;
+    var c = tpCounts(vals, ll, 20);
+    if (c.n){
+      var h = dir === "Over" ? c.o : c.u;
+      lad.push(dir + " " + fmtVal(ll) + ": <b>" + Math.round(100 * h / c.n) + "%</b> (" + h + "/" + c.n + ")");
+    }
+  });
+  return '<div class="tstats">' + stats.join(" &middot; ") + "</div>"
+    + tpStrip(vals, line, dir)
+    + '<div class="tsplits">'
+    + split((rows || []).filter(function(r){ return r.home; }), "Home")
+    + split((rows || []).filter(function(r){ return !r.home; }), "Away")
+    + "<div><span>vs " + esc(p.oppName || p.opp || "opp") + "</span>" + h2h + "</div></div>"
+    + (lad.length ? '<div class="tlad"><span>Alt lines (L20)</span> ' + lad.join(" &middot; ") + "</div>" : "")
+    + teamPopMeta(p);
+}
+function tpPropHtml(p, rows){
+  var vals = tpSeries(p, rows);
+  var f = teamFeatured(p);
+  var big = tpRate(p, vals, _tpWin);
+  var open = !!_tpOpen[p.stat];
+  return '<div class="tpop-prop">'
+    + '<div class="linebox"><span class="dir ' + (f.dir === "Over" ? "over" : "under") + '">' + f.dir + " " + fmtVal(p.line) + '</span>'
+    + '<span class="stat">' + esc(p.statLabel) + '</span>'
+    + '<span class="tpop-big"><b>' + big.rate + '%</b><small>' + big.hits + "/" + big.n + " &middot; " + (_tpWin === "S" ? "Season" : _tpWin) + "</small></span></div>"
+    + '<div class="rates">' + tpRateCellW(p, vals, "L5") + tpRateCellW(p, vals, "L10") + tpRateCellW(p, vals, "L20") + tpRateCellW(p, vals, "S") + "</div>"
+    + '<button type="button" class="tpop-more" data-tpmore="' + esc(p.stat) + '">' + (open ? "Hide details" : "Game strip, splits &amp; alt lines") + "</button>"
+    + (open ? '<div class="tpop-det">' + tpDetail(p, rows, vals) + "</div>" : "")
+    + "</div>";
+}
+function teamPopPropLegacy(p){
   var f = teamFeatured(p);
   return '<div class="tpop-prop">'
-    + '<div class="linebox"><span class="dir ' + (f.dir === "Over" ? "over" : "under") + '">' + f.dir + " " + fmtVal(p.line) + "</span>"
-    + '<span class="stat">' + esc(p.statLabel) + "</span>"
+    + '<div class="linebox"><span class="dir ' + (f.dir === "Over" ? "over" : "under") + '">' + f.dir + " " + fmtVal(p.line) + '</span>'
+    + '<span class="stat">' + esc(p.statLabel) + '</span>'
     + '<span class="avg">L10 avg <b>' + fmtVal(p.avg) + "</b></span></div>"
     + '<div class="rates">' + teamRateCell(p, "L5") + teamRateCell(p, "L10") + teamRateCell(p, "L20") + "</div>"
     + teamPopMeta(p)
     + "</div>";
+}
+function renderTeamPop(){
+  var list = ((window.TEAMS_DATA && window.TEAMS_DATA.leagues && window.TEAMS_DATA.leagues[state.league]) || [])
+    .filter(function(p){ return p.team === _tpAbbr; });
+  if (!list.length) return;
+  var rows = tpLogs(_tpAbbr);
+  var first = list[0];
+  $("#teamPopTitle").textContent = first.teamName || _tpAbbr;
+  $("#teamPopSub").textContent = state.league + " · Next: " + (first.home ? "vs " : "at ") + (first.oppName || "") + " · " + fmtD(first.gameDate);
+  var body = "";
+  if (rows){
+    var sorted = list.slice().sort(function(a, b){
+      return tpRate(b, tpSeries(b, rows), _tpWin).rate - tpRate(a, tpSeries(a, rows), _tpWin).rate;
+    });
+    body += '<div class="tform"><span>Form</span>' + tpFormChips(rows, 5) + "</div>";
+    body += '<div class="twtog" role="group" aria-label="Games window">'
+      + ["L5", "L10", "L20", "S"].map(function(w){
+          return '<button type="button" data-twin="' + w + '"' + (w === _tpWin ? ' class="on"' : "") + ">" + (w === "S" ? "Season" : w) + "</button>";
+        }).join("") + "</div>";
+    body += sorted.map(function(p){ return tpPropHtml(p, rows); }).join("");
+    var orows = first.opp ? tpLogs(first.opp) : null;
+    if (orows && orows.length){
+      var l10 = orows.slice(0, 10);
+      var sc = l10.reduce(function(a, r){ return a + r.pf; }, 0) / l10.length;
+      var al = l10.reduce(function(a, r){ return a + r.pa; }, 0) / l10.length;
+      body += '<div class="topp"><h4>Opponent snapshot &mdash; ' + esc(first.oppName || first.opp) + '</h4>'
+        + '<div class="tform">' + tpFormChips(orows, 5) + "</div>"
+        + "<p>Over their last 10, " + esc(first.oppName || first.opp) + " score <b>" + fmtVal(Math.round(sc * 10) / 10)
+        + "</b> and allow <b>" + fmtVal(Math.round(al * 10) / 10) + "</b> per game.</p></div>";
+    }
+  } else {
+    body = list.slice().sort(function(a, b){ return teamFeatured(b).rate - teamFeatured(a).rate; })
+      .map(teamPopPropLegacy).join("");
+  }
+  body += '<div class="cardfoot" style="margin-top:10px"><span class="note">Research lines from the team&rsquo;s last-10 average &middot; hit rates vs this line</span></div>'
+    + '<p style="margin:12px 0 0"><a href="/' + state.league.toLowerCase() + "/team/" + teamSlugJS(first.teamName) + '/">See the full ' + esc(first.teamName) + " team page &rarr;</a></p>";
+  $("#teamPopBody").innerHTML = body;
 }
 function openTeamPop(abbr){
   var m = $("#teamModal"); if (!m) return;
   var list = ((window.TEAMS_DATA && window.TEAMS_DATA.leagues && window.TEAMS_DATA.leagues[state.league]) || [])
     .filter(function(p){ return p.team === abbr; });
   if (!list.length) return;
-  list.sort(function(a, b){ return teamFeatured(b).rate - teamFeatured(a).rate; });
-  var first = list[0];
-  $("#teamPopTitle").textContent = first.teamName || abbr;
-  $("#teamPopSub").textContent = state.league + " · Next: " + (first.home ? "vs " : "at ") + (first.oppName || "") + " · " + fmtD(first.gameDate);
-  $("#teamPopBody").innerHTML = list.map(teamPopPropHtml).join("")
-    + '<div class="cardfoot" style="margin-top:10px"><span class="note">Research lines from the team&rsquo;s last-10 average &middot; hit rates vs this line</span></div>'
-    + '<p style="margin:12px 0 0"><a href="/' + state.league.toLowerCase() + "/team/" + teamSlugJS(first.teamName) + '/">See the full ' + esc(first.teamName) + " team page &rarr;</a></p>";
+  _tpAbbr = abbr;
+  _tpOpen = {};
+  var top = list.slice().sort(function(a, b){ return teamFeatured(b).rate - teamFeatured(a).rate; })[0];
+  if (top) _tpOpen[top.stat] = true;
+  renderTeamPop();
   m.classList.add("open");
   document.body.classList.add("modal-open");
   if (window.__LL.lockScroll) window.__LL.lockScroll();
@@ -2995,6 +3179,14 @@ window.__LL.openTeamPop = openTeamPop;
 (function(){
   var m = $("#teamModal"); if (!m) return;
   $("#teamClose").addEventListener("click", closeTeamPop);
+  m.addEventListener("click", function(e){
+    var t = e.target && e.target.closest ? e.target : null;
+    if (!t) return;
+    var w = t.closest("[data-twin]");
+    if (w){ _tpWin = w.getAttribute("data-twin"); renderTeamPop(); return; }
+    var b = t.closest("[data-tpmore]");
+    if (b){ var k = b.getAttribute("data-tpmore"); _tpOpen[k] = !_tpOpen[k]; renderTeamPop(); }
+  });
   m.querySelector(".backdrop").addEventListener("click", closeTeamPop);
   document.addEventListener("keydown", function(e){
     if (e.key === "Escape" && m.classList.contains("open")) closeTeamPop();
