@@ -4,284 +4,10 @@
   "2026-11-19",
   "2026-11-20",
   "2026-11-21",
-  "2026-11-22"
+  "2026-11-22",
+  "2026-11-23"
  ],
  "pending": [
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-19",
-   "pid": "6589",
-   "name": "Draymond Green",
-   "team": "GS",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    11,
-    13
-   ],
-   "gameDate": "2026-11-19",
-   "opp": "MEM"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-19",
-   "pid": "6589",
-   "name": "Draymond Green",
-   "team": "GS",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    9,
-    13
-   ],
-   "gameDate": "2026-11-19",
-   "opp": "MEM"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-19",
-   "pid": "6589",
-   "name": "Draymond Green",
-   "team": "GS",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    10,
-    13
-   ],
-   "gameDate": "2026-11-19",
-   "opp": "MEM"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4379399",
-   "name": "James Cook III",
-   "team": "BUF",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    9
-   ],
-   "l20": [
-    8,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4431611",
-   "name": "Caleb Williams",
-   "team": "CHI",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    5,
-    6
-   ],
-   "l20": [
-    5,
-    6
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NO"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4890973",
-   "name": "Ashton Jeanty",
-   "team": "LV",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    8,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "3117251",
-   "name": "Christian McCaffrey",
-   "team": "SF",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "3918298",
-   "name": "Josh Allen",
-   "team": "BUF",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 32.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4685472",
-   "name": "Tetairoa McMillan",
-   "team": "CAR",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BAL"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "3117251",
-   "name": "Christian McCaffrey",
-   "team": "SF",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4695883",
-   "name": "Jalen Coker",
-   "team": "CAR",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    8
-   ],
-   "l20": [
-    6,
-    8
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BAL"
-  },
   {
    "league": "NFL",
    "snapshotDate": "2026-11-19",
@@ -306,56 +32,6 @@
    ],
    "gameDate": "2026-11-23",
    "opp": "CIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4702555",
-   "name": "Jonah Coleman",
-   "team": "DEN",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LV"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4702555",
-   "name": "Jonah Coleman",
-   "team": "DEN",
-   "key": "receivingYards",
-   "stat": "Rec Yds",
-   "dir": "Under",
-   "line": 32.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LV"
   },
   {
    "league": "NFL",
@@ -406,281 +82,6 @@
    ],
    "gameDate": "2026-11-23",
    "opp": "CIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4685247",
-   "name": "Braelon Allen",
-   "team": "NYJ",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LAC"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "3043078",
-   "name": "Derrick Henry",
-   "team": "BAL",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "CAR"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "2577417",
-   "name": "Dak Prescott",
-   "team": "DAL",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4361579",
-   "name": "Javonte Williams",
-   "team": "DAL",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 69.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4361579",
-   "name": "Javonte Williams",
-   "team": "DAL",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "14880",
-   "name": "Kirk Cousins",
-   "team": "MIN",
-   "key": "passingYards",
-   "stat": "Pass Yds",
-   "dir": "Under",
-   "line": 254.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "SF"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4428718",
-   "name": "Tre Tucker",
-   "team": "LV",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4428718",
-   "name": "Tre Tucker",
-   "team": "LV",
-   "key": "receptions",
-   "stat": "Receptions",
-   "dir": "Over",
-   "line": 3.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4361741",
-   "name": "Brock Purdy",
-   "team": "SF",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    9
-   ],
-   "l20": [
-    6,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4596448",
-   "name": "Bucky Irving",
-   "team": "TB",
-   "key": "receptions",
-   "stat": "Receptions",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    9
-   ],
-   "l20": [
-    6,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DET"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
-   "pid": "4431611",
-   "name": "Caleb Williams",
-   "team": "CHI",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 24.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    4,
-    6
-   ],
-   "l20": [
-    4,
-    6
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NO"
   },
   {
    "league": "NHL",
@@ -735,206 +136,6 @@
   {
    "league": "NFL",
    "snapshotDate": "2026-11-20",
-   "pid": "4379399",
-   "name": "James Cook III",
-   "team": "BUF",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    9
-   ],
-   "l20": [
-    8,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4431611",
-   "name": "Caleb Williams",
-   "team": "CHI",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    5,
-    6
-   ],
-   "l20": [
-    5,
-    6
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NO"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4890973",
-   "name": "Ashton Jeanty",
-   "team": "LV",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    8,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "3117251",
-   "name": "Christian McCaffrey",
-   "team": "SF",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "3918298",
-   "name": "Josh Allen",
-   "team": "BUF",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 32.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4685472",
-   "name": "Tetairoa McMillan",
-   "team": "CAR",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BAL"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "3117251",
-   "name": "Christian McCaffrey",
-   "team": "SF",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4695883",
-   "name": "Jalen Coker",
-   "team": "CAR",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    8
-   ],
-   "l20": [
-    6,
-    8
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BAL"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
    "pid": "4697815",
    "name": "Rachaad White",
    "team": "WSH",
@@ -956,81 +157,6 @@
    ],
    "gameDate": "2026-11-23",
    "opp": "CIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4241478",
-   "name": "DeVonta Smith",
-   "team": "PHI",
-   "key": "receivingYards",
-   "stat": "Rec Yds",
-   "dir": "Under",
-   "line": 77.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "PIT"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4702555",
-   "name": "Jonah Coleman",
-   "team": "DEN",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LV"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4702555",
-   "name": "Jonah Coleman",
-   "team": "DEN",
-   "key": "receivingYards",
-   "stat": "Rec Yds",
-   "dir": "Under",
-   "line": 32.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LV"
   },
   {
    "league": "NFL",
@@ -1081,281 +207,6 @@
    ],
    "gameDate": "2026-11-23",
    "opp": "CIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4685247",
-   "name": "Braelon Allen",
-   "team": "NYJ",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LAC"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "3043078",
-   "name": "Derrick Henry",
-   "team": "BAL",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "CAR"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "2577417",
-   "name": "Dak Prescott",
-   "team": "DAL",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4361579",
-   "name": "Javonte Williams",
-   "team": "DAL",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 69.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4361579",
-   "name": "Javonte Williams",
-   "team": "DAL",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "14880",
-   "name": "Kirk Cousins",
-   "team": "MIN",
-   "key": "passingYards",
-   "stat": "Pass Yds",
-   "dir": "Under",
-   "line": 254.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "SF"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4428718",
-   "name": "Tre Tucker",
-   "team": "LV",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4428718",
-   "name": "Tre Tucker",
-   "team": "LV",
-   "key": "receptions",
-   "stat": "Receptions",
-   "dir": "Over",
-   "line": 3.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4361741",
-   "name": "Brock Purdy",
-   "team": "SF",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    9
-   ],
-   "l20": [
-    6,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4596448",
-   "name": "Bucky Irving",
-   "team": "TB",
-   "key": "receptions",
-   "stat": "Receptions",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    9
-   ],
-   "l20": [
-    6,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DET"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4431611",
-   "name": "Caleb Williams",
-   "team": "CHI",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 24.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    4,
-    6
-   ],
-   "l20": [
-    4,
-    6
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NO"
   },
   {
    "league": "NBA",
@@ -1410,331 +261,6 @@
   {
    "league": "NFL",
    "snapshotDate": "2026-11-21",
-   "pid": "4379399",
-   "name": "James Cook III",
-   "team": "BUF",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    9
-   ],
-   "l20": [
-    8,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4431611",
-   "name": "Caleb Williams",
-   "team": "CHI",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    5,
-    6
-   ],
-   "l20": [
-    5,
-    6
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NO"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4869645",
-   "name": "Caleb Douglas",
-   "team": "MIA",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    5,
-    6
-   ],
-   "l20": [
-    5,
-    6
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BUF"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4890973",
-   "name": "Ashton Jeanty",
-   "team": "LV",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    8,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "3117251",
-   "name": "Christian McCaffrey",
-   "team": "SF",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "3918298",
-   "name": "Josh Allen",
-   "team": "BUF",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 32.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4685472",
-   "name": "Tetairoa McMillan",
-   "team": "CAR",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BAL"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4882093",
-   "name": "Bhayshul Tuten",
-   "team": "JAX",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NYG"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "3117251",
-   "name": "Christian McCaffrey",
-   "team": "SF",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4695883",
-   "name": "Jalen Coker",
-   "team": "CAR",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    8
-   ],
-   "l20": [
-    6,
-    8
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BAL"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4241478",
-   "name": "DeVonta Smith",
-   "team": "PHI",
-   "key": "receivingYards",
-   "stat": "Rec Yds",
-   "dir": "Under",
-   "line": 77.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "PIT"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4702555",
-   "name": "Jonah Coleman",
-   "team": "DEN",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LV"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4702555",
-   "name": "Jonah Coleman",
-   "team": "DEN",
-   "key": "receivingYards",
-   "stat": "Rec Yds",
-   "dir": "Under",
-   "line": 32.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LV"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
    "pid": "4362921",
    "name": "Tyquan Thornton",
    "team": "KC",
@@ -1781,256 +307,6 @@
    ],
    "gameDate": "2026-11-23",
    "opp": "CIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4685247",
-   "name": "Braelon Allen",
-   "team": "NYJ",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LAC"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "3043078",
-   "name": "Derrick Henry",
-   "team": "BAL",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "CAR"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "2577417",
-   "name": "Dak Prescott",
-   "team": "DAL",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "15864",
-   "name": "Geno Smith",
-   "team": "NYJ",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LAC"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4361579",
-   "name": "Javonte Williams",
-   "team": "DAL",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 69.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4361579",
-   "name": "Javonte Williams",
-   "team": "DAL",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "14880",
-   "name": "Kirk Cousins",
-   "team": "MIN",
-   "key": "passingYards",
-   "stat": "Pass Yds",
-   "dir": "Under",
-   "line": 254.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "SF"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4428718",
-   "name": "Tre Tucker",
-   "team": "LV",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4428718",
-   "name": "Tre Tucker",
-   "team": "LV",
-   "key": "receptions",
-   "stat": "Receptions",
-   "dir": "Over",
-   "line": 3.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-21",
-   "pid": "4361741",
-   "name": "Brock Purdy",
-   "team": "SF",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    9
-   ],
-   "l20": [
-    6,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
   },
   {
    "league": "NHL",
@@ -2085,481 +361,6 @@
   {
    "league": "NBA",
    "snapshotDate": "2026-11-22",
-   "pid": "4278562",
-   "name": "Paul Reed",
-   "team": "DET",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    10,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "ATL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "6583",
-   "name": "Anthony Davis",
-   "team": "WSH",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    13,
-    15
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "ORL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4683778",
-   "name": "Jared McCain",
-   "team": "OKC",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    14,
-    16
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4684742",
-   "name": "Ausar Thompson",
-   "team": "DET",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    12,
-    14
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "ATL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4277919",
-   "name": "Mo Bamba",
-   "team": "UTAH",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    11,
-    13
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DAL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4277919",
-   "name": "Mo Bamba",
-   "team": "UTAH",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    11,
-    13
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DAL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4601025",
-   "name": "Pelle Larsson",
-   "team": "MIA",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    10,
-    12
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "OKC"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4017837",
-   "name": "Ivica Zubac",
-   "team": "IND",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    9,
-    11
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NY"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "5175737",
-   "name": "Yaxel Lendeborg",
-   "team": "GS",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BOS"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4431680",
-   "name": "Onyeka Okongwu",
-   "team": "ATL",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DET"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4066372",
-   "name": "Kevin Huerter",
-   "team": "DET",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "ATL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4395626",
-   "name": "Tre Jones",
-   "team": "CHI",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "3936299",
-   "name": "Jamal Murray",
-   "team": "DEN",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    11,
-    14
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "CHI"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "3934672",
-   "name": "Jalen Brunson",
-   "team": "NY",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    12,
-    16
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "IND"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "6475",
-   "name": "Klay Thompson",
-   "team": "MIA",
-   "key": "totalRebounds",
-   "stat": "Rebounds",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    10,
-    14
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "OKC"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4702382",
-   "name": "Tristan da Silva",
-   "team": "ORL",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    9,
-    13
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "WSH"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4222252",
-   "name": "Isaiah Hartenstein",
-   "team": "OKC",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Under",
-   "line": 7.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    10,
-    16
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4277905",
-   "name": "Trae Young",
-   "team": "WSH",
-   "key": "totalRebounds",
-   "stat": "Rebounds",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    10,
-    17
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "ORL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4432165",
-   "name": "Jalen Suggs",
-   "team": "ORL",
-   "key": "totalRebounds",
-   "stat": "Rebounds",
-   "dir": "Over",
-   "line": 5.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    5,
-    7
-   ],
-   "l20": [
-    5,
-    7
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "WSH"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
    "pid": "5174983",
    "name": "Aday Mara",
    "team": "OKC",
@@ -2581,456 +382,6 @@
    ],
    "gameDate": "2026-11-22",
    "opp": "MIA"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "5175737",
-   "name": "Yaxel Lendeborg",
-   "team": "GS",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BOS"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4066372",
-   "name": "Kevin Huerter",
-   "team": "DET",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "ATL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4066372",
-   "name": "Kevin Huerter",
-   "team": "DET",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Under",
-   "line": 13.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "ATL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4066372",
-   "name": "Kevin Huerter",
-   "team": "DET",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 3.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "ATL"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-22",
-   "pid": "4066372",
-   "name": "Kevin Huerter",
-   "team": "DET",
-   "key": "combo",
-   "stat": "Pts+Reb+Ast",
-   "dir": "Under",
-   "line": 19.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "ATL"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4379399",
-   "name": "James Cook III",
-   "team": "BUF",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    9
-   ],
-   "l20": [
-    8,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4431611",
-   "name": "Caleb Williams",
-   "team": "CHI",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    5,
-    6
-   ],
-   "l20": [
-    5,
-    6
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NO"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4869645",
-   "name": "Caleb Douglas",
-   "team": "MIA",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    5,
-    6
-   ],
-   "l20": [
-    5,
-    6
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BUF"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4890973",
-   "name": "Ashton Jeanty",
-   "team": "LV",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    8,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3117251",
-   "name": "Christian McCaffrey",
-   "team": "SF",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3918298",
-   "name": "Josh Allen",
-   "team": "BUF",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 32.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIA"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4685472",
-   "name": "Tetairoa McMillan",
-   "team": "CAR",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BAL"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4882093",
-   "name": "Bhayshul Tuten",
-   "team": "JAX",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NYG"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3117251",
-   "name": "Christian McCaffrey",
-   "team": "SF",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    9
-   ],
-   "l20": [
-    7,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4695883",
-   "name": "Jalen Coker",
-   "team": "CAR",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    8
-   ],
-   "l20": [
-    6,
-    8
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BAL"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4241478",
-   "name": "DeVonta Smith",
-   "team": "PHI",
-   "key": "receivingYards",
-   "stat": "Rec Yds",
-   "dir": "Under",
-   "line": 77.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "PIT"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4702555",
-   "name": "Jonah Coleman",
-   "team": "DEN",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LV"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4702555",
-   "name": "Jonah Coleman",
-   "team": "DEN",
-   "key": "receivingYards",
-   "stat": "Rec Yds",
-   "dir": "Under",
-   "line": 32.5,
-   "l5": [
-    3,
-    4
-   ],
-   "l10": [
-    3,
-    4
-   ],
-   "l20": [
-    3,
-    4
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LV"
   },
   {
    "league": "NFL",
@@ -3083,456 +434,6 @@
    "opp": "CIN"
   },
   {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4685247",
-   "name": "Braelon Allen",
-   "team": "NYJ",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LAC"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3043078",
-   "name": "Derrick Henry",
-   "team": "BAL",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "CAR"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "2577417",
-   "name": "Dak Prescott",
-   "team": "DAL",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "15864",
-   "name": "Geno Smith",
-   "team": "NYJ",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "LAC"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4361579",
-   "name": "Javonte Williams",
-   "team": "DAL",
-   "key": "rushingYards",
-   "stat": "Rush Yds",
-   "dir": "Under",
-   "line": 69.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4361579",
-   "name": "Javonte Williams",
-   "team": "DAL",
-   "key": "rushingTouchdowns",
-   "stat": "Rush TD",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "14880",
-   "name": "Kirk Cousins",
-   "team": "MIN",
-   "key": "passingYards",
-   "stat": "Pass Yds",
-   "dir": "Under",
-   "line": 254.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "SF"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4428718",
-   "name": "Tre Tucker",
-   "team": "LV",
-   "key": "receivingTouchdowns",
-   "stat": "Rec TD",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4428718",
-   "name": "Tre Tucker",
-   "team": "LV",
-   "key": "receptions",
-   "stat": "Receptions",
-   "dir": "Over",
-   "line": 3.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    7,
-    10
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "DEN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4361741",
-   "name": "Brock Purdy",
-   "team": "SF",
-   "key": "passingTouchdowns",
-   "stat": "Pass TD",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    9
-   ],
-   "l20": [
-    6,
-    9
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "MIN"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "2976849",
-   "name": "Mark Jankowski",
-   "team": "CAR",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    17,
-    19
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NYR"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3042062",
-   "name": "Jason Dickinson",
-   "team": "EDM",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "STL"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "5103645",
-   "name": "Jackson Blake",
-   "team": "CAR",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    16,
-    20
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "NYR"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4874718",
-   "name": "Mason McTavish",
-   "team": "STL",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    15,
-    20
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "EDM"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4588205",
-   "name": "Pontus Holmberg",
-   "team": "TB",
-   "key": "goals",
-   "stat": "Goals",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    15,
-    20
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BUF"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4588205",
-   "name": "Pontus Holmberg",
-   "team": "TB",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    15,
-    20
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "BUF"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4233868",
-   "name": "Conor Timmins",
-   "team": "BUF",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    7,
-    8
-   ],
-   "l20": [
-    7,
-    8
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TB"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4233868",
-   "name": "Conor Timmins",
-   "team": "BUF",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    7,
-    8
-   ],
-   "l20": [
-    7,
-    8
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "TB"
-  },
-  {
    "league": "NHL",
    "snapshotDate": "2026-11-22",
    "pid": "3025540",
@@ -3558,40 +459,145 @@
    "opp": "PIT"
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3941973",
-   "name": "Anthony Cirelli",
-   "team": "TB",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Under",
-   "line": 1.5,
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4871144",
+   "name": "Alperen Sengun",
+   "team": "HOU",
+   "key": "threePointersMade",
+   "stat": "3PM",
+   "dir": "Over",
+   "line": 0.5,
    "l5": [
-    4,
+    5,
     5
    ],
    "l10": [
-    8,
+    9,
     10
    ],
    "l20": [
-    17,
-    20
+    13,
+    15
    ],
-   "gameDate": "2026-11-22",
-   "opp": "BUF"
+   "gameDate": "2026-11-23",
+   "opp": "LAC",
+   "pModel": 0.61
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "2562629",
-   "name": "Rickard Rakell",
-   "team": "PIT",
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "3936099",
+   "name": "Derrick Jones Jr.",
+   "team": "LAC",
    "key": "assists",
    "stat": "Assists",
    "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    12,
+    14
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "HOU",
+   "pModel": 0.679
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4684740",
+   "name": "Amen Thompson",
+   "team": "HOU",
+   "key": "threePointersMade",
+   "stat": "3PM",
+   "dir": "Under",
    "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    13,
+    16
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "LAC",
+   "pModel": 0.641
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4437244",
+   "name": "Jalen Green",
+   "team": "PHX",
+   "key": "blocks",
+   "stat": "Blocks",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    11,
+    15
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "NO",
+   "pModel": 0.583
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4997538",
+   "name": "Karlo Matkovic",
+   "team": "NO",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    12,
+    17
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "PHX",
+   "pModel": 0.562
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4683778",
+   "name": "Jared McCain",
+   "team": "OKC",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Under",
+   "line": 1.5,
    "l5": [
     4,
     5
@@ -3601,47 +607,23 @@
     10
    ],
    "l20": [
-    17,
-    20
+    15,
+    17
    ],
-   "gameDate": "2026-11-22",
-   "opp": "DAL"
+   "gameDate": "2026-11-23",
+   "opp": "IND",
+   "pModel": 0.724
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3899979",
-   "name": "Brock Boeser",
-   "team": "VAN",
-   "key": "points",
-   "stat": "Points",
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4871144",
+   "name": "Alperen Sengun",
+   "team": "HOU",
+   "key": "blocks",
+   "stat": "Blocks",
    "dir": "Under",
    "line": 1.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    17,
-    20
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "CHI"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3114",
-   "name": "Sidney Crosby",
-   "team": "PIT",
-   "key": "goals",
-   "stat": "Goals",
-   "dir": "Under",
-   "line": 0.5,
    "l5": [
     5,
     5
@@ -3651,47 +633,23 @@
     10
    ],
    "l20": [
-    16,
-    20
+    13,
+    15
    ],
-   "gameDate": "2026-11-22",
-   "opp": "DAL"
+   "gameDate": "2026-11-23",
+   "opp": "LAC",
+   "pModel": 0.724
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4697397",
-   "name": "Dylan Holloway",
-   "team": "STL",
-   "key": "goals",
-   "stat": "Goals",
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4433247",
+   "name": "Jonathan Kuminga",
+   "team": "MIN",
+   "key": "blocks",
+   "stat": "Blocks",
    "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    16,
-    20
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "EDM"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4874718",
-   "name": "Mason McTavish",
-   "team": "STL",
-   "key": "goals",
-   "stat": "Goals",
-   "dir": "Under",
-   "line": 0.5,
+   "line": 1.5,
    "l5": [
     4,
     5
@@ -3701,22 +659,23 @@
     10
    ],
    "l20": [
-    15,
-    20
+    14,
+    16
    ],
-   "gameDate": "2026-11-22",
-   "opp": "EDM"
+   "gameDate": "2026-11-23",
+   "opp": "BKN",
+   "pModel": 0.743
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4781556",
-   "name": "Owen Power",
-   "team": "BUF",
-   "key": "assists",
-   "stat": "Assists",
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4591725",
+   "name": "Ryan Rollins",
+   "team": "MIL",
+   "key": "steals",
+   "stat": "Steals",
    "dir": "Under",
-   "line": 0.5,
+   "line": 1.5,
    "l5": [
     4,
     5
@@ -3726,20 +685,47 @@
     10
    ],
    "l20": [
-    15,
-    20
+    13,
+    15
    ],
-   "gameDate": "2026-11-22",
-   "opp": "TB"
+   "gameDate": "2026-11-23",
+   "opp": "TOR",
+   "pModel": 0.688
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "2562629",
-   "name": "Rickard Rakell",
-   "team": "PIT",
-   "key": "shotsTotal",
-   "stat": "Shots",
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4395725",
+   "name": "Tyler Herro",
+   "team": "MIL",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    14,
+    16
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "TOR",
+   "pModel": 0.761
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "3992",
+   "name": "James Harden",
+   "team": "CLE",
+   "key": "threePointersMade",
+   "stat": "3PM",
    "dir": "Under",
    "line": 3.5,
    "l5": [
@@ -3751,20 +737,73 @@
     10
    ],
    "l20": [
-    15,
-    20
+    14,
+    16
    ],
-   "gameDate": "2026-11-22",
-   "opp": "DAL"
+   "gameDate": "2026-11-23",
+   "opp": "CHI",
+   "pModel": 0.671
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4352692",
-   "name": "Jesperi Kotkaniemi",
-   "team": "CAR",
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "3134908",
+   "name": "Jakob Poeltl",
+   "team": "TOR",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    12,
+    14
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "MIL",
+   "pModel": 0.699
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4277919",
+   "name": "Mo Bamba",
+   "team": "UTAH",
    "key": "assists",
    "stat": "Assists",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    12,
+    14
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "LAL",
+   "pModel": 0.685
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4277919",
+   "name": "Mo Bamba",
+   "team": "UTAH",
+   "key": "threePointersMade",
+   "stat": "3PM",
    "dir": "Under",
    "line": 0.5,
    "l5": [
@@ -3776,46 +815,22 @@
     10
    ],
    "l20": [
-    14,
-    19
+    12,
+    14
    ],
-   "gameDate": "2026-11-22",
-   "opp": "NYR"
+   "gameDate": "2026-11-23",
+   "opp": "LAL",
+   "pModel": 0.594
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4588750",
-   "name": "Tye Kartye",
-   "team": "NYR",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    14,
-    20
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "CAR"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3042062",
-   "name": "Jason Dickinson",
-   "team": "EDM",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Under",
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4684740",
+   "name": "Amen Thompson",
+   "team": "HOU",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Over",
    "line": 0.5,
    "l5": [
     4,
@@ -3826,18 +841,591 @@
     10
    ],
    "l20": [
-    11,
+    13,
     16
    ],
-   "gameDate": "2026-11-22",
-   "opp": "STL"
+   "gameDate": "2026-11-23",
+   "opp": "LAC",
+   "pModel": 0.669
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "5105565",
+   "name": "Donovan Clingan",
+   "team": "POR",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    9,
+    16
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "PHI",
+   "pModel": 0.535
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4903027",
+   "name": "Cedric Coward",
+   "team": "MEM",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Over",
+   "line": 3.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    9,
+    16
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "CHA",
+   "pModel": 0.483
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4066328",
+   "name": "Jarrett Allen",
+   "team": "CLE",
+   "key": "blocks",
+   "stat": "Blocks",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    11,
+    14
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "CHI",
+   "pModel": 0.776
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4433137",
+   "name": "Ziaire Williams",
+   "team": "LAL",
+   "key": "totalRebounds",
+   "stat": "Rebounds",
+   "dir": "Over",
+   "line": 1.5,
+   "l5": [
+    2,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    11,
+    14
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "UTAH",
+   "pModel": 0.677
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4711294",
+   "name": "Matas Buzelis",
+   "team": "CHI",
+   "key": "totalRebounds",
+   "stat": "Rebounds",
+   "dir": "Over",
+   "line": 4.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    12,
+    16
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "CLE",
+   "pModel": 0.618
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "3945274",
+   "name": "Luka Doncic",
+   "team": "LAL",
+   "key": "threePointersMade",
+   "stat": "3PM",
+   "dir": "Over",
+   "line": 4.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    11,
+    15
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "UTAH",
+   "pModel": 0.615
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "5105623",
+   "name": "Kel'el Ware",
+   "team": "MIL",
+   "key": "combo",
+   "stat": "Pts+Reb+Ast",
+   "dir": "Over",
+   "line": 12.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    12,
+    17
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "TOR",
+   "pModel": 0.734
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4278104",
+   "name": "Michael Porter Jr.",
+   "team": "BKN",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    10,
+    14
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "MIN",
+   "pModel": 0.679
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4395724",
+   "name": "Immanuel Quickley",
+   "team": "TOR",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    10,
+    14
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "MIL",
+   "pModel": 0.685
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-23",
+   "pid": "4432639",
+   "name": "Jabari Smith Jr.",
+   "team": "HOU",
+   "key": "combo",
+   "stat": "Pts+Reb+Ast",
+   "dir": "Over",
+   "line": 21.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    12,
+    17
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "LAC",
+   "pModel": 0.642
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4426348",
+   "name": "Jayden Daniels",
+   "team": "WSH",
+   "key": "rushingYards",
+   "stat": "Rush Yds",
+   "dir": "Under",
+   "line": 40.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    5,
+    7
+   ],
+   "l20": [
+    5,
+    7
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "CIN",
+   "pModel": 0.465
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4362628",
+   "name": "Ja'Marr Chase",
+   "team": "CIN",
+   "key": "receivingTouchdowns",
+   "stat": "Rec TD",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    6,
+    9
+   ],
+   "l20": [
+    6,
+    9
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "WSH",
+   "pModel": 0.588
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-23",
+   "pid": "3116164",
+   "name": "Mike Gesicki",
+   "team": "CIN",
+   "key": "receivingTouchdowns",
+   "stat": "Rec TD",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    6,
+    9
+   ],
+   "l20": [
+    6,
+    9
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "WSH",
+   "pModel": 0.566
   },
   {
    "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4697382",
-   "name": "Alexis Lafreniere",
-   "team": "NYR",
+   "snapshotDate": "2026-11-23",
+   "pid": "4874730",
+   "name": "Matt Coronato",
+   "team": "CGY",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    10,
+    10
+   ],
+   "l20": [
+    14,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "OTT",
+   "pModel": 0.613
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "3114802",
+   "name": "Adrian Kempe",
+   "team": "LA",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    17,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "MTL",
+   "pModel": 0.675
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4755729",
+   "name": "Ben Meyers",
+   "team": "SEA",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    15,
+    18
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "ANA",
+   "pModel": 0.661
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "5216897",
+   "name": "Matvei Gridin",
+   "team": "CGY",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    15,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "OTT",
+   "pModel": 0.7
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "5149211",
+   "name": "Easton Cowan",
+   "team": "TOR",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    14,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "NYI",
+   "pModel": 0.658
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4352750",
+   "name": "Joel Farabee",
+   "team": "CGY",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    14,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "OTT",
+   "pModel": 0.632
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4915855",
+   "name": "Arseny Gritsyuk",
+   "team": "NJ",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    13,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "CBJ",
+   "pModel": 0.616
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4781553",
+   "name": "Kent Johnson",
+   "team": "CBJ",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    11,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "NJ",
+   "pModel": 0.561
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4587580",
+   "name": "Matias Maccelli",
+   "team": "NYI",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    11,
+    13
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "TOR",
+   "pModel": 0.754
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4565228",
+   "name": "Dylan Cozens",
+   "team": "OTT",
    "key": "goals",
    "stat": "Goals",
    "dir": "Under",
@@ -3851,22 +1439,49 @@
     10
    ],
    "l20": [
-    13,
+    16,
     20
    ],
-   "gameDate": "2026-11-22",
-   "opp": "CAR"
+   "gameDate": "2026-11-23",
+   "opp": "CGY",
+   "pModel": 0.658
   },
   {
    "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4588205",
-   "name": "Pontus Holmberg",
-   "team": "TB",
+   "snapshotDate": "2026-11-23",
+   "pid": "4781553",
+   "name": "Kent Johnson",
+   "team": "CBJ",
    "key": "points",
    "stat": "Points",
    "dir": "Under",
-   "line": 0.5,
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    16,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "NJ",
+   "pModel": 0.717
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4268771",
+   "name": "Jesper Bratt",
+   "team": "NJ",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Under",
+   "line": 1.5,
    "l5": [
     5,
     5
@@ -3876,20 +1491,21 @@
     10
    ],
    "l20": [
-    12,
+    15,
     20
    ],
-   "gameDate": "2026-11-22",
-   "opp": "BUF"
+   "gameDate": "2026-11-23",
+   "opp": "CBJ",
+   "pModel": 0.675
   },
   {
    "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4874718",
-   "name": "Mason McTavish",
-   "team": "STL",
-   "key": "points",
-   "stat": "Points",
+   "snapshotDate": "2026-11-23",
+   "pid": "4697725",
+   "name": "Alex Laferriere",
+   "team": "LA",
+   "key": "assists",
+   "stat": "Assists",
    "dir": "Under",
    "line": 0.5,
    "l5": [
@@ -3901,22 +1517,23 @@
     10
    ],
    "l20": [
-    12,
+    15,
     20
    ],
-   "gameDate": "2026-11-22",
-   "opp": "EDM"
+   "gameDate": "2026-11-23",
+   "opp": "MTL",
+   "pModel": 0.596
   },
   {
    "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4874718",
-   "name": "Mason McTavish",
-   "team": "STL",
-   "key": "shotsTotal",
-   "stat": "Shots",
+   "snapshotDate": "2026-11-23",
+   "pid": "5149155",
+   "name": "Will Smith",
+   "team": "SJ",
+   "key": "goals",
+   "stat": "Goals",
    "dir": "Under",
-   "line": 1.5,
+   "line": 0.5,
    "l5": [
     4,
     5
@@ -3926,36 +1543,298 @@
     10
    ],
    "l20": [
-    10,
+    15,
     20
    ],
-   "gameDate": "2026-11-22",
-   "opp": "EDM"
+   "gameDate": "2026-11-23",
+   "opp": "MIN",
+   "pModel": 0.658
   },
   {
    "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "4915850",
-   "name": "Alexander Nikishin",
-   "team": "CAR",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Under",
+   "snapshotDate": "2026-11-23",
+   "pid": "4268771",
+   "name": "Jesper Bratt",
+   "team": "NJ",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    13,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "CBJ",
+   "pModel": 0.66
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4565244",
+   "name": "Simon Holmstrom",
+   "team": "NYI",
+   "key": "shotsTotal",
+   "stat": "Shots",
+   "dir": "Over",
    "line": 1.5,
    "l5": [
     3,
-    4
+    5
    ],
    "l10": [
-    3,
-    4
+    8,
+    10
    ],
    "l20": [
-    3,
-    4
+    13,
+    20
    ],
-   "gameDate": "2026-11-22",
-   "opp": "NYR"
+   "gameDate": "2026-11-23",
+   "opp": "TOR",
+   "pModel": 0.624
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "3571762",
+   "name": "Ben Hutton",
+   "team": "NYI",
+   "key": "shotsTotal",
+   "stat": "Shots",
+   "dir": "Over",
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    5,
+    7
+   ],
+   "l20": [
+    5,
+    7
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "TOR",
+   "pModel": 0.515
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "5149155",
+   "name": "Will Smith",
+   "team": "SJ",
+   "key": "shotsTotal",
+   "stat": "Shots",
+   "dir": "Over",
+   "line": 1.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    16,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "MIN",
+   "pModel": 0.726
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4587580",
+   "name": "Matias Maccelli",
+   "team": "NYI",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    8,
+    13
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "TOR",
+   "pModel": 0.581
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4565233",
+   "name": "Matt Boldy",
+   "team": "MIN",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    12,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "SJ",
+   "pModel": 0.639
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4565236",
+   "name": "Cole Caufield",
+   "team": "MTL",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    2,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    12,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "LA",
+   "pModel": 0.601
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "3115032",
+   "name": "Brandon Montour",
+   "team": "SEA",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    11,
+    19
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "ANA",
+   "pModel": 0.619
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "4874741",
+   "name": "Mackie Samoskevich",
+   "team": "SEA",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    11,
+    19
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "ANA",
+   "pModel": 0.647
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "3899952",
+   "name": "Kyle Connor",
+   "team": "WPG",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Over",
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    9,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "UTA",
+   "pModel": 0.452
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-23",
+   "pid": "5219",
+   "name": "Brayden Schenn",
+   "team": "NYI",
+   "key": "shotsTotal",
+   "stat": "Shots",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    2,
+    5
+   ],
+   "l10": [
+    6,
+    10
+   ],
+   "l20": [
+    16,
+    20
+   ],
+   "gameDate": "2026-11-23",
+   "opp": "TOR",
+   "pModel": 0.747
   }
  ],
  "graded": {
@@ -5199,6 +3078,87 @@
     ],
     "gameDate": "2026-11-19",
     "opp": "POR",
+    "value": null,
+    "result": "DNP"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-19",
+    "pid": "6589",
+    "name": "Draymond Green",
+    "team": "GS",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     11,
+     13
+    ],
+    "gameDate": "2026-11-19",
+    "opp": "MEM",
+    "value": null,
+    "result": "DNP"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-19",
+    "pid": "6589",
+    "name": "Draymond Green",
+    "team": "GS",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     9,
+     13
+    ],
+    "gameDate": "2026-11-19",
+    "opp": "MEM",
+    "value": null,
+    "result": "DNP"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-19",
+    "pid": "6589",
+    "name": "Draymond Green",
+    "team": "GS",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     10,
+     13
+    ],
+    "gameDate": "2026-11-19",
+    "opp": "MEM",
     "value": null,
     "result": "DNP"
    }
@@ -7122,6 +5082,1979 @@
     "opp": "POR",
     "value": null,
     "result": "DNP"
+   }
+  ],
+  "2026-11-22": [
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "6583",
+    "name": "Anthony Davis",
+    "team": "WSH",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     13,
+     15
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "ORL",
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4684742",
+    "name": "Ausar Thompson",
+    "team": "DET",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     14
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "ATL",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4222252",
+    "name": "Isaiah Hartenstein",
+    "team": "OKC",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 7.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     16
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "MIA",
+    "value": 2,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4017837",
+    "name": "Ivica Zubac",
+    "team": "IND",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     9,
+     11
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "NY",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "3934672",
+    "name": "Jalen Brunson",
+    "team": "NY",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     16
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "IND",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4432165",
+    "name": "Jalen Suggs",
+    "team": "ORL",
+    "key": "totalRebounds",
+    "stat": "Rebounds",
+    "dir": "Over",
+    "line": 5.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     5,
+     7
+    ],
+    "l20": [
+     5,
+     7
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "WSH",
+    "value": 4,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "3936299",
+    "name": "Jamal Murray",
+    "team": "DEN",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     11,
+     14
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "CHI",
+    "value": 3,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4683778",
+    "name": "Jared McCain",
+    "team": "OKC",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     14,
+     16
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "MIA",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4066372",
+    "name": "Kevin Huerter",
+    "team": "DET",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "ATL",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4066372",
+    "name": "Kevin Huerter",
+    "team": "DET",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "ATL",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4066372",
+    "name": "Kevin Huerter",
+    "team": "DET",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 13.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "ATL",
+    "value": 2,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4066372",
+    "name": "Kevin Huerter",
+    "team": "DET",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 3.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "ATL",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4066372",
+    "name": "Kevin Huerter",
+    "team": "DET",
+    "key": "combo",
+    "stat": "Pts+Reb+Ast",
+    "dir": "Under",
+    "line": 19.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "ATL",
+    "value": 6,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "6475",
+    "name": "Klay Thompson",
+    "team": "MIA",
+    "key": "totalRebounds",
+    "stat": "Rebounds",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     14
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "OKC",
+    "value": 6,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4277919",
+    "name": "Mo Bamba",
+    "team": "UTAH",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     11,
+     13
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DAL",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4277919",
+    "name": "Mo Bamba",
+    "team": "UTAH",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     11,
+     13
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DAL",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4431680",
+    "name": "Onyeka Okongwu",
+    "team": "ATL",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DET",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4278562",
+    "name": "Paul Reed",
+    "team": "DET",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     10,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "ATL",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4601025",
+    "name": "Pelle Larsson",
+    "team": "MIA",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     12
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "OKC",
+    "value": 3,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4277905",
+    "name": "Trae Young",
+    "team": "WSH",
+    "key": "totalRebounds",
+    "stat": "Rebounds",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     17
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "ORL",
+    "value": 4,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4395626",
+    "name": "Tre Jones",
+    "team": "CHI",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DEN",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "4702382",
+    "name": "Tristan da Silva",
+    "team": "ORL",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     9,
+     13
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "WSH",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "5175737",
+    "name": "Yaxel Lendeborg",
+    "team": "GS",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "BOS",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-22",
+    "pid": "5175737",
+    "name": "Yaxel Lendeborg",
+    "team": "GS",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "BOS",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4890973",
+    "name": "Ashton Jeanty",
+    "team": "LV",
+    "key": "receivingTouchdowns",
+    "stat": "Rec TD",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     8,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DEN",
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4882093",
+    "name": "Bhayshul Tuten",
+    "team": "JAX",
+    "key": "receivingTouchdowns",
+    "stat": "Rec TD",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     9
+    ],
+    "l20": [
+     7,
+     9
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "NYG",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4685247",
+    "name": "Braelon Allen",
+    "team": "NYJ",
+    "key": "rushingTouchdowns",
+    "stat": "Rush TD",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     7,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "LAC",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4361741",
+    "name": "Brock Purdy",
+    "team": "SF",
+    "key": "passingTouchdowns",
+    "stat": "Pass TD",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     6,
+     9
+    ],
+    "l20": [
+     6,
+     9
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "MIN",
+    "value": 3,
+    "result": "MISS"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-20",
+    "pid": "4596448",
+    "name": "Bucky Irving",
+    "team": "TB",
+    "key": "receptions",
+    "stat": "Receptions",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     6,
+     9
+    ],
+    "l20": [
+     6,
+     9
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DET",
+    "value": 3,
+    "result": "MISS"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4869645",
+    "name": "Caleb Douglas",
+    "team": "MIA",
+    "key": "receivingTouchdowns",
+    "stat": "Rec TD",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     5,
+     6
+    ],
+    "l20": [
+     5,
+     6
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "BUF",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4431611",
+    "name": "Caleb Williams",
+    "team": "CHI",
+    "key": "rushingTouchdowns",
+    "stat": "Rush TD",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     5,
+     6
+    ],
+    "l20": [
+     5,
+     6
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "NO",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-20",
+    "pid": "4431611",
+    "name": "Caleb Williams",
+    "team": "CHI",
+    "key": "rushingYards",
+    "stat": "Rush Yds",
+    "dir": "Under",
+    "line": 24.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     4,
+     6
+    ],
+    "l20": [
+     4,
+     6
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "NO",
+    "value": 11,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3117251",
+    "name": "Christian McCaffrey",
+    "team": "SF",
+    "key": "rushingTouchdowns",
+    "stat": "Rush TD",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     9
+    ],
+    "l20": [
+     7,
+     9
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "MIN",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3117251",
+    "name": "Christian McCaffrey",
+    "team": "SF",
+    "key": "receivingTouchdowns",
+    "stat": "Rec TD",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     9
+    ],
+    "l20": [
+     7,
+     9
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "MIN",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "2577417",
+    "name": "Dak Prescott",
+    "team": "DAL",
+    "key": "passingTouchdowns",
+    "stat": "Pass TD",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     7,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "TEN",
+    "value": 4,
+    "result": "MISS"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4241478",
+    "name": "DeVonta Smith",
+    "team": "PHI",
+    "key": "receivingYards",
+    "stat": "Rec Yds",
+    "dir": "Under",
+    "line": 77.5,
+    "l5": [
+     3,
+     4
+    ],
+    "l10": [
+     3,
+     4
+    ],
+    "l20": [
+     3,
+     4
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "PIT",
+    "value": 41,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3043078",
+    "name": "Derrick Henry",
+    "team": "BAL",
+    "key": "rushingTouchdowns",
+    "stat": "Rush TD",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     7,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "CAR",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "15864",
+    "name": "Geno Smith",
+    "team": "NYJ",
+    "key": "passingTouchdowns",
+    "stat": "Pass TD",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     7,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "LAC",
+    "value": 3,
+    "result": "MISS"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4695883",
+    "name": "Jalen Coker",
+    "team": "CAR",
+    "key": "receivingTouchdowns",
+    "stat": "Rec TD",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     6,
+     8
+    ],
+    "l20": [
+     6,
+     8
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "BAL",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4379399",
+    "name": "James Cook III",
+    "team": "BUF",
+    "key": "rushingTouchdowns",
+    "stat": "Rush TD",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     9
+    ],
+    "l20": [
+     8,
+     9
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "MIA",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4361579",
+    "name": "Javonte Williams",
+    "team": "DAL",
+    "key": "rushingYards",
+    "stat": "Rush Yds",
+    "dir": "Under",
+    "line": 69.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     7,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "TEN",
+    "value": 67,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4361579",
+    "name": "Javonte Williams",
+    "team": "DAL",
+    "key": "rushingTouchdowns",
+    "stat": "Rush TD",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     7,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "TEN",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4702555",
+    "name": "Jonah Coleman",
+    "team": "DEN",
+    "key": "rushingTouchdowns",
+    "stat": "Rush TD",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     3,
+     4
+    ],
+    "l10": [
+     3,
+     4
+    ],
+    "l20": [
+     3,
+     4
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "LV",
+    "value": 3,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4702555",
+    "name": "Jonah Coleman",
+    "team": "DEN",
+    "key": "receivingYards",
+    "stat": "Rec Yds",
+    "dir": "Under",
+    "line": 32.5,
+    "l5": [
+     3,
+     4
+    ],
+    "l10": [
+     3,
+     4
+    ],
+    "l20": [
+     3,
+     4
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "LV",
+    "value": 18,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3918298",
+    "name": "Josh Allen",
+    "team": "BUF",
+    "key": "rushingYards",
+    "stat": "Rush Yds",
+    "dir": "Under",
+    "line": 32.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     9
+    ],
+    "l20": [
+     7,
+     9
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "MIA",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "14880",
+    "name": "Kirk Cousins",
+    "team": "MIN",
+    "key": "passingYards",
+    "stat": "Pass Yds",
+    "dir": "Under",
+    "line": 254.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     7,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "SF",
+    "value": 235,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4685472",
+    "name": "Tetairoa McMillan",
+    "team": "CAR",
+    "key": "receivingTouchdowns",
+    "stat": "Rec TD",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     9
+    ],
+    "l20": [
+     7,
+     9
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "BAL",
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4428718",
+    "name": "Tre Tucker",
+    "team": "LV",
+    "key": "receivingTouchdowns",
+    "stat": "Rec TD",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     7,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DEN",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4428718",
+    "name": "Tre Tucker",
+    "team": "LV",
+    "key": "receptions",
+    "stat": "Receptions",
+    "dir": "Over",
+    "line": 3.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     7,
+     10
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DEN",
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4915850",
+    "name": "Alexander Nikishin",
+    "team": "CAR",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     3,
+     4
+    ],
+    "l10": [
+     3,
+     4
+    ],
+    "l20": [
+     3,
+     4
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "NYR",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4697382",
+    "name": "Alexis Lafreniere",
+    "team": "NYR",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     13,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "CAR",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3941973",
+    "name": "Anthony Cirelli",
+    "team": "TB",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     17,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "BUF",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3899979",
+    "name": "Brock Boeser",
+    "team": "VAN",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     17,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "CHI",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4233868",
+    "name": "Conor Timmins",
+    "team": "BUF",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     7,
+     8
+    ],
+    "l20": [
+     7,
+     8
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "TB",
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4233868",
+    "name": "Conor Timmins",
+    "team": "BUF",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     7,
+     8
+    ],
+    "l20": [
+     7,
+     8
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "TB",
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4697397",
+    "name": "Dylan Holloway",
+    "team": "STL",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     16,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "EDM",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "5103645",
+    "name": "Jackson Blake",
+    "team": "CAR",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     16,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "NYR",
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3042062",
+    "name": "Jason Dickinson",
+    "team": "EDM",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "STL",
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3042062",
+    "name": "Jason Dickinson",
+    "team": "EDM",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     11,
+     16
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "STL",
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4352692",
+    "name": "Jesperi Kotkaniemi",
+    "team": "CAR",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     14,
+     19
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "NYR",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "2976849",
+    "name": "Mark Jankowski",
+    "team": "CAR",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     17,
+     19
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "NYR",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4874718",
+    "name": "Mason McTavish",
+    "team": "STL",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "EDM",
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4874718",
+    "name": "Mason McTavish",
+    "team": "STL",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "EDM",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4874718",
+    "name": "Mason McTavish",
+    "team": "STL",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "EDM",
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4874718",
+    "name": "Mason McTavish",
+    "team": "STL",
+    "key": "shotsTotal",
+    "stat": "Shots",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "EDM",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4781556",
+    "name": "Owen Power",
+    "team": "BUF",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "TB",
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4588205",
+    "name": "Pontus Holmberg",
+    "team": "TB",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "BUF",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4588205",
+    "name": "Pontus Holmberg",
+    "team": "TB",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "BUF",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4588205",
+    "name": "Pontus Holmberg",
+    "team": "TB",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "BUF",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "2562629",
+    "name": "Rickard Rakell",
+    "team": "PIT",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     17,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DAL",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "2562629",
+    "name": "Rickard Rakell",
+    "team": "PIT",
+    "key": "shotsTotal",
+    "stat": "Shots",
+    "dir": "Under",
+    "line": 3.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DAL",
+    "value": 3,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3114",
+    "name": "Sidney Crosby",
+    "team": "PIT",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     16,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "DAL",
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "4588750",
+    "name": "Tye Kartye",
+    "team": "NYR",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     14,
+     20
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "CAR",
+    "value": 0,
+    "result": "HIT"
    }
   ]
  }
