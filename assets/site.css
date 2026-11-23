@@ -172,7 +172,7 @@
      chevron: the label takes the chevron's auto left margin so the
      pair rides together on the header's right side, in the theme
      accent green (--accent: #1d9e4b light / #4ade80 dark) */
-  .propsec-head .sec-more{margin-left:auto;flex:none;font-size:14px;font-weight:600;color:var(--accent);white-space:nowrap}
+  .propsec-head .sec-more{margin-left:auto;flex:none;font-size:14px;font-weight:600;color:var(--accent);white-space:nowrap;font-family:'Moderniz','LegLockSans',sans-serif;letter-spacing:.02em}
   .propsec-head .sec-more + .gf-chev{margin-left:0}
   @media (prefers-reduced-motion: reduce){.propsec-head .gf-chev{transition:none}}
   /* Merged Props board header (compact rows): the section head button
@@ -803,6 +803,7 @@
     .brand{padding:7px 0 1px}
     .brand img{width:min(210px,52vw)}
     .brand .tagline{font-size:10px;margin-top:1px;line-height:1.3}
+    .propsec-head .sec-more{font-size:10.5px}
     .livestamp{font-size:9.5px;padding-top:3px;gap:5px}
     .livedot{width:6px;height:6px}
     .topbar{padding:5px 0 4px}
