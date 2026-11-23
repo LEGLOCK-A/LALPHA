@@ -2845,14 +2845,31 @@ fBtn.addEventListener("click", function(){
    topbar button or a header duplicate) are left to the toggle's own
    click — excluding them here is what stops a close-then-reopen
    double toggle. pointerdown rather than click, so the panel is
-   already closed before the press's own action (opening a card,
-   switching a tab) runs. */
+   already closed before the press lifts.
+   The dismissing press is also swallowed: without that, the tap that
+   closes the panel lands on whatever sits underneath — a prop card —
+   and opens it, which reads as an accidental popup. The swallow is a
+   one-shot capture-phase click block armed only by a dismissing
+   press, and it expires within half a second so it can never eat a
+   later, unrelated tap (a press that turns into a scroll fires no
+   click at all). */
+var _filterSwallow = false, _filterSwallowTimer = null;
+document.addEventListener("click", function(e){
+  if (!_filterSwallow) return;
+  _filterSwallow = false;
+  if (_filterSwallowTimer) clearTimeout(_filterSwallowTimer);
+  e.stopPropagation();
+  e.preventDefault();
+}, true);
 document.addEventListener("pointerdown", function(e){
   if (!fPanel.classList.contains("open")) return;
   if (!e.target.closest) return;
   if (e.target.closest("#filtersPanel")) return;
   if (e.target.closest("#filterBtn") || e.target.closest(".filters-dup")) return;
   setFiltersOpen(false);
+  _filterSwallow = true;
+  if (_filterSwallowTimer) clearTimeout(_filterSwallowTimer);
+  _filterSwallowTimer = setTimeout(function(){ _filterSwallow = false; }, 500);
 });
 /* Duplicate Filters buttons beside each view's heading — a second, more
    reachable copy Jay asked for; the top-right original stays. Each dup
@@ -3577,6 +3594,7 @@ function closeTeamPop(){
   if (was && window.__LL.unlockScroll) window.__LL.unlockScroll();
 }
 window.__LL.openTeamPop = openTeamPop;
+window.__LL.closeTeamPop = closeTeamPop;
 (function(){
   var m = $("#teamModal"); if (!m) return;
   $("#teamClose").addEventListener("click", closeTeamPop);
@@ -5137,8 +5155,8 @@ runCheck(false);
 
 
 /* ---------- Swipe-down-to-dismiss for the popup sheets (iPhone sheet style) ----------
-   Attached to every bottom-sheet modal on the page (game log + Players to Watch),
-   so the gesture works the same way everywhere.
+   Attached to every bottom-sheet modal on the page (game log, Players to
+   Watch and team props), so the gesture works the same way everywhere.
    - Dragging down from the sheet header (or the grab handle) always drags the sheet.
    - Dragging down from the content drags the sheet only while the content is
      scrolled to its very top; if a gesture scrolls the content back to the top
@@ -5252,4 +5270,5 @@ runCheck(false);
   }
   attach("logModal", function(){ if (window.__LL && window.__LL.closeLogModal) window.__LL.closeLogModal(); });
   attach("pwModal", function(){ if (window.__LL && window.__LL.closePlayersToWatch) window.__LL.closePlayersToWatch(); });
+  attach("teamModal", function(){ if (window.__LL && window.__LL.closeTeamPop) window.__LL.closeTeamPop(); });
 })();
