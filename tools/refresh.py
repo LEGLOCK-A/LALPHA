@@ -1335,7 +1335,7 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None,
 <title>{cfg['title']}</title>
 <meta name="description" content="{cfg['description']}" />
 <link rel="canonical" href="{SITE_ORIGIN}/{slug}/" />
-<link rel="stylesheet" href="/assets/site.css?v=7" />
+<link rel="stylesheet" href="/assets/site.css?v=8" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{cfg['h1']}</h1><p class="sub" style="margin:0 0 10px">{cfg['sub']}</p><section class="content-body">
@@ -2190,7 +2190,194 @@ def team_game_info(lg, league, today_et):
     return out
 
 
-def snapshot_entries_for_league(lg, league, today_et):
+def _win_value(key, row):
+    """A prop's value in one game, browser semantics: a stat absent
+    from the row means the game does not count for that prop (the
+    archive grader's prop_value_from_row deliberately differs — it
+    counts a missing stat as 0, as build_prop does)."""
+    sv = row.get("s") or {}
+    if key == "combo":
+        parts = [sv.get(k) for k in ("points", "totalRebounds", "assists")]
+        if any(v is None for v in parts):
+            return None
+        return sum(parts)
+    v = sv.get(key)
+    return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+
+
+def _norm_cdf(z):
+    return 0.5 * (1.0 + math.erf(z / math.sqrt(2.0)))
+
+
+def _blend_mean(windows):
+    num = den = 0.0
+    for vals, w in windows:
+        if vals:
+            num += w * (sum(vals) / len(vals))
+            den += w
+    return num / den if den else None
+
+
+def model_probability(lg, league, logs_prev, p, opp_abbr, home_flag, game_date, allow_cache):
+    """The archive's logged model probability for one board prop — a
+    Python port of the board's probability engine (same recency blend,
+    same opponent/venue/rest adjustments, same empirical blend and
+    shrinkage; pace and spread factors are browser-only in v1). Logged
+    at snapshot time so the archive can grade the model itself, not
+    just the board's hit rates. None when there is not enough data."""
+    pid, key = p["pid"], p["key"]
+
+    def entries(rows):
+        out = []
+        for row in rows or []:
+            v = _win_value(key, row)
+            if v is None:
+                continue
+            sv = row.get("s") or {}
+            out.append({"v": v, "mins": sv.get("minutes"),
+                        "d": row.get("d") or "",
+                        "home": str(row.get("opp") or "").startswith("vs")})
+        return out
+
+    cur = entries(league["logs"].get(pid))
+    all_e = entries(merged_rows_for(league, logs_prev, pid))
+    excl = 0
+    if lg == "NBA":
+        with_m = [e for e in all_e if e["mins"] is not None]
+        if len(with_m) >= 6 and len(with_m) >= 0.6 * len(all_e):
+            mins_sorted = sorted(e["mins"] for e in with_m)
+            med = mins_sorted[len(mins_sorted) // 2] if len(mins_sorted) % 2                 else (mins_sorted[len(mins_sorted) // 2 - 1] + mins_sorted[len(mins_sorted) // 2]) / 2
+            if med:
+                kept = [e for e in all_e if e["mins"] is None or e["mins"] >= 0.6 * med]
+                if len(kept) >= 5:
+                    excl = len(all_e) - len(kept)
+                    cur = [e for e in kept if e in cur]
+                    all_e = kept
+    all_v = [e["v"] for e in all_e]
+    season_v = [e["v"] for e in cur]
+    n = len(all_v)
+    if n < 5:
+        return None
+    mu0 = None
+    if lg == "NBA":
+        with_m = [e for e in all_e if e["mins"]]
+        if len(with_m) >= 6:
+            def rate_of(seg):
+                sv_ = sum(e["v"] for e in seg if e["mins"])
+                sm = sum(e["mins"] for e in seg if e["mins"])
+                return sv_ / sm if sm >= 30 else None
+            num = den = 0.0
+            for seg, w in ((cur, 0.4), (all_e[:20], 0.3), (all_e[:10], 0.2), (all_e[:5], 0.1)):
+                r = rate_of(seg)
+                if r is not None:
+                    num += w * r
+                    den += w
+            proj_mins = _blend_mean([
+                ([e["mins"] for e in cur if e["mins"] is not None], 0.4),
+                ([e["mins"] for e in all_e[:20] if e["mins"] is not None], 0.3),
+                ([e["mins"] for e in all_e[:10] if e["mins"] is not None], 0.2),
+                ([e["mins"] for e in all_e[:5] if e["mins"] is not None], 0.1)])
+            if den and proj_mins:
+                mu0 = (num / den) * proj_mins
+    if mu0 is None:
+        mu0 = _blend_mean([(season_v, 0.4), (all_v[:20], 0.3), (all_v[:10], 0.2), (all_v[:5], 0.1)])
+    if not mu0 and mu0 != 0:
+        return None
+    seg30 = all_v[:30]
+    mean30 = sum(seg30) / len(seg30)
+    var = sum((v - mean30) ** 2 for v in seg30) / len(seg30)
+    sigma = max(math.sqrt(var), 0.22 * mu0 if mu0 > 0 else 0.6)
+    if sigma <= 0:
+        return None
+    f = 1.0
+    if opp_abbr:
+        if key not in allow_cache:
+            by_opp, allv = {}, []
+            rows_by_pid = {}
+            for pid2 in set(league["logs"]) | set(logs_prev or {}):
+                rows_by_pid[pid2] = merged_rows_for(league, logs_prev, pid2)
+            for rows in rows_by_pid.values():
+                for row in rows:
+                    v = _win_value(key, row)
+                    if v is None:
+                        continue
+                    allv.append(v)
+                    o = row_opp(row)
+                    if o:
+                        by_opp.setdefault(o, []).append(v)
+            allow_cache[key] = (by_opp, sum(allv) / len(allv) if allv else None)
+        by_opp, league_mean = allow_cache[key]
+        oa = by_opp.get(opp_abbr)
+        if oa and len(oa) >= 25 and league_mean:
+            f *= min(1.18, max(0.85, (sum(oa) / len(oa)) / league_mean))
+        split = [e["v"] for e in all_e if e["home"] == bool(home_flag)]
+        om = sum(all_v) / len(all_v)
+        if len(split) >= 4 and om:
+            f *= min(1.08, max(0.92, (sum(split) / len(split)) / om))
+        if all_e and all_e[0]["d"]:
+            try:
+                last = datetime.strptime(all_e[0]["d"], "%Y-%m-%d").date()
+                gap = (game_date - last).days
+                if gap <= 1:
+                    f *= 0.97
+                elif gap >= 5:
+                    f *= 1.01
+            except ValueError:
+                pass
+    mu = mu0 * f
+    line, dir_ = p["line"], p["dir"]
+    cc = 0.5 if float(line) == int(line) else 0.0
+    if dir_ == "Over":
+        pm = 1.0 - _norm_cdf((line + cc - mu) / sigma)
+    else:
+        pm = _norm_cdf((line - cc - mu) / sigma)
+    l20 = all_v[:20]
+    pr = pm
+    if len(l20) >= 5:
+        hits = sum(1 for v in l20 if (v > line if dir_ == "Over" else v < line))
+        pr = 0.65 * pm + 0.35 * (hits / len(l20))
+    ne = min(n, 30)
+    pr = (pr * ne + 3.0) / (ne + 6.0)
+    return round(min(0.98, max(0.02, pr)), 3)
+
+
+def calibration_section(state):
+    """Predicted vs actual for every graded prop that carries a
+    logged model probability, plus the Brier score. Renders only once
+    at least 30 model-graded props exist — below that the buckets
+    would be noise dressed as measurement."""
+    pairs = []
+    for entries in state["graded"].values():
+        for e in entries:
+            pm = e.get("pModel")
+            if pm is None or e.get("result") not in ("HIT", "MISS"):
+                continue
+            pairs.append((pm, 1 if e["result"] == "HIT" else 0))
+    if len(pairs) < 30:
+        return ""
+    brier = sum((p_ - o) ** 2 for p_, o in pairs) / len(pairs)
+    rows = []
+    for lo, hi in ((0.50, 0.55), (0.55, 0.60), (0.60, 0.65), (0.65, 0.70), (0.70, 1.01)):
+        seg = [(p_, o) for p_, o in pairs if lo <= p_ < hi]
+        if len(seg) < 5:
+            continue
+        pred = sum(p_ for p_, _ in seg) / len(seg)
+        act = sum(o for _, o in seg) / len(seg)
+        rows.append(
+            f"<li>Model {int(lo * 100)}&ndash;{int(min(hi, 1.0) * 100)}%: "
+            f"predicted {pred * 100:.0f}%, actual {act * 100:.0f}% ({len(seg)} props)</li>")
+    if not rows:
+        return ""
+    return ("<h2>Model calibration</h2>\n"
+            "<p>Each morning's snapshot also logs the model probability behind every board "
+            "prop — a projection adjusted for opponent, venue and rest, not the raw hit rate. "
+            "This is how those probabilities have graded since: a well-calibrated 65% should "
+            f"hit about 65% of the time. Brier score so far: <b>{brier:.3f}</b> over "
+            f"{len(pairs)} graded props (lower is better; 0.25 is coin-flip).</p>\n"
+            '<ul class="streak-list">\n' + "\n".join(rows) + "\n</ul>")
+
+
+def snapshot_entries_for_league(lg, league, today_et, logs_prev=None):
     """Today's board for one league, as archive entries: exactly the
     selection the league pages publish (see select_page_props), each
     entry carrying the ET date of the player's game and the opponent.
@@ -2202,6 +2389,18 @@ def snapshot_entries_for_league(lg, league, today_et):
     if sel["window"] == "fallback" or not sel["listed"]:
         return []
     info = team_game_info(lg, league, today_et)
+    if lg == "NFL":
+        _gs = slate_games_nfl_week(league, today_et)
+    else:
+        _gs = [g for g in league["games"] if game_et_date(g) == today_et]
+    home_map = {}
+    for g in _gs:
+        _h = (g.get("home") or {}).get("abbr")
+        _a = (g.get("away") or {}).get("abbr")
+        if _h and _a:
+            home_map[_h] = True
+            home_map[_a] = False
+    allow_cache = {}
     entries = []
     for p in sel["listed"]:
         gd_opp = info.get(p["team"])
@@ -2210,14 +2409,22 @@ def snapshot_entries_for_league(lg, league, today_et):
         gd, opp = gd_opp
         if gd < today_et:
             continue
-        entries.append({
+        entry = {
             "league": lg, "snapshotDate": today_et.isoformat(), "pid": p["pid"],
             "name": p["name"], "team": p["team"], "key": p["key"], "stat": p["stat"],
             "dir": p["dir"], "line": p["line"],
             "l5": list(featured_counts(p, "L5")), "l10": list(featured_counts(p, "L10")),
             "l20": list(featured_counts(p, "L20")), "gameDate": gd.isoformat(),
             "opp": opp,
-        })
+        }
+        try:
+            pm = model_probability(lg, league, logs_prev, p, opp,
+                                   home_map.get(p["team"]), gd, allow_cache)
+        except Exception:
+            pm = None
+        if pm is not None:
+            entry["pModel"] = pm
+        entries.append(entry)
     return entries
 
 
@@ -2365,7 +2572,7 @@ def archive_page_shell(title, description, canonical_path, h1, sub, body_html, l
 <title>{title}</title>
 <meta name="description" content="{description}" />
 <link rel="canonical" href="{SITE_ORIGIN}{canonical_path}" />
-<link rel="stylesheet" href="/assets/site.css?v=7" />
+<link rel="stylesheet" href="/assets/site.css?v=8" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{h1}</h1><p class="sub" style="margin:0 0 10px">{sub}</p><section class="content-body">
@@ -2447,6 +2654,9 @@ def render_archive_index(state, logo_uri):
     else:
         parts.append("<p>No graded slates yet — the first results land the morning after "
                      "the first recorded slate.</p>")
+    cal = calibration_section(state)
+    if cal:
+        parts.append(cal)
     others = " and ".join(
         '<a href="/{}/">{} player prop hit rates today</a>'.format(PAGE_LEAGUES[o]["slug"], o)
         for o in ("NBA", "NHL", "NFL"))
@@ -2477,7 +2687,8 @@ def run_archive(league_objs, logs_prev_objs, now_utc, state):
     if now_et.hour < 12 and today_et.isoformat() not in state["snapshots"]:
         added = []
         for lg in ("NBA", "NFL", "NHL"):
-            added += snapshot_entries_for_league(lg, league_objs[lg], today_et)
+            added += snapshot_entries_for_league(lg, league_objs[lg], today_et,
+                                                 (logs_prev_objs or {}).get(lg))
         state["pending"].extend(added)
         state["snapshots"].append(today_et.isoformat())
         info["archiveSnapshotted"] = len(added)

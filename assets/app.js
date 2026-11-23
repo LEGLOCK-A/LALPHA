@@ -485,6 +485,286 @@ function cmpSignal(a, b){
   var aa = a ? a.avg : -1, ab = b ? b.avg : -1;
   return ab - aa;
 }
+/* ---------- Model probability engine ----------
+   Turns a prop's game logs into a projected probability for tonight,
+   instead of a raw hit rate against a line the same games produced.
+   Projection: a recency blend (Season 40 / L20 30 / L10 20 / L5 10) of
+   the player's output — for the NBA, minutes x per-minute rate — then
+   adjusted for opponent allowance, venue split, pace (NBA), rest,
+   blowout risk (NBA spread) and implied team total (NFL). The adjusted
+   mean feeds a normal distribution (the log's own standard deviation,
+   floored) for P(over the line); the result is blended with the
+   empirical L20 rate and shrunk toward 50% by sample size. Games where
+   an NBA player's minutes collapsed below 60% of his median (injury
+   exits, garbage time) are excluded and counted. The engine also
+   reports the out-of-sample rate: games 11-30, which played no part in
+   setting the L10-based research line. Exposed on window.__LL so the
+   workstation and team popups can use it. */
+function normCdf(z){
+  var t = 1 / (1 + 0.2316419 * Math.abs(z));
+  var d = 0.3989423 * Math.exp(-z * z / 2);
+  var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return z > 0 ? 1 - p : p;
+}
+function mpMean(a){ return a.length ? a.reduce(function(x, y){ return x + y; }, 0) / a.length : null; }
+function mpBlend(wins){
+  /* wins: [{vals, w}] — weighted mean of window means, renormalised
+     over the windows that have data. */
+  var num = 0, den = 0;
+  wins.forEach(function(x){
+    if (x.vals && x.vals.length){ num += x.w * mpMean(x.vals); den += x.w; }
+  });
+  return den ? num / den : null;
+}
+function mpClamp(v, lo, hi){ return Math.min(hi, Math.max(lo, v)); }
+var _mpAllowCache = {};
+function mpAllow(lg, key){
+  var ck = lg + "|" + key;
+  if (_mpAllowCache[ck]) return _mpAllowCache[ck];
+  var lgData = DATA.leagues[lg] || {};
+  var byOpp = {}, all = [];
+  [lgData.logs || {}, lgData.logsPrev || {}].forEach(function(src){
+    Object.keys(src).forEach(function(pid){
+      (src[pid] || []).forEach(function(row){
+        var v = winVal(row, key);
+        if (v == null) return;
+        all.push(v);
+        var ab = String(row.opp || "").replace(/^(vs|@)\s*/, "");
+        if (ab) (byOpp[ab] = byOpp[ab] || []).push(v);
+      });
+    });
+  });
+  var out = { league: mpMean(all), byOpp: {} };
+  Object.keys(byOpp).forEach(function(ab){
+    out.byOpp[ab] = { mean: mpMean(byOpp[ab]), n: byOpp[ab].length };
+  });
+  _mpAllowCache[ck] = out;
+  return out;
+}
+var _mpPaceCache = null;
+function mpPace(lg){
+  if (_mpPaceCache) return _mpPaceCache;
+  var td = window.TEAMS_DATA, out = { league: null, byTeam: {} };
+  var logs = td && td.logs && td.logs[lg];
+  if (logs){
+    var envs = [];
+    Object.keys(logs).forEach(function(ab){
+      var rows = (logs[ab].rows || []).slice(0, 10);
+      if (rows.length){
+        var e = mpMean(rows.map(function(r){ return r.pf + r.pa; }));
+        out.byTeam[ab] = e;
+        envs.push(e);
+      }
+    });
+    out.league = mpMean(envs);
+  }
+  _mpPaceCache = out;
+  return out;
+}
+function mpGame(lg, team){
+  var games = (DATA.leagues[lg] || {}).games || [];
+  var today = udEtDay(new Date().toISOString());
+  var best = null;
+  games.forEach(function(g){
+    if (!g || !g.home || !g.away || g.state === "post") return;
+    if (g.home.abbr !== team && g.away.abbr !== team) return;
+    var day = udEtDay(g.date);
+    if (!day) return;
+    if (lg !== "NFL" && today && day !== today){
+      var p = today.split("-");
+      var tom = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + 1)).toISOString().slice(0, 10);
+      if (day !== tom) return;
+    }
+    if (!best || String(g.date || "") < String(best.date || "")) best = g;
+  });
+  return best;
+}
+function mpSpread(g, team){
+  var s = String((g && g.spread) || "").trim();
+  var m = s.match(/^([A-Z.]+)\s+(-?\d+(?:\.\d+)?)$/);
+  if (!m) return null;
+  return { fav: m[1], pts: Math.abs(parseFloat(m[2])) };
+}
+var _modelCache = {};
+function modelFor(lg, p){
+  var ck = lg + "|" + p.pid + "|" + p.key;
+  if (_modelCache[ck]) return _modelCache[ck];
+  var lgData = DATA.leagues[lg] || {};
+  function entries(rows){
+    var out = [];
+    (rows || []).forEach(function(row){
+      var v = winVal(row, p.key);
+      if (v == null) return;
+      out.push({ v: v, mins: row.s && row.s.minutes != null ? row.s.minutes : null,
+                 d: row.d || "", home: String(row.opp || "").indexOf("vs") === 0 });
+    });
+    return out;
+  }
+  var cur = entries((lgData.logs || {})[p.pid]);
+  var prev = entries((lgData.logsPrev || {})[p.pid]);
+  var allE = cur.concat(prev);
+  /* short-minutes exclusion (NBA: the only league whose logs carry
+     minutes) — a game under 60% of the player's median minutes is an
+     injury exit or garbage time, not evidence about tonight */
+  var excl = 0;
+  var withMins = allE.filter(function(e){ return e.mins != null; });
+  if (lg === "NBA" && withMins.length >= 6 && withMins.length >= allE.length * 0.6){
+    var med = medianOf(withMins.map(function(e){ return e.mins; }));
+    if (med){
+      var kept = [];
+      allE.forEach(function(e){
+        if (e.mins != null && e.mins < 0.6 * med) excl++;
+        else kept.push(e);
+      });
+      if (kept.length >= 5){ allE = kept; cur = kept.filter(function(e){ return cur.indexOf(e) >= 0; }); }
+      else excl = 0;
+    }
+  }
+  var all = allE.map(function(e){ return e.v; });
+  var season = cur.map(function(e){ return e.v; });
+  var n = all.length;
+  if (n < 5){ _modelCache[ck] = null; return null; }
+  var W = [{ vals: season, w: 0.4 }, { vals: all.slice(0, 20), w: 0.3 },
+           { vals: all.slice(0, 10), w: 0.2 }, { vals: all.slice(0, 5), w: 0.1 }];
+  var mu0 = null, projMins = null;
+  if (lg === "NBA" && withMins.length >= 6){
+    function rateBlend(es){
+      function rs(seg){
+        var sv = 0, sm = 0;
+        seg.forEach(function(e){ if (e.mins){ sv += e.v; sm += e.mins; } });
+        return sm >= 30 ? sv / sm : null;
+      }
+      var num = 0, den = 0;
+      [[cur, 0.4], [allE.slice(0, 20), 0.3], [allE.slice(0, 10), 0.2], [allE.slice(0, 5), 0.1]].forEach(function(x){
+        var r = rs(x[0]);
+        if (r != null){ num += x[1] * r; den += x[1]; }
+      });
+      return den ? num / den : null;
+    }
+    var perMin = rateBlend(allE);
+    projMins = mpBlend([{ vals: cur.map(function(e){ return e.mins; }).filter(function(x){ return x != null; }), w: 0.4 },
+                        { vals: allE.slice(0, 20).map(function(e){ return e.mins; }).filter(function(x){ return x != null; }), w: 0.3 },
+                        { vals: allE.slice(0, 10).map(function(e){ return e.mins; }).filter(function(x){ return x != null; }), w: 0.2 },
+                        { vals: allE.slice(0, 5).map(function(e){ return e.mins; }).filter(function(x){ return x != null; }), w: 0.1 }]);
+    if (perMin != null && projMins != null) mu0 = perMin * projMins;
+  }
+  if (mu0 == null) mu0 = mpBlend(W);
+  if (mu0 == null){ _modelCache[ck] = null; return null; }
+  var sd = wsSdPub(all.slice(0, 30), mpMean(all.slice(0, 30)));
+  var sigma = Math.max(sd == null ? 0 : sd, mu0 > 0 ? 0.22 * mu0 : 0.6);
+  /* --- context factors --- */
+  var nx = null;
+  try { nx = lg === "NFL" ? udNextGameWeek(p.team) : udNextGame(lg, p.team); } catch (e) { nx = null; }
+  var F = { opp: 1, venue: 1, pace: 1, rest: 1, blow: 1, impl: 1, usage: 1 };
+  var oppAbbr = nx && nx.opp;
+  if (oppAbbr){
+    var al = mpAllow(lg, p.key);
+    var oa = al.byOpp[oppAbbr];
+    if (oa && oa.n >= 25 && al.league) F.opp = mpClamp(oa.mean / al.league, 0.85, 1.18);
+    var hv = allE.filter(function(e){ return e.home; }).map(function(e){ return e.v; });
+    var av = allE.filter(function(e){ return !e.home; }).map(function(e){ return e.v; });
+    var split = nx.home ? hv : av;
+    var om = mpMean(all);
+    if (split.length >= 4 && om) F.venue = mpClamp(mpMean(split) / om, 0.92, 1.08);
+    if (allE.length && nx.day && allE[0].d){
+      var gap = Math.round((Date.parse(nx.day + "T12:00:00Z") - Date.parse(allE[0].d + "T12:00:00Z")) / 86400000);
+      if (gap <= 1) F.rest = 0.97;
+      else if (gap >= 5) F.rest = 1.01;
+    }
+  }
+  var g = mpGame(lg, p.team);
+  if (lg === "NBA"){
+    var pc = mpPace(lg);
+    if (pc.league && oppAbbr && pc.byTeam[p.team] && pc.byTeam[oppAbbr])
+      F.pace = mpClamp(((pc.byTeam[p.team] + pc.byTeam[oppAbbr]) / 2) / pc.league, 0.93, 1.07);
+    var sp = mpSpread(g, p.team);
+    if (sp && sp.fav === p.team && sp.pts >= 13 && projMins != null && projMins >= 26) F.blow = 0.95;
+  }
+  if (lg === "NFL"){
+    if (g && g.total){
+      var sp2 = mpSpread(g, p.team);
+      var implied = g.total / 2 + (sp2 ? (sp2.fav === p.team ? sp2.pts / 2 : -sp2.pts / 2) : 0);
+      var td = window.TEAMS_DATA, tl = td && td.logs && td.logs.NFL && td.logs.NFL[p.team];
+      var tavg = tl ? mpMean((tl.rows || []).slice(0, 10).map(function(r){ return r.pf; })) : null;
+      if (tavg) F.impl = mpClamp(implied / tavg, 0.92, 1.08);
+    }
+    try {
+      var tr = nflUsageTrend(p.pid);
+      if (tr && tr.rising) F.usage = 1.04;
+      else if (tr && tr.falling) F.usage = 0.96;
+    } catch (e) {}
+  }
+  var mu = mu0 * F.opp * F.venue * F.pace * F.rest * F.blow * F.impl * F.usage;
+  var l20 = all.slice(0, 20);
+  var oosSeg = all.slice(10, 30);
+  var oosHits = 0;
+  oosSeg.forEach(function(v){ if (p.dir === "Over" ? v > p.line : v < p.line) oosHits++; });
+  var res = {
+    mu: mu, mu0: mu0, sigma: sigma, n: n, excl: excl, factors: F,
+    opp: oppAbbr || null,
+    oos: oosSeg.length >= 5 ? { rate: Math.round(100 * oosHits / oosSeg.length), n: oosSeg.length } : null,
+    pDir: function(line, dir){
+      var cc = Math.abs(line % 1) < 1e-9 ? 0.5 : 0;
+      var pm = dir === "Over" ? 1 - normCdf((line + cc - mu) / sigma) : normCdf((line - cc - mu) / sigma);
+      var emp = null;
+      if (l20.length >= 5){
+        var h = 0;
+        l20.forEach(function(v){ if (dir === "Over" ? v > line : v < line) h++; });
+        emp = h / l20.length;
+      }
+      var pr = emp == null ? pm : 0.65 * pm + 0.35 * emp;
+      var ne = Math.min(n, 30);
+      pr = (pr * ne + 3) / (ne + 6);
+      return mpClamp(pr, 0.02, 0.98);
+    }
+  };
+  _modelCache[ck] = res;
+  return res;
+}
+function wsSdPub(vals, avg){
+  if (!vals || vals.length < 2) return null;
+  var a = avg == null ? mpMean(vals) : avg, acc = 0;
+  vals.forEach(function(v){ acc += (v - a) * (v - a); });
+  return Math.sqrt(acc / vals.length);
+}
+window.__LL.modelFor = function(lg, pid, key){
+  var list = (DATA.leagues[lg] || {}).props || [];
+  for (var i = 0; i < list.length; i++)
+    if (list[i].pid === pid && list[i].key === key) return modelFor(lg, list[i]);
+  return null;
+};
+var _edgeOdds = "-110";
+window.__LL.setEdgeOdds = function(v){ _edgeOdds = String(v || "-110"); };
+window.__LL.edgeVerdict = function(lg, pid, key, line, dir, oddsStr){
+  var m = window.__LL.modelFor(lg, pid, key);
+  if (!m) return "Not enough logged games to model this prop.";
+  var o = parseInt(String(oddsStr || "").replace(/[^0-9-]/g, ""), 10);
+  if (isNaN(o) || o === 0) return "Enter American odds, e.g. -110 or +130.";
+  var implied = o < 0 ? (-o) / ((-o) + 100) : 100 / (o + 100);
+  var mp = m.pDir(line, dir);
+  var edge = (mp - implied) * 100;
+  var word = edge >= 5 ? "a real edge, if the model is right"
+    : edge >= 1.5 ? "a small edge"
+    : edge > -1.5 ? "no edge at this price"
+    : "the price is against you";
+  return "Implied <b>" + Math.round(implied * 100) + "%</b> &middot; Model <b>" + Math.round(mp * 100)
+    + "%</b> &middot; Edge <b>" + (edge > 0 ? "+" : "") + edge.toFixed(1) + " pts</b> &middot; " + word + ".";
+};
+window.__LL.modelBlock = function(lg, pid, key, line, dir){
+  var m = window.__LL.modelFor(lg, pid, key);
+  if (!m) return "";
+  var pct = Math.round(m.pDir(line, dir) * 100);
+  var verdict = window.__LL.edgeVerdict(lg, pid, key, line, dir, _edgeOdds);
+  return '<div class="sumgrid" style="margin-top:8px">'
+    + '<div class="sumcell"><span>Model probability &middot; ' + esc(dir) + '</span><b>' + pct + '%</b></div>'
+    + '<div class="sumcell"><span>Projected</span><b>' + fmtVal(Math.round(m.mu * 10) / 10) + '</b></div>'
+    + '<div class="sumcell"><span>Out-of-sample &middot; games 11&ndash;30</span><b>' + (m.oos ? m.oos.rate + "% (" + m.oos.n + "g)" : "—") + '</b></div>'
+    + '<div class="sumcell"><span>' + (m.excl ? "Short-minutes games excluded" : "Games modelled") + '</span><b>' + (m.excl ? m.excl : m.n) + '</b></div>'
+    + '</div>'
+    + '<div class="edgebar"><label>Your book&rsquo;s odds <input id="edgeOdds" type="text" inputmode="numeric" value="' + esc(_edgeOdds) + '" aria-label="Your book odds in American format"></label>'
+    + '<span id="edgeVerdict">' + verdict + '</span></div>'
+    + '<div class="sumnote">Model probability, not a hit rate: a recency-blended projection (NBA: minutes &times; per-minute rate) adjusted for opponent, venue, pace and rest, judged on games that did not set the line. A few points of edge is realistic; treat a huge edge as likely model error.</div>';
+};
 function winRowHtml(p, lg){
   var ws = winStat(lg, p);
   if (!ws) return "";
@@ -2177,6 +2457,16 @@ function renderPoolNote(dealt, picks){
       picks.forEach(function(x){ comb *= (x.r || 0) / 100; });
       var cpct = comb * 100;
       txt += ' Combined L10 hit rate for the set: <b>' + (cpct >= 10 ? Math.round(cpct) : Math.round(cpct * 10) / 10) + '%</b>.';
+      var mpAll = 1, mpOk = picks.length > 0;
+      picks.forEach(function(x){
+        var mm = modelFor(x.lg, x.p);
+        if (!mm) { mpOk = false; return; }
+        mpAll *= mm.pDir(x.p.line, x.p.dir);
+      });
+      if (mpOk){
+        var fair = mpAll >= 0.5 ? "-" + Math.round(100 * mpAll / (1 - mpAll)) : "+" + Math.round(100 * (1 - mpAll) / mpAll);
+        txt += ' Model probability all legs hit: <b>' + (mpAll * 100 >= 10 ? Math.round(mpAll * 100) : Math.round(mpAll * 1000) / 10) + '%</b> (fair odds ' + fair + '). Legs are priced as if independent — same-game legs move together, so treat that as a ceiling, and remember the vig compounds on every leg.';
+      }
     }
     if (dealt < want) txt += ' The pool is smaller than the pick count at this threshold, so you got everything available — the rate floor was not lowered to fill the set.';
   }
@@ -2184,6 +2474,7 @@ function renderPoolNote(dealt, picks){
 }
 function dealCard(x){
   var p = x.p, lg = x.lg;
+  var dmm = modelFor(lg, p);
   return '<article class="card dealcard" data-open-logs="' + esc(p.pid) + '" data-stat-key="' + esc(p.key) + '" data-lg="' + esc(lg) + '" role="button" tabindex="0" aria-label="Open game log for ' + esc(p.name) + ' — ' + esc(p.stat) + '">'
     + '<div class="cardtop">' + avatarHtml(lg, p.pid, p.name)
     + '<div class="who"><div class="nm">' + esc(p.name) + '</div><div class="tm">' + esc(p.team) + (p.pos ? ' · ' + esc(p.pos) : '') + ' · ' + esc(lg) + '</div>' + nflCardMetaHtml(p, lg) + '</div>'
@@ -2192,7 +2483,7 @@ function dealCard(x){
     + '<span class="stat">' + esc(p.stat) + '</span>'
     + '<span class="avg">Avg <b>' + fmtVal(p.avg) + '</b><br>L10 avg <b>' + fmtVal(p.l10avg) + '</b> · Last <b>' + fmtVal(p.last) + '</b></span></div>'
     + '<div class="rates">' + rateCell(p, "L5") + rateCell(p, "L10") + rateCell(p, "L20") + '</div>'
-    + '<div class="cardfoot"><span class="note">' + p.gp + ' games logged · hit rates vs this line</span>'
+    + '<div class="cardfoot"><span class="note">' + p.gp + ' games logged · hit rates vs this line' + (dmm ? ' · Model <b>' + Math.round(dmm.pDir(p.line, p.dir) * 100) + '%</b>' : '') + '</span>'
     + '<button class="openbtn" data-open-logs="' + esc(p.pid) + '" data-stat-key="' + esc(p.key) + '" data-lg="' + esc(lg) + '">Game log</button></div>'
     + '</article>';
 }
@@ -3088,7 +3379,117 @@ function tpDetail(p, rows, vals){
     + split((rows || []).filter(function(r){ return !r.home; }), "Away")
     + "<div><span>vs " + esc(p.oppName || p.opp || "opp") + "</span>" + h2h + "</div></div>"
     + (lad.length ? '<div class="tlad"><span>Alt lines (L20)</span> ' + lad.join(" &middot; ") + "</div>" : "")
-    + teamPopMeta(p);
+    + teamPopMeta(p)
+    + tpEdgeHtml(p, rows, vals);
+}
+/* ---------- team model probability ----------
+   Same idea as the player engine, from the team's own game logs:
+   recency-blended projection (Season 40 / L20 30 / L10 20 / L5 10),
+   adjusted for the venue split, the opponent's scoring/allowing
+   strength, pace (NBA) and a back-to-back, then a normal distribution
+   for P(over the line), blended with the empirical L20 rate and
+   shrunk toward 50% by sample size. */
+var _tpOdds = "-110";
+var _tpEnvCache = {};
+function tpNormCdf(z){
+  var t = 1 / (1 + 0.2316419 * Math.abs(z));
+  var d = 0.3989423 * Math.exp(-z * z / 2);
+  var pr = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return z > 0 ? 1 - pr : pr;
+}
+function tpMn(a){ return a && a.length ? a.reduce(function(x, y){ return x + y; }, 0) / a.length : null; }
+function tpLeagueEnv(lg){
+  if (_tpEnvCache[lg]) return _tpEnvCache[lg];
+  var td = window.TEAMS_DATA, logs = td && td.logs && td.logs[lg];
+  var out = null;
+  if (logs){
+    var pas = [], pfs = [], envs = [];
+    Object.keys(logs).forEach(function(ab){
+      var rows = (logs[ab].rows || []).slice(0, 10);
+      if (!rows.length) return;
+      pas.push(tpMn(rows.map(function(r){ return r.pa; })));
+      pfs.push(tpMn(rows.map(function(r){ return r.pf; })));
+      envs.push(tpMn(rows.map(function(r){ return r.pf + r.pa; })));
+    });
+    out = { pa: tpMn(pas), pf: tpMn(pfs), env: tpMn(envs) };
+  }
+  _tpEnvCache[lg] = out;
+  return out;
+}
+function tpModel(p, rows, vals){
+  if (!vals || vals.length < 5) return null;
+  var num = 0, den = 0;
+  [[vals, 0.4], [vals.slice(0, 20), 0.3], [vals.slice(0, 10), 0.2], [vals.slice(0, 5), 0.1]].forEach(function(x){
+    if (x[0].length){ num += x[1] * tpMn(x[0]); den += x[1]; }
+  });
+  if (!den) return null;
+  var mu0 = num / den;
+  var sd = tpStd(vals.slice(0, 30));
+  var sigma = Math.max(sd == null ? 0 : sd, mu0 > 0 ? 0.22 * mu0 : 0.6);
+  var F = 1;
+  var hv = [], av = [];
+  (rows || []).forEach(function(r){
+    var v = tpVal(p.stat, r);
+    if (v == null) return;
+    (r.home ? hv : av).push(v);
+  });
+  var split = p.home ? hv : av, om = tpMn(vals);
+  if (split.length >= 4 && om) F *= Math.min(1.08, Math.max(0.92, tpMn(split) / om));
+  var env = tpLeagueEnv(state.league);
+  var orows = p.opp ? tpLogs(p.opp) : null;
+  if (env && orows && orows.length >= 4){
+    var o10 = orows.slice(0, 10);
+    if (p.stat === "total" || p.stat === "firstHalf"){
+      var oa = tpMn(o10.map(function(r){ return r.pa; }));
+      if (oa && env.pa) F *= Math.pow(Math.min(1.15, Math.max(0.88, oa / env.pa)), p.stat === "firstHalf" ? 0.5 : 1);
+    } else if (p.stat === "oppTotal"){
+      var op = tpMn(o10.map(function(r){ return r.pf; }));
+      if (op && env.pf) F *= Math.min(1.15, Math.max(0.88, op / env.pf));
+    }
+    if (state.league === "NBA" && (p.stat === "total" || p.stat === "oppTotal" || p.stat === "teamThrees")){
+      var eT = tpMn((rows || []).slice(0, 10).map(function(r){ return r.pf + r.pa; }));
+      var eO = tpMn(o10.map(function(r){ return r.pf + r.pa; }));
+      if (eT && eO && env.env) F *= Math.min(1.07, Math.max(0.93, ((eT + eO) / 2) / env.env));
+    }
+  }
+  if (p.b2b) F *= 0.97;
+  var mu = mu0 * F, l20 = vals.slice(0, 20), n = vals.length;
+  return { mu: mu, sigma: sigma, n: n,
+    pDir: function(line, dir){
+      var cc = Math.abs(line % 1) < 1e-9 ? 0.5 : 0;
+      var pm = dir === "Over" ? 1 - tpNormCdf((line + cc - mu) / sigma) : tpNormCdf((line - cc - mu) / sigma);
+      var pr = pm;
+      if (l20.length >= 5){
+        var h = 0;
+        l20.forEach(function(v){ if (dir === "Over" ? v > line : v < line) h++; });
+        pr = 0.65 * pm + 0.35 * (h / l20.length);
+      }
+      var ne = Math.min(n, 30);
+      pr = (pr * ne + 3) / (ne + 6);
+      return Math.min(0.98, Math.max(0.02, pr));
+    } };
+}
+function tpVerdict(m, line, dir, oddsStr){
+  var o = parseInt(String(oddsStr || "").replace(/[^0-9-]/g, ""), 10);
+  if (isNaN(o) || o === 0) return "Enter American odds, e.g. -110 or +130.";
+  var implied = o < 0 ? (-o) / ((-o) + 100) : 100 / (o + 100);
+  var mp = m.pDir(line, dir);
+  var edge = (mp - implied) * 100;
+  var word = edge >= 5 ? "a real edge, if the model is right"
+    : edge >= 1.5 ? "a small edge"
+    : edge > -1.5 ? "no edge at this price"
+    : "the price is against you";
+  return "Implied <b>" + Math.round(implied * 100) + "%</b> &middot; Model <b>" + Math.round(mp * 100)
+    + "%</b> &middot; Edge <b>" + (edge > 0 ? "+" : "") + edge.toFixed(1) + " pts</b> &middot; " + word + ".";
+}
+function tpEdgeHtml(p, rows, vals){
+  var m = tpModel(p, rows, vals);
+  if (!m) return "";
+  var dir = teamFeatured(p).dir;
+  return '<div class="tstats">Model probability <b>' + Math.round(m.pDir(p.line, dir) * 100) + "%</b> " + dir.toLowerCase()
+    + " &middot; projected <b>" + fmtVal(Math.round(m.mu * 10) / 10) + "</b> &middot; not a hit rate</div>"
+    + '<div class="edgebar"><label>Your book&rsquo;s odds <input type="text" inputmode="numeric" data-tedge="' + esc(p.stat) + '" value="' + esc(_tpOdds) + '" aria-label="Your book odds in American format"></label>'
+    + '<span data-tverd="' + esc(p.stat) + '">' + tpVerdict(m, p.line, dir, _tpOdds) + "</span></div>";
 }
 function tpPropHtml(p, rows){
   var vals = tpSeries(p, rows);
@@ -3179,6 +3580,22 @@ window.__LL.openTeamPop = openTeamPop;
 (function(){
   var m = $("#teamModal"); if (!m) return;
   $("#teamClose").addEventListener("click", closeTeamPop);
+  m.addEventListener("input", function(e){
+    var t = e.target;
+    if (!t || !t.getAttribute) return;
+    var stat = t.getAttribute("data-tedge");
+    if (!stat) return;
+    _tpOdds = t.value;
+    var list = ((window.TEAMS_DATA && window.TEAMS_DATA.leagues && window.TEAMS_DATA.leagues[state.league]) || [])
+      .filter(function(x){ return x.team === _tpAbbr; });
+    var prop = null;
+    list.forEach(function(x){ if (x.stat === stat) prop = x; });
+    var span = m.querySelector('[data-tverd="' + stat + '"]');
+    if (!prop || !span) return;
+    var rows = tpLogs(_tpAbbr);
+    var mm = tpModel(prop, rows, tpSeries(prop, rows));
+    if (mm) span.innerHTML = tpVerdict(mm, prop.line, teamFeatured(prop).dir, t.value);
+  });
   m.addEventListener("click", function(e){
     var t = e.target && e.target.closest ? e.target : null;
     if (!t) return;
@@ -3441,6 +3858,14 @@ function ladderHtml(){
   var body = rowHtml(winLab, vWin);
   if (v20.length !== vWin.length) body += rowHtml(v20.length === 20 ? "L20" : "Last " + v20.length, v20);
   return '<div class="ladder"><div class="ladtitle">Alt lines · ' + esc(dir) + ' hit rate at each line</div>' + body + '</div>';
+}
+/* ---------- model probability (engine lives in the board code) ---------- */
+function modelBlockHtml(){
+  try {
+    if (window.__LL && window.__LL.modelBlock)
+      return window.__LL.modelBlock(S.league, S.ws.pid, S.ws.stat, S.ws.line, S.ws.dir);
+  } catch (e) {}
+  return "";
 }
 /* ---------- injury impact ----------
    When a teammate is on the injury report, the popup shows what the
@@ -3714,10 +4139,18 @@ function renderWorkstation(){
     + '</div>'
     + '<div class="sumnote">' + esc(splitTitle(rows)) + ' · Last 25 / 50 / 82 fill from last season and count in the averages and hit %.</div>'
     + ladderHtml()
+    + modelBlockHtml()
     + injuryImpactHtml();
   $$("#wsPanel [data-wsdir]").forEach(function(b){ b.addEventListener("click", function(){ ws.dir = b.getAttribute("data-wsdir"); renderWorkstation(); }); });
   $("#stepUp").addEventListener("click", function(){ ws.line = Math.round((ws.line + 0.5) * 10) / 10; renderWorkstation(); });
   $("#stepDown").addEventListener("click", function(){ if (ws.line > 0.5) ws.line = Math.round((ws.line - 0.5) * 10) / 10; renderWorkstation(); });
+  var eo = $("#edgeOdds");
+  if (eo) eo.addEventListener("input", function(){
+    if (window.__LL && window.__LL.setEdgeOdds) window.__LL.setEdgeOdds(eo.value);
+    var t = $("#edgeVerdict");
+    if (t && window.__LL && window.__LL.edgeVerdict)
+      t.innerHTML = window.__LL.edgeVerdict(S.league, S.ws.pid, S.ws.stat, S.ws.line, S.ws.dir, eo.value);
+  });
   renderGraph(rows);
   renderCompactLog(rows);
   renderFullTable(rows);
