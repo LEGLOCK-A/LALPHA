@@ -1335,7 +1335,7 @@ def build_league_page(lg, league, stamp, today_et, logo_uri, slugs=None,
 <title>{cfg['title']}</title>
 <meta name="description" content="{cfg['description']}" />
 <link rel="canonical" href="{SITE_ORIGIN}/{slug}/" />
-<link rel="stylesheet" href="/assets/site.css?v=10" />
+<link rel="stylesheet" href="/assets/site.css?v=11" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{cfg['h1']}</h1><p class="sub" style="margin:0 0 10px">{cfg['sub']}</p><section class="content-body">
@@ -1432,6 +1432,46 @@ def _fmt_short_date(iso):
     return f"{dt.strftime('%b')} {dt.day}"
 
 
+PLAYER_PAGE_JS = """
+<script>
+(function(){
+  var cur = "";
+  function apply(){
+    document.querySelectorAll("[data-statpick]").forEach(function(b){
+      b.classList.toggle("on", (b.getAttribute("data-statpick") || "") === cur);
+    });
+    document.querySelectorAll("[data-prow]").forEach(function(r){
+      r.classList.toggle("dim", !!cur && r.getAttribute("data-prow") !== cur);
+    });
+    document.querySelectorAll("[data-col]").forEach(function(c){
+      var k = c.getAttribute("data-col");
+      var hit = !!cur && (k === cur || (cur === "combo" && (k === "points" || k === "totalRebounds" || k === "assists")));
+      c.classList.toggle("hl", hit);
+    });
+  }
+  document.addEventListener("click", function(e){
+    if (!e.target || !e.target.closest) return;
+    var b = e.target.closest("[data-statpick]");
+    if (b){
+      var k = b.getAttribute("data-statpick") || "";
+      cur = (k === cur) ? "" : k;
+      apply();
+      return;
+    }
+    var th = e.target.closest("th[data-col]");
+    if (th){
+      var k2 = th.getAttribute("data-col");
+      if (document.querySelector('[data-statpick="' + k2 + '"]')){
+        cur = (cur === k2) ? "" : k2;
+        apply();
+      }
+    }
+  });
+  apply();
+})();
+</script>
+"""
+
 def build_player_page(lg, league, pid, stamp, logo_uri, slugs):
     cfg = PAGE_LEAGUES[lg]
     lslug = cfg["slug"]
@@ -1472,14 +1512,29 @@ def build_player_page(lg, league, pid, stamp, logo_uri, slugs):
         for p in props:
             sh, sn = _season_counts(league, p)
             rows.append(
-                '<tr><td>{}</td><td class="num">{} {}</td><td class="num">{}</td>'
+                '<tr data-prow="{}"><td><button type="button" class="statpick" '
+                'data-statpick="{}">{}</button></td><td class="num">{} {}</td><td class="num">{}</td>'
                 '<td class="num">{}</td><td class="num">{}</td><td class="num">{}/{}</td>'
                 '<td class="num">{}</td></tr>'.format(
-                    html_escape(p["stat"]), p["dir"], fmt_line(p["line"]),
+                    html_escape(p["key"]), html_escape(p["key"]), html_escape(p["stat"]),
+                    p["dir"], fmt_line(p["line"]),
                     fmt_counts(p, "L5"), fmt_counts(p, "L10"), fmt_counts(p, "L20"),
                     sh, sn, _fmt_num(p["l10avg"])))
+        seen_stats = []
+        for p in props:
+            if p["key"] not in [k for k, _ in seen_stats]:
+                seen_stats.append((p["key"], p["stat"]))
+        chips = "".join(
+            f'<button type="button" class="statchip" data-statpick="{html_escape(k)}">'
+            f'{html_escape(lab)}</button>'
+            for k, lab in seen_stats)
         parts.append(
             "<h2>Prop hit rates</h2>\n"
+            '<div class="statchips" role="group" aria-label="Highlight a stat">'
+            '<button type="button" class="statchip on" data-statpick="">All stats</button>'
+            + chips + "</div>\n"
+            '<p class="stathint">Tap a stat to highlight it in both tables — '
+            "tap again to clear.</p>\n"
             '<table class="props-table">\n'
             "<thead><tr><th>Stat</th><th>Line</th><th>L5</th><th>L10</th><th>L20</th>"
             "<th>Season</th><th>L10 avg</th></tr></thead>\n<tbody>\n"
@@ -1500,11 +1555,11 @@ def build_player_page(lg, league, pid, stamp, logo_uri, slugs):
         defs = list(league["statDefs"])
         has_min = any("minutes" in r["s"] for r in rows_log)
         cols = ([{"k": "minutes", "label": "Min"}] if has_min else []) + defs
-        head = "".join(f"<th>{html_escape(d['label'])}</th>" for d in cols)
+        head = "".join(f'<th data-col="{d["k"]}">{html_escape(d["label"])}</th>' for d in cols)
         body_rows = []
         for r in rows_log:
             cells = "".join(
-                f'<td class="num">{_fmt_num(r["s"][d["k"]]) if d["k"] in r["s"] else "&mdash;"}</td>'
+                f'<td class="num" data-col="{d["k"]}">{_fmt_num(r["s"][d["k"]]) if d["k"] in r["s"] else "&mdash;"}</td>'
                 for d in cols)
             body_rows.append(
                 f'<tr><td>{_fmt_short_date(r["d"])}</td><td>{html_escape(r["opp"])}</td>'
@@ -1529,6 +1584,7 @@ def build_player_page(lg, league, pid, stamp, logo_uri, slugs):
                   {"@type": "ListItem", "position": 3, "name": name,
                    "item": f"{SITE_ORIGIN}/{lslug}/player/{pslug}/"}]}
     parts.append(f'<script type="application/ld+json">{json.dumps(crumbs)}</script>')
+    parts.append(PLAYER_PAGE_JS)
     return archive_page_shell(
         title, description, f"/{lslug}/player/{pslug}/", name,
         f"{team_full} &middot; {lg} prop hit rates and game log",
@@ -1843,6 +1899,53 @@ TEAM_PAGE_JS = """
     });
     cards.forEach(function(c){ wrap.appendChild(c); });
   });
+  var COLMAP = {"total": "score", "oppTotal": "score", "winBy": "score", "firstHalf": "fh",
+                "firstPeriod": "p1", "teamThrees": "threes", "teamShots": "shots"};
+  var REVMAP = {"score": ["total", "oppTotal", "winBy"], "fh": ["firstHalf"],
+                "p1": ["firstPeriod"], "threes": ["teamThrees"], "shots": ["teamShots"]};
+  var curStat = "";
+  function applyStat(){
+    document.querySelectorAll("[data-statpick]").forEach(function(b){
+      b.classList.toggle("on", (b.getAttribute("data-statpick") || "") === curStat);
+    });
+    document.querySelectorAll(".tprop").forEach(function(c){
+      c.classList.toggle("dim", !!curStat && c.getAttribute("data-stat") !== curStat);
+    });
+    var col = curStat ? COLMAP[curStat] : null;
+    document.querySelectorAll("[data-col]").forEach(function(c){
+      c.classList.toggle("hl", !!col && c.getAttribute("data-col") === col);
+    });
+    if (curStat){
+      var card = document.querySelector('.tprop[data-stat="' + curStat + '"]');
+      if (card && !card.classList.contains("open")){
+        var body = card.querySelector(".tprop-body"), head = card.querySelector(".tprop-head");
+        card.classList.add("open");
+        if (body) body.hidden = false;
+        if (head) head.setAttribute("aria-expanded", "true");
+      }
+    }
+  }
+  document.addEventListener("click", function(e){
+    if (!e.target || !e.target.closest) return;
+    var b = e.target.closest("[data-statpick]");
+    if (b){
+      var k = b.getAttribute("data-statpick") || "";
+      curStat = (k === curStat) ? "" : k;
+      applyStat();
+      return;
+    }
+    var th = e.target.closest("th[data-col]");
+    if (th){
+      var cands = REVMAP[th.getAttribute("data-col")] || [];
+      for (var i = 0; i < cands.length; i++){
+        if (document.querySelector('[data-statpick="' + cands[i] + '"]')){
+          curStat = (curStat === cands[i]) ? "" : cands[i];
+          applyStat();
+          return;
+        }
+      }
+    }
+  });
   document.querySelectorAll(".tprop-head").forEach(function(h){
     h.addEventListener("click", function(){
       var card = h.parentNode, body = card.querySelector(".tprop-body");
@@ -1947,7 +2050,7 @@ def _t_prop_card(p, rows, idx, opp_abbr, opp_name):
     streak_html = (f'<span class="tstreak">{streak} straight {fdir.lower()}s</span>'
                    if streak >= 3 else "")
     return (
-        f'<div class="tprop" data-i="{idx}" data-rate="{rate10}" '
+        f'<div class="tprop" data-i="{idx}" data-rate="{rate10}" data-stat="{html_escape(p["stat"])}" '
         f'data-streak="{streak}" data-name="{html_escape(p["statLabel"])}">'
         f'<button type="button" class="tprop-head" aria-expanded="false">'
         f'<span class="tprop-stat">{html_escape(p["statLabel"])}</span>'
@@ -2000,8 +2103,17 @@ def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug,
         fdir, _ = _team_featured(p)
         payload.append({"stat": p["statLabel"], "line": p["line"], "dir": fdir,
                         "vals": _t_series(p, rows)[:30]})
+    tchips = "".join(
+        f'<button type="button" class="statchip" data-statpick="{html_escape(p["stat"])}">'
+        f'{html_escape(p["statLabel"])}</button>'
+        for p in team_props)
     parts.append(
         "<h2>Team prop hit rates</h2>\n"
+        '<div class="statchips" role="group" aria-label="Highlight a stat">'
+        '<button type="button" class="statchip on" data-statpick="">All stats</button>'
+        + tchips + "</div>\n"
+        '<p class="stathint">Tap a stat to open its card and highlight it in the '
+        "recent results — tap again to clear.</p>\n"
         '<div class="tcontrols"><div class="twtog" role="group" aria-label="Games window">'
         '<button type="button" data-w="L5">L5</button>'
         '<button type="button" data-w="L10" class="on">L10</button>'
@@ -2036,19 +2148,19 @@ def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug,
                           ("Rush Yds", "ryds", "num"), ("TO", "tov", "num")),
                   "NHL": (("P1", "p1", "num"), ("P2", "p2", "num"), ("P3", "p3", "num"),
                           ("Shots", "shots", "num"), ("Saves", "saves", "num"), ("Save %", "svp", "frac"))}[lg]
-        head = "".join(f"<th>{lab}</th>" for lab, _, _ in extras)
+        head = "".join(f'<th data-col="{k}">{lab}</th>' for lab, k, _ in extras)
 
         def _cell(r, k, kind):
             v = r.get(k)
             if v is None:
-                return '<td class="num">&mdash;</td>'
+                return f'<td class="num" data-col="{k}">&mdash;</td>'
             if kind == "pct":
                 txt = f"{v * 100:.1f}%" if v <= 1.5 else f"{_fmt_num(v)}%"
             elif kind == "frac":
                 txt = f"{v:.3f}".lstrip("0") if 0 < v < 1 else _fmt_num(v)
             else:
                 txt = _fmt_num(v)
-            return f'<td class="num">{txt}</td>'
+            return f'<td class="num" data-col="{k}">{txt}</td>'
 
         body_rows = []
         for r in rows_log:
@@ -2057,11 +2169,11 @@ def build_team_page(lg, team_props, abbr, rows_entry, stamp, logo_uri, tslug,
             body_rows.append(
                 f'<tr><td>{_fmt_short_date(r["d"])}</td>'
                 f'<td>{"vs" if r["home"] else "@"} {html_escape(r["opp"])}</td>'
-                f'<td class="num">{r["pf"]}&ndash;{r["pa"]}</td><td>{result}</td>{cells}</tr>')
+                f'<td class="num" data-col="score">{r["pf"]}&ndash;{r["pa"]}</td><td>{result}</td>{cells}</tr>')
         parts.append(
             "<h2>Recent results</h2>\n"
             '<table class="props-table">\n'
-            f"<thead><tr><th>Date</th><th>Opp</th><th>Score</th><th>Result</th>{head}</tr></thead>\n<tbody>\n"
+            f"<thead><tr><th>Date</th><th>Opp</th><th data-col=\"score\">Score</th><th>Result</th>{head}</tr></thead>\n<tbody>\n"
             + "\n".join(body_rows) + "\n</tbody>\n</table>")
 
     parts.append(
@@ -2586,7 +2698,7 @@ def archive_page_shell(title, description, canonical_path, h1, sub, body_html, l
 <title>{title}</title>
 <meta name="description" content="{description}" />
 <link rel="canonical" href="{SITE_ORIGIN}{canonical_path}" />
-<link rel="stylesheet" href="/assets/site.css?v=10" />
+<link rel="stylesheet" href="/assets/site.css?v=11" />
 {PAGE_STYLE}
 </head>
 <body><main>{logo_html}{PAGE_TABS}<h1 class="display" style="font-size:28px;font-weight:700;margin:14px 0 2px">{h1}</h1><p class="sub" style="margin:0 0 10px">{sub}</p><section class="content-body">
