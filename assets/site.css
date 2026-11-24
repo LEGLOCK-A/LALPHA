@@ -1120,3 +1120,8 @@ tr.dim{opacity:.35}
 /* My Board popup sits below the player/team popups it can open */
 #myBoardModal{z-index:850}
 #myBoardModal .sheet .grid{margin-top:10px}
+
+/* My Board pins (bigger tap target) */
+.pinbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:9px 15px;min-height:38px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.pinbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pinbtn.wspin{margin-left:auto;align-self:center}
