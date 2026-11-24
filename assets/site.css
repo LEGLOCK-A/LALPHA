@@ -1116,3 +1116,7 @@ tr.dim{opacity:.35}
 @keyframes pinpop{35%{transform:scale(1.18)}}
 #myBoardSec.mbflash{animation:mbflash 1.7s ease}
 @keyframes mbflash{0%,55%{background:var(--accent-soft)}100%{background:transparent}}
+
+/* My Board popup sits below the player/team popups it can open */
+#myBoardModal{z-index:850}
+#myBoardModal .sheet .grid{margin-top:10px}

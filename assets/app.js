@@ -1050,9 +1050,54 @@ function syncPinButtons(){
     b.textContent = on ? "Pinned" : "Pin";
   });
 }
+function ensureMyBoardModal(){
+  var m = $("#myBoardModal");
+  if (m) return m;
+  m = document.createElement("div");
+  m.className = "modal"; m.id = "myBoardModal";
+  m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true");
+  m.setAttribute("aria-label", "My Board");
+  m.innerHTML = '<div class="backdrop"></div><div class="sheet">'
+    + '<div class="sheetgrab" aria-hidden="true"><span></span></div>'
+    + '<div class="sheethead"><div class="lghtitle"><h3>My Board</h3>'
+    + '<div class="sub">Your pinned props \u00b7 saved on this device</div></div>'
+    + '<button class="xbtn" id="myBoardClose" aria-label="Close My Board">&times;</button></div>'
+    + '<div class="grid" id="myBoardList"></div></div>';
+  document.body.appendChild(m);
+  m.querySelector(".backdrop").addEventListener("click", closeMyBoard);
+  m.querySelector("#myBoardClose").addEventListener("click", closeMyBoard);
+  return m;
+}
+function openMyBoard(){
+  ensureMyBoardModal();
+  renderMyBoard();
+  syncPinButtons();
+  var m = $("#myBoardModal");
+  m.classList.add("open");
+  document.body.classList.add("modal-open");
+  if (window.__LL.lockScroll) window.__LL.lockScroll();
+}
+function closeMyBoard(){
+  var m = $("#myBoardModal"); if (!m) return;
+  var was = m.classList.contains("open");
+  m.classList.remove("open");
+  var other = ["#logModal", "#pwModal", "#teamModal"].some(function(id){
+    var x = $(id); return x && x.classList.contains("open");
+  });
+  if (!other) document.body.classList.remove("modal-open");
+  if (was && window.__LL.unlockScroll) window.__LL.unlockScroll();
+}
+window.__LL.openMyBoard = openMyBoard;
+window.__LL.closeMyBoard = closeMyBoard;
+document.addEventListener("keydown", function(e){
+  if (e.key !== "Escape") return;
+  var m = $("#myBoardModal");
+  if (m && m.classList.contains("open")) closeMyBoard();
+});
 function renderMyBoard(){
-  var sec = $("#myBoardSec"), list = $("#myBoardList");
-  if (!sec || !list) return;
+  ensureMyBoardModal();
+  var list = $("#myBoardList");
+  if (!list) return;
   var cards = [];
   loadPins().forEach(function(x){
     var lgData = (DATA.leagues || {})[x.lg]; if (!lgData) return;
@@ -1060,8 +1105,8 @@ function renderMyBoard(){
     if (!p || isInjured(x.lg, p)) return;
     cards.push(propCard(p, x.lg));
   });
-  sec.hidden = !cards.length;
-  list.innerHTML = cards.join("");
+  list.innerHTML = cards.length ? cards.join("")
+    : '<div class="emptybox" style="grid-column:1/-1">No pinned props yet. Tap Pin on any prop card and it will live here.</div>';
 }
 
 /* Floating My Board bubble: shows the pin count in the corner and
@@ -1085,18 +1130,9 @@ function updatePinBubble(popIt){
   b.setAttribute("aria-label", "My Board \u2014 " + n + " pinned prop" + (n === 1 ? "" : "s") + ". Tap to open.");
   if (popIt && n){ b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }
 }
-function gotoMyBoard(){
-  var sec = $("#myBoardSec"); if (!sec) return;
-  var dv = $("#view-discover");
-  if (typeof showView === "function" && dv && !dv.classList.contains("active")) showView("discover");
-  renderMyBoard();
-  setTimeout(function(){
-    sec.scrollIntoView({ behavior: "smooth", block: "start" });
-    sec.classList.add("mbflash");
-    setTimeout(function(){ sec.classList.remove("mbflash"); }, 1700);
-  }, 80);
-}
+function gotoMyBoard(){ openMyBoard(); }
 window.__LL.pins = { is: isPinned, toggle: togglePin };
+ensureMyBoardModal();
 updatePinBubble(false);
 document.addEventListener("click", function(e){
   if (!e.target || !e.target.closest) return;
@@ -5418,4 +5454,5 @@ runCheck(false);
   attach("logModal", function(){ if (window.__LL && window.__LL.closeLogModal) window.__LL.closeLogModal(); });
   attach("pwModal", function(){ if (window.__LL && window.__LL.closePlayersToWatch) window.__LL.closePlayersToWatch(); });
   attach("teamModal", function(){ if (window.__LL && window.__LL.closeTeamPop) window.__LL.closeTeamPop(); });
+  attach("myBoardModal", function(){ if (window.__LL && window.__LL.closeMyBoard) window.__LL.closeMyBoard(); });
 })();
