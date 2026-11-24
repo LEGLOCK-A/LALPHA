@@ -1021,6 +1021,55 @@ function renderStatChips(){
   /* the collapsed Stats fold header names the active stat */
   if (typeof syncStatFoldSum === "function") syncStatFoldSum();
 }
+/* ---------- My Board (user-pinned props) ---------- */
+/* Pins are the user's own picks, kept in localStorage on this device:
+   [{lg, pid, key}] — the prop is re-resolved against the current data
+   on every render, so a pinned prop always shows today's line. */
+var PIN_KEY = "leglock.myboard.v1";
+function loadPins(){ try { return JSON.parse(window.localStorage.getItem(PIN_KEY) || "[]") || []; } catch (e) { return []; } }
+function savePins(list){ try { window.localStorage.setItem(PIN_KEY, JSON.stringify(list)); } catch (e) {} }
+function pinId(lg, pid, key){ return lg + ":" + pid + ":" + key; }
+function isPinned(lg, pid, key){
+  return loadPins().some(function(x){ return pinId(x.lg, x.pid, x.key) === pinId(lg, pid, key); });
+}
+function togglePin(lg, pid, key){
+  var id = pinId(lg, pid, key), list = loadPins();
+  var has = list.some(function(x){ return pinId(x.lg, x.pid, x.key) === id; });
+  list = has ? list.filter(function(x){ return pinId(x.lg, x.pid, x.key) !== id; })
+             : [{ lg: lg, pid: pid, key: key }].concat(list);
+  savePins(list);
+  renderMyBoard();
+  syncPinButtons();
+}
+function syncPinButtons(){
+  $$("[data-pin]").forEach(function(b){
+    var card = b.closest("[data-open-logs]"); if (!card) return;
+    var on = isPinned(card.getAttribute("data-lg"), card.getAttribute("data-open-logs"), card.getAttribute("data-stat-key"));
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.textContent = on ? "Pinned" : "Pin";
+  });
+}
+function renderMyBoard(){
+  var sec = $("#myBoardSec"), list = $("#myBoardList");
+  if (!sec || !list) return;
+  var cards = [];
+  loadPins().forEach(function(x){
+    var lgData = (DATA.leagues || {})[x.lg]; if (!lgData) return;
+    var p = (lgData.props || []).filter(function(y){ return String(y.pid) === String(x.pid) && y.key === x.key; })[0];
+    if (!p || isInjured(x.lg, p)) return;
+    cards.push(propCard(p, x.lg));
+  });
+  sec.hidden = !cards.length;
+  list.innerHTML = cards.join("");
+}
+window.__LL.pins = { is: isPinned, toggle: togglePin };
+document.addEventListener("click", function(e){
+  if (!e.target || !e.target.closest) return;
+  var b = e.target.closest("[data-pin]"); if (!b) return;
+  var card = b.closest("[data-open-logs]"); if (!card) return;
+  togglePin(card.getAttribute("data-lg"), card.getAttribute("data-open-logs"), card.getAttribute("data-stat-key"));
+});
+
 function propCard(p, lg){
   var l10 = dirRate(p, "L10");
   /* Signal mode only: the Why? breakdown rides on the card as data
@@ -1041,6 +1090,7 @@ function propCard(p, lg){
     + '<div class="rates">' + rateCell(p, "L5") + rateCell(p, "L10") + rateCell(p, "L20") + '</div>'
     + '<div class="cardfoot"><span class="note">' + p.gp + ' games logged · hit rates vs this line</span>'
     + (sig ? '<button class="whybtn" data-why="1" data-no-log data-sig="' + Math.round(sig.score) + '" data-hit="' + Math.round(sig.hit) + '" data-raw="' + Math.round(sig.rate) + '" data-shrunk="' + Math.round(sig.shrunk * 100) + '" data-vol="' + sig.vol.toFixed(2) + '" data-sample="' + sig.sample.toFixed(2) + '" data-meaning="' + sig.meaning.toFixed(2) + '" aria-haspopup="true" aria-expanded="false" aria-controls="sigPop" aria-label="Why is this ranked here? Signal Score breakdown">Why?</button>' : '')
+    + '<button class="pinbtn" data-pin="1" data-no-log aria-pressed="' + (isPinned(lg, p.pid, p.key) ? "true" : "false") + '" aria-label="Pin this prop to My Board">' + (isPinned(lg, p.pid, p.key) ? "Pinned" : "Pin") + '</button>'
     + '<button class="openbtn" data-open-logs="' + esc(p.pid) + '" data-stat-key="' + esc(p.key) + '" data-lg="' + esc(lg) + '">Game log</button></div>'
     + '</article>';
 }
@@ -1110,6 +1160,8 @@ function renderDiscover(){
   $("#propGrid").innerHTML = list.length ? list.slice(0, 90).map(function(p){ return propCard(p, state.league); }).join("")
     : '<div class="emptybox" style="grid-column:1/-1">No props match those filters. Loosen the minimum hit rate or pick another stat.</div>';
   renderSecPreview();
+  renderMyBoard();
+  syncPinButtons();
 }
 /* One delegated handler for EVERY player surface: any element carrying
    data-open-logs (prop cards, watchlist / riser cards, cheatsheet rows,
@@ -2493,6 +2545,7 @@ function dealCard(x){
     + '<span class="avg">Avg <b>' + fmtVal(p.avg) + '</b><br>L10 avg <b>' + fmtVal(p.l10avg) + '</b> · Last <b>' + fmtVal(p.last) + '</b></span></div>'
     + '<div class="rates">' + rateCell(p, "L5") + rateCell(p, "L10") + rateCell(p, "L20") + '</div>'
     + '<div class="cardfoot"><span class="note">' + p.gp + ' games logged · hit rates vs this line' + (dmm ? ' · Model <b>' + Math.round(dmm.pDir(p.line, p.dir) * 100) + '%</b>' : '') + '</span>'
+    + '<button class="pinbtn" data-pin="1" data-no-log aria-pressed="' + (isPinned(lg, p.pid, p.key) ? "true" : "false") + '" aria-label="Pin this prop to My Board">' + (isPinned(lg, p.pid, p.key) ? "Pinned" : "Pin") + '</button>'
     + '<button class="openbtn" data-open-logs="' + esc(p.pid) + '" data-stat-key="' + esc(p.key) + '" data-lg="' + esc(lg) + '">Game log</button></div>'
     + '</article>';
 }
@@ -4153,11 +4206,12 @@ function renderWorkstation(){
   var h2hAvg = h2hVals.length ? h2hVals.reduce(function(a, b){ return a + b; }, 0) / h2hVals.length : null;
   var xgfCell = (lg === "NHL" && p.xgf != null && !isNaN(p.xgf)) ? '<div class="sumcell"><span>xGF% · MoneyPuck</span><b>' + (+p.xgf).toFixed(1) + '</b></div>' : '';
   var efgCell = (lg === "NBA" && p.efg != null && !isNaN(p.efg)) ? '<div class="sumcell"><span>eFG%</span><b>' + (+p.efg).toFixed(1) + '</b></div>' : '';
+  var wsPinned = (window.__LL && window.__LL.pins) ? window.__LL.pins.is(lg, ws.pid, ws.stat) : false;
   $("#wsPanel").innerHTML =
     '<div class="sumtop">'
     + '<div class="seg" role="group" aria-label="Over or under"><button data-wsdir="Over" aria-pressed="' + (ws.dir === "Over") + '">Over</button><button data-wsdir="Under" aria-pressed="' + (ws.dir === "Under") + '">Under</button></div>'
     + '<div class="stepper sm"><button id="stepDown" aria-label="Lower the line">−</button><div class="val"><span id="stepVal">' + fmtVal(ws.line) + '</span><small>Line · ' + esc(statLabel(ws.stat)) + '</small></div><button id="stepUp" aria-label="Raise the line">+</button></div>'
-    + '</div>'
+    + '<button class="pinbtn wspin" id="wsPinBtn" type="button" aria-pressed="' + (wsPinned ? "true" : "false") + '">' + (wsPinned ? "Pinned to My Board" : "Pin prop") + '</button></div>'
     + '<div class="ratechips">'
     + '<div class="rchip"><span>L5</span><b>' + wRate(5) + '</b></div>'
     + '<div class="rchip"><span>L10</span><b>' + wRate(10) + '</b></div>'
@@ -4188,7 +4242,16 @@ function renderWorkstation(){
     if (t && window.__LL && window.__LL.edgeVerdict)
       t.innerHTML = window.__LL.edgeVerdict(S.league, S.ws.pid, S.ws.stat, S.ws.line, S.ws.dir, eo.value);
   });
+  var pb = $("#wsPinBtn");
+  if (pb) pb.addEventListener("click", function(){
+    if (!(window.__LL && window.__LL.pins)) return;
+    window.__LL.pins.toggle(S.league, S.ws.pid, S.ws.stat);
+    var on = window.__LL.pins.is(S.league, S.ws.pid, S.ws.stat);
+    pb.setAttribute("aria-pressed", on ? "true" : "false");
+    pb.textContent = on ? "Pinned to My Board" : "Pin prop";
+  });
   renderGraph(rows);
+  renderTrend();
   renderCompactLog(rows);
   renderFullTable(rows);
   renderH2hBlock();
@@ -4218,6 +4281,36 @@ function renderGraph(rows){
     + '<svg viewBox="0 0 ' + W + ' 122" width="100%" height="106" role="img" aria-label="Bar chart of game by game ' + esc(statLabel(ws.stat)) + ' against the line">'
     + '<line x1="30" y1="16" x2="30" y2="' + base + '" stroke="var(--line2)"/><line x1="30" y1="' + base + '" x2="545" y2="' + base + '" stroke="var(--line2)"/>'
     + '<line x1="30" y1="' + ly.toFixed(1) + '" x2="545" y2="' + ly.toFixed(1) + '" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="6 5"/>' + bars + '</svg>';
+}
+function renderTrend(){
+  var el = $("#wsTrend"); if (!el) return;
+  var ws = S.ws;
+  var vals = [];
+  allRows().forEach(function(r){ var v = statVal(r, ws.stat); if (v != null) vals.push(v); });
+  vals.reverse();
+  if (vals.length > 82) vals = vals.slice(vals.length - 82);
+  if (vals.length < 10){ el.innerHTML = ""; return; }
+  var roll = vals.map(function(_, i){
+    var a = vals.slice(Math.max(0, i - 9), i + 1);
+    return a.reduce(function(x, y){ return x + y; }, 0) / a.length;
+  });
+  var W = 560, H = 128, base = 106, top = 14;
+  var all = vals.concat(roll, [ws.line]);
+  var max = Math.max.apply(null, all) * 1.08, min = Math.min.apply(null, all);
+  min = Math.max(0, min - (max - min) * 0.15); if (max <= min) max = min + 1;
+  var X = function(i){ return 34 + (W - 48) * (i / (vals.length - 1)); };
+  var Y = function(v){ return top + (base - top) * (1 - (v - min) / (max - min)); };
+  var raw = vals.map(function(v, i){ return (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1); }).join(" ");
+  var rol = roll.map(function(v, i){ return (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1); }).join(" ");
+  var ly = Y(ws.line), n = vals.length;
+  var l10 = roll[n - 1], p10 = n >= 20 ? roll[n - 11] : null;
+  var dtxt = p10 == null ? "" : ' \u00b7 last-10 avg ' + fmtVal(l10) + ' vs prior 10 ' + fmtVal(p10) + ' (' + (l10 - p10 >= 0 ? "\u25b2 +" : "\u25bc ") + fmtVal(l10 - p10) + ')';
+  el.innerHTML = '<div class="ghead"><b>Season trend \u00b7 ' + esc(statLabel(ws.stat)) + '</b><span>game values faint \u00b7 rolling 10-game avg bold \u00b7 ' + n + ' games' + dtxt + '</span></div>'
+    + '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="112" role="img" aria-label="Season trend chart for ' + esc(statLabel(ws.stat)) + '">'
+    + '<line x1="30" y1="' + ly.toFixed(1) + '" x2="545" y2="' + ly.toFixed(1) + '" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="6 5"/>'
+    + '<path d="' + raw + '" fill="none" stroke="var(--ink3)" stroke-width="1.2" opacity="0.55"/>'
+    + '<path d="' + rol + '" fill="none" stroke="var(--accent)" stroke-width="2.4"/>'
+    + '<circle cx="' + X(n - 1).toFixed(1) + '" cy="' + Y(roll[n - 1]).toFixed(1) + '" r="3.4" fill="var(--accent)"/></svg>';
 }
 function renderCompactLog(rows){
   var ws = S.ws;
