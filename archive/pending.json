@@ -12,31 +12,6 @@
   {
    "league": "NFL",
    "snapshotDate": "2026-11-19",
-   "pid": "4697815",
-   "name": "Rachaad White",
-   "team": "WSH",
-   "key": "receptions",
-   "stat": "Receptions",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    8
-   ],
-   "l20": [
-    6,
-    8
-   ],
-   "gameDate": "2026-11-23",
-   "opp": "CIN"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-19",
    "pid": "4362921",
    "name": "Tyquan Thornton",
    "team": "KC",
@@ -108,31 +83,6 @@
    ],
    "gameDate": "2026-11-19",
    "opp": "VGK"
-  },
-  {
-   "league": "NFL",
-   "snapshotDate": "2026-11-20",
-   "pid": "4697815",
-   "name": "Rachaad White",
-   "team": "WSH",
-   "key": "receptions",
-   "stat": "Receptions",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    6,
-    8
-   ],
-   "l20": [
-    6,
-    8
-   ],
-   "gameDate": "2026-11-23",
-   "opp": "CIN"
   },
   {
    "league": "NFL",
@@ -9018,6 +8968,33 @@
     "pModel": 0.726,
     "value": 1,
     "result": "MISS"
+   },
+   {
+    "league": "NFL",
+    "snapshotDate": "2026-11-20",
+    "pid": "4697815",
+    "name": "Rachaad White",
+    "team": "WSH",
+    "key": "receptions",
+    "stat": "Receptions",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     6,
+     8
+    ],
+    "l20": [
+     6,
+     8
+    ],
+    "gameDate": "2026-11-23",
+    "opp": "CIN",
+    "value": 0,
+    "result": "HIT"
    }
   ]
  }
