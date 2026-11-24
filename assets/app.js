@@ -1040,6 +1040,7 @@ function togglePin(lg, pid, key){
   savePins(list);
   renderMyBoard();
   syncPinButtons();
+  updatePinBubble(!has);
 }
 function syncPinButtons(){
   $$("[data-pin]").forEach(function(b){
@@ -1062,7 +1063,41 @@ function renderMyBoard(){
   sec.hidden = !cards.length;
   list.innerHTML = cards.join("");
 }
+
+/* Floating My Board bubble: shows the pin count in the corner and
+   grows by one with a pop each time a leg is added. Tapping it jumps
+   to the My Board section (every app page carries the Props view, so
+   it works from anywhere, Shuffle included). */
+function ensurePinBubble(){
+  var b = $("#pinBubble");
+  if (b) return b;
+  b = document.createElement("button");
+  b.id = "pinBubble"; b.type = "button"; b.hidden = true;
+  b.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" fill="currentColor"/></svg><span class="pbn">0</span>';
+  b.addEventListener("click", gotoMyBoard);
+  document.body.appendChild(b);
+  return b;
+}
+function updatePinBubble(popIt){
+  var b = ensurePinBubble(), n = loadPins().length;
+  b.hidden = !n;
+  var num = b.querySelector(".pbn"); if (num) num.textContent = n;
+  b.setAttribute("aria-label", "My Board \u2014 " + n + " pinned prop" + (n === 1 ? "" : "s") + ". Tap to open.");
+  if (popIt && n){ b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }
+}
+function gotoMyBoard(){
+  var sec = $("#myBoardSec"); if (!sec) return;
+  var dv = $("#view-discover");
+  if (typeof showView === "function" && dv && !dv.classList.contains("active")) showView("discover");
+  renderMyBoard();
+  setTimeout(function(){
+    sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    sec.classList.add("mbflash");
+    setTimeout(function(){ sec.classList.remove("mbflash"); }, 1700);
+  }, 80);
+}
 window.__LL.pins = { is: isPinned, toggle: togglePin };
+updatePinBubble(false);
 document.addEventListener("click", function(e){
   if (!e.target || !e.target.closest) return;
   var b = e.target.closest("[data-pin]"); if (!b) return;

@@ -1108,3 +1108,11 @@
 .props-table th[data-col]{cursor:pointer}
 tr.dim{opacity:.35}
 .tprop.dim{opacity:.45}
+
+/* My Board corner bubble */
+#pinBubble{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:800;display:flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:10px 15px;font:inherit;font-size:16px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.28);cursor:pointer}
+#pinBubble[hidden]{display:none}
+#pinBubble.pop{animation:pinpop .35s ease}
+@keyframes pinpop{35%{transform:scale(1.18)}}
+#myBoardSec.mbflash{animation:mbflash 1.7s ease}
+@keyframes mbflash{0%,55%{background:var(--accent-soft)}100%{background:transparent}}
