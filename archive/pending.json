@@ -209,56 +209,6 @@
    "opp": "CIN"
   },
   {
-   "league": "NBA",
-   "snapshotDate": "2026-11-21",
-   "pid": "4395628",
-   "name": "Zion Williamson",
-   "team": "NO",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    12,
-    16
-   ],
-   "gameDate": "2026-11-21",
-   "opp": "SA"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-21",
-   "pid": "4395628",
-   "name": "Zion Williamson",
-   "team": "NO",
-   "key": "totalRebounds",
-   "stat": "Rebounds",
-   "dir": "Under",
-   "line": 6.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-21",
-   "opp": "SA"
-  },
-  {
    "league": "NFL",
    "snapshotDate": "2026-11-21",
    "pid": "4362921",
@@ -5080,6 +5030,60 @@
     ],
     "gameDate": "2026-11-21",
     "opp": "POR",
+    "value": null,
+    "result": "DNP"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-21",
+    "pid": "4395628",
+    "name": "Zion Williamson",
+    "team": "NO",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     16
+    ],
+    "gameDate": "2026-11-21",
+    "opp": "SA",
+    "value": null,
+    "result": "DNP"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-21",
+    "pid": "4395628",
+    "name": "Zion Williamson",
+    "team": "NO",
+    "key": "totalRebounds",
+    "stat": "Rebounds",
+    "dir": "Under",
+    "line": 6.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-21",
+    "opp": "SA",
     "value": null,
     "result": "DNP"
    }
