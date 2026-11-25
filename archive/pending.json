@@ -6,7 +6,8 @@
   "2026-11-21",
   "2026-11-22",
   "2026-11-23",
-  "2026-11-24"
+  "2026-11-24",
+  "2026-11-25"
  ],
  "pending": [
   {
@@ -258,656 +259,6 @@
    ],
    "gameDate": "2026-11-22",
    "opp": "PIT"
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4278562",
-   "name": "Paul Reed",
-   "team": "DET",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    10,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "ORL",
-   "pModel": 0.667
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "6583",
-   "name": "Anthony Davis",
-   "team": "WSH",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "BOS",
-   "pModel": 0.708
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4066372",
-   "name": "Kevin Huerter",
-   "team": "DET",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "ORL",
-   "pModel": 0.721
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "6442",
-   "name": "Kyrie Irving",
-   "team": "DAL",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 5.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    11,
-    14
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DEN",
-   "pModel": 0.641
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4397424",
-   "name": "Neemias Queta",
-   "team": "BOS",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    12,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "WSH",
-   "pModel": 0.597
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4684742",
-   "name": "Ausar Thompson",
-   "team": "DET",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 5.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    11,
-    15
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "ORL",
-   "pModel": 0.607
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "3978",
-   "name": "DeMar DeRozan",
-   "team": "DEN",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    10,
-    14
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DAL",
-   "pModel": 0.523
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4702382",
-   "name": "Tristan da Silva",
-   "team": "ORL",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    10,
-    14
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DET",
-   "pModel": 0.581
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "6442",
-   "name": "Kyrie Irving",
-   "team": "DAL",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    10,
-    14
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DEN",
-   "pModel": 0.607
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4066320",
-   "name": "Desmond Bane",
-   "team": "ORL",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    10,
-    15
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DET",
-   "pModel": 0.59
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4431767",
-   "name": "Christian Braun",
-   "team": "DEN",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Over",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    9,
-    15
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DAL",
-   "pModel": 0.551
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4066372",
-   "name": "Kevin Huerter",
-   "team": "DET",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "ORL",
-   "pModel": 0.713
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4066372",
-   "name": "Kevin Huerter",
-   "team": "DET",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Under",
-   "line": 12.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "ORL",
-   "pModel": 0.684
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4066372",
-   "name": "Kevin Huerter",
-   "team": "DET",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 3.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    13,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "ORL",
-   "pModel": 0.654
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "5142718",
-   "name": "AJ Dybantsa",
-   "team": "WSH",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 3.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    11,
-    14
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "BOS",
-   "pModel": 0.64
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "3078576",
-   "name": "Derrick White",
-   "team": "BOS",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    12,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "WSH",
-   "pModel": 0.689
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "3064290",
-   "name": "Aaron Gordon",
-   "team": "DEN",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    11,
-    15
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DAL",
-   "pModel": 0.644
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "5142718",
-   "name": "AJ Dybantsa",
-   "team": "WSH",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    10,
-    14
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "BOS",
-   "pModel": 0.659
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4712849",
-   "name": "Anthony Black",
-   "team": "ORL",
-   "key": "threePointersMade",
-   "stat": "3PM",
-   "dir": "Over",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    9,
-    13
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DET",
-   "pModel": 0.538
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "3112335",
-   "name": "Nikola Jokic",
-   "team": "DEN",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    10,
-    15
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DAL",
-   "pModel": 0.662
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4251",
-   "name": "Paul George",
-   "team": "BOS",
-   "key": "combo",
-   "stat": "Pts+Reb+Ast",
-   "dir": "Over",
-   "line": 28.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    9,
-    14
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "WSH",
-   "pModel": 0.591
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "3078576",
-   "name": "Derrick White",
-   "team": "BOS",
-   "key": "totalRebounds",
-   "stat": "Rebounds",
-   "dir": "Over",
-   "line": 2.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    10,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "WSH",
-   "pModel": 0.585
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "3908845",
-   "name": "John Collins",
-   "team": "DET",
-   "key": "blocks",
-   "stat": "Blocks",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    10,
-    16
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "ORL",
-   "pModel": 0.626
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "4066320",
-   "name": "Desmond Bane",
-   "team": "ORL",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Over",
-   "line": 2.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    9,
-    15
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "DET",
-   "pModel": 0.51
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-24",
-   "pid": "5160992",
-   "name": "Alex Sarr",
-   "team": "WSH",
-   "key": "totalRebounds",
-   "stat": "Rebounds",
-   "dir": "Over",
-   "line": 7.5,
-   "l5": [
-    2,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    10,
-    17
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "BOS",
-   "pModel": 0.42
   },
   {
    "league": "NFL",
@@ -1560,17 +911,95 @@
    "pModel": 0.499
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3151096",
-   "name": "Victor Olofsson",
-   "team": "VGK",
-   "key": "points",
-   "stat": "Points",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4437244",
+   "name": "Jalen Green",
+   "team": "PHX",
+   "key": "blocks",
+   "stat": "Blocks",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    10,
+    10
+   ],
+   "l20": [
+    12,
+    16
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "HOU",
+   "pModel": 0.631
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4871144",
+   "name": "Alperen Sengun",
+   "team": "HOU",
+   "key": "threePointersMade",
+   "stat": "3PM",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    14,
+    16
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "PHX",
+   "pModel": 0.613
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4432194",
+   "name": "Day'Ron Sharpe",
+   "team": "BKN",
+   "key": "threePointersMade",
+   "stat": "3PM",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    12,
+    16
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "MIL",
+   "pModel": 0.632
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4683778",
+   "name": "Jared McCain",
+   "team": "OKC",
+   "key": "steals",
+   "stat": "Steals",
    "dir": "Under",
    "line": 1.5,
    "l5": [
-    5,
+    4,
     5
    ],
    "l10": [
@@ -1578,49 +1007,23 @@
     10
    ],
    "l20": [
-    10,
-    12
+    16,
+    18
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.8
+   "gameDate": "2026-11-25",
+   "opp": "MIN",
+   "pModel": 0.743
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3151096",
-   "name": "Victor Olofsson",
-   "team": "VGK",
-   "key": "assists",
-   "stat": "Assists",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "3992",
+   "name": "James Harden",
+   "team": "CLE",
+   "key": "threePointersMade",
+   "stat": "3PM",
    "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    9,
-    12
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.672
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3114985",
-   "name": "Ivan Barbashev",
-   "team": "VGK",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 0.5,
+   "line": 3.5,
    "l5": [
     4,
     5
@@ -1631,48 +1034,22 @@
    ],
    "l20": [
     15,
-    20
+    17
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.615
+   "gameDate": "2026-11-25",
+   "opp": "NY",
+   "pModel": 0.697
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3648002",
-   "name": "Jack Eichel",
-   "team": "VGK",
-   "key": "goals",
-   "stat": "Goals",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4591725",
+   "name": "Ryan Rollins",
+   "team": "MIL",
+   "key": "steals",
+   "stat": "Steals",
    "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    14,
-    20
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.651
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "5545",
-   "name": "Mark Stone",
-   "team": "VGK",
-   "key": "goals",
-   "stat": "Goals",
-   "dir": "Under",
-   "line": 0.5,
+   "line": 1.5,
    "l5": [
     4,
     5
@@ -1683,21 +1060,125 @@
    ],
    "l20": [
     14,
-    20
+    16
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.611
+   "gameDate": "2026-11-25",
+   "opp": "BKN",
+   "pModel": 0.652
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3899937",
-   "name": "Mitch Marner",
-   "team": "VGK",
-   "key": "shotsTotal",
-   "stat": "Shots",
-   "dir": "Over",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4065732",
+   "name": "De'Andre Hunter",
+   "team": "SAC",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Under",
+   "line": 2.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    13,
+    15
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "GS",
+   "pModel": 0.634
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "6589",
+   "name": "Draymond Green",
+   "team": "GS",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    12,
+    14
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "SAC",
+   "pModel": 0.735
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4432639",
+   "name": "Jabari Smith Jr.",
+   "team": "HOU",
+   "key": "blocks",
+   "stat": "Blocks",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    15,
+    18
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "PHX",
+   "pModel": 0.74
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "5105623",
+   "name": "Kel'el Ware",
+   "team": "MIL",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    15,
+    18
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "BKN",
+   "pModel": 0.652
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "3134907",
+   "name": "Kyle Kuzma",
+   "team": "MIL",
+   "key": "threePointersMade",
+   "stat": "3PM",
+   "dir": "Under",
    "line": 2.5,
    "l5": [
     4,
@@ -1708,21 +1189,21 @@
     10
    ],
    "l20": [
-    11,
-    20
+    14,
+    17
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.508
+   "gameDate": "2026-11-25",
+   "opp": "BKN",
+   "pModel": 0.699
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "2976844",
-   "name": "Tomas Hertl",
-   "team": "VGK",
-   "key": "points",
-   "stat": "Points",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4871144",
+   "name": "Alperen Sengun",
+   "team": "HOU",
+   "key": "blocks",
+   "stat": "Blocks",
    "dir": "Under",
    "line": 1.5,
    "l5": [
@@ -1730,25 +1211,155 @@
     5
    ],
    "l10": [
-    7,
+    8,
     10
    ],
    "l20": [
-    17,
-    20
+    13,
+    16
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.725
+   "gameDate": "2026-11-25",
+   "opp": "PHX",
+   "pModel": 0.722
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "4352722",
-   "name": "Evan Bouchard",
-   "team": "EDM",
-   "key": "assists",
-   "stat": "Assists",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "3936099",
+   "name": "Derrick Jones Jr.",
+   "team": "LAC",
+   "key": "blocks",
+   "stat": "Blocks",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    12,
+    15
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "MEM",
+   "pModel": 0.713
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4683021",
+   "name": "Deni Avdija",
+   "team": "POR",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    12,
+    15
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "SA",
+   "pModel": 0.73
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4278104",
+   "name": "Michael Porter Jr.",
+   "team": "BKN",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    11,
+    15
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "MIL",
+   "pModel": 0.681
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "1966",
+   "name": "LeBron James",
+   "team": "PHI",
+   "key": "combo",
+   "stat": "Pts+Reb+Ast",
+   "dir": "Over",
+   "line": 30.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    9,
+    14
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "MIA",
+   "pModel": 0.578
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "3908809",
+   "name": "Donovan Mitchell",
+   "team": "CLE",
+   "key": "combo",
+   "stat": "Pts+Reb+Ast",
+   "dir": "Over",
+   "line": 35.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    10,
+    17
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "NY",
+   "pModel": 0.39
+  },
+  {
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4066328",
+   "name": "Jarrett Allen",
+   "team": "CLE",
+   "key": "blocks",
+   "stat": "Blocks",
    "dir": "Over",
    "line": 0.5,
    "l5": [
@@ -1760,51 +1371,25 @@
     10
    ],
    "l20": [
-    16,
-    20
+    12,
+    15
    ],
-   "gameDate": "2026-11-24",
-   "opp": "VGK",
-   "pModel": 0.664
+   "gameDate": "2026-11-25",
+   "opp": "NY",
+   "pModel": 0.731
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3114727",
-   "name": "Leon Draisaitl",
-   "team": "EDM",
-   "key": "shotsTotal",
-   "stat": "Shots",
-   "dir": "Under",
-   "line": 4.5,
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4395725",
+   "name": "Tyler Herro",
+   "team": "MIL",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Over",
+   "line": 0.5,
    "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    16,
-    20
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "VGK",
-   "pModel": 0.714
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3042062",
-   "name": "Jason Dickinson",
-   "team": "EDM",
-   "key": "shotsTotal",
-   "stat": "Shots",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
+    5,
     5
    ],
    "l10": [
@@ -1815,48 +1400,22 @@
     13,
     17
    ],
-   "gameDate": "2026-11-24",
-   "opp": "VGK",
-   "pModel": 0.709
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3648002",
-   "name": "Jack Eichel",
-   "team": "VGK",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    15,
-    20
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
+   "gameDate": "2026-11-25",
+   "opp": "BKN",
    "pModel": 0.657
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "2976844",
-   "name": "Tomas Hertl",
-   "team": "VGK",
-   "key": "goals",
-   "stat": "Goals",
-   "dir": "Under",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4684740",
+   "name": "Amen Thompson",
+   "team": "HOU",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Over",
    "line": 0.5,
    "l5": [
-    4,
+    3,
     5
    ],
    "l10": [
@@ -1864,48 +1423,22 @@
     10
    ],
    "l20": [
-    15,
-    20
+    13,
+    17
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.598
+   "gameDate": "2026-11-25",
+   "opp": "PHX",
+   "pModel": 0.625
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "4352722",
-   "name": "Evan Bouchard",
-   "team": "EDM",
-   "key": "goals",
-   "stat": "Goals",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    14,
-    20
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "VGK",
-   "pModel": 0.621
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3114727",
-   "name": "Leon Draisaitl",
-   "team": "EDM",
-   "key": "goals",
-   "stat": "Goals",
-   "dir": "Under",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4066261",
+   "name": "Bam Adebayo",
+   "team": "MIA",
+   "key": "steals",
+   "stat": "Steals",
+   "dir": "Over",
    "line": 1.5,
    "l5": [
     4,
@@ -1916,23 +1449,23 @@
     10
    ],
    "l20": [
-    14,
-    20
+    12,
+    16
    ],
-   "gameDate": "2026-11-24",
-   "opp": "VGK",
-   "pModel": 0.701
+   "gameDate": "2026-11-25",
+   "opp": "PHI",
+   "pModel": 0.546
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3899937",
-   "name": "Mitch Marner",
-   "team": "VGK",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4684740",
+   "name": "Amen Thompson",
+   "team": "HOU",
    "key": "assists",
    "stat": "Assists",
-   "dir": "Under",
-   "line": 1.5,
+   "dir": "Over",
+   "line": 2.5,
    "l5": [
     4,
     5
@@ -1942,21 +1475,21 @@
     10
    ],
    "l20": [
-    14,
-    20
+    12,
+    17
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.706
+   "gameDate": "2026-11-25",
+   "opp": "PHX",
+   "pModel": 0.602
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3114727",
-   "name": "Leon Draisaitl",
-   "team": "EDM",
-   "key": "assists",
-   "stat": "Assists",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4278073",
+   "name": "Shai Gilgeous-Alexander",
+   "team": "OKC",
+   "key": "blocks",
+   "stat": "Blocks",
    "dir": "Over",
    "line": 0.5,
    "l5": [
@@ -1969,24 +1502,24 @@
    ],
    "l20": [
     12,
-    20
+    17
    ],
-   "gameDate": "2026-11-24",
-   "opp": "VGK",
-   "pModel": 0.572
+   "gameDate": "2026-11-25",
+   "opp": "MIN",
+   "pModel": 0.662
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3648002",
-   "name": "Jack Eichel",
-   "team": "VGK",
-   "key": "assists",
-   "stat": "Assists",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4600663",
+   "name": "Zach Edey",
+   "team": "MEM",
+   "key": "blocks",
+   "stat": "Blocks",
    "dir": "Over",
    "line": 0.5,
    "l5": [
-    4,
+    3,
     5
    ],
    "l10": [
@@ -1994,25 +1527,25 @@
     10
    ],
    "l20": [
-    9,
-    20
+    10,
+    14
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.551
+   "gameDate": "2026-11-25",
+   "opp": "LAC",
+   "pModel": 0.635
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "2976844",
-   "name": "Tomas Hertl",
-   "team": "VGK",
-   "key": "shotsTotal",
-   "stat": "Shots",
+   "league": "NBA",
+   "snapshotDate": "2026-11-25",
+   "pid": "4711294",
+   "name": "Matas Buzelis",
+   "team": "CHI",
+   "key": "assists",
+   "stat": "Assists",
    "dir": "Over",
-   "line": 2.5,
+   "line": 1.5,
    "l5": [
-    4,
+    2,
     5
    ],
    "l10": [
@@ -2020,23 +1553,361 @@
     10
    ],
    "l20": [
-    9,
-    20
+    12,
+    17
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.461
+   "gameDate": "2026-11-25",
+   "opp": "CHA",
+   "pModel": 0.583
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "2976844",
-   "name": "Tomas Hertl",
-   "team": "VGK",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Over",
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4379399",
+   "name": "James Cook III",
+   "team": "BUF",
+   "key": "rushingTouchdowns",
+   "stat": "Rush TD",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    9,
+    10
+   ],
+   "gameDate": "2026-11-26",
+   "opp": "KC",
+   "pModel": 0.766
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4430878",
+   "name": "Jaxon Smith-Njigba",
+   "team": "SEA",
+   "key": "receivingTouchdowns",
+   "stat": "Rec TD",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    8,
+    10
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "SF",
+   "pModel": 0.675
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3117251",
+   "name": "Christian McCaffrey",
+   "team": "SF",
+   "key": "rushingTouchdowns",
+   "stat": "Rush TD",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    8,
+    10
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "SEA",
+   "pModel": 0.754
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4702555",
+   "name": "Jonah Coleman",
+   "team": "DEN",
+   "key": "rushingYards",
+   "stat": "Rush Yds",
+   "dir": "Under",
+   "line": 60.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    4,
+    5
+   ],
+   "l20": [
+    4,
+    5
+   ],
+   "gameDate": "2026-11-27",
+   "opp": "PIT",
+   "pModel": 0.567
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4702555",
+   "name": "Jonah Coleman",
+   "team": "DEN",
+   "key": "rushingTouchdowns",
+   "stat": "Rush TD",
+   "dir": "Under",
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    4,
+    5
+   ],
+   "l20": [
+    4,
+    5
+   ],
+   "gameDate": "2026-11-27",
+   "opp": "PIT",
+   "pModel": 0.602
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3117251",
+   "name": "Christian McCaffrey",
+   "team": "SF",
+   "key": "receivingTouchdowns",
+   "stat": "Rec TD",
+   "dir": "Under",
    "line": 0.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    8,
+    10
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "SEA",
+   "pModel": 0.64
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4890973",
+   "name": "Ashton Jeanty",
+   "team": "LV",
+   "key": "receivingTouchdowns",
+   "stat": "Rec TD",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    8,
+    11
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "CLE",
+   "pModel": 0.659
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4695883",
+   "name": "Jalen Coker",
+   "team": "CAR",
+   "key": "receivingTouchdowns",
+   "stat": "Rec TD",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    9
+   ],
+   "l20": [
+    7,
+    9
+   ],
+   "gameDate": "2026-11-30",
+   "opp": "TB",
+   "pModel": 0.618
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4362921",
+   "name": "Tyquan Thornton",
+   "team": "KC",
+   "key": "receivingTouchdowns",
+   "stat": "Rec TD",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    3,
+    4
+   ],
+   "l10": [
+    3,
+    4
+   ],
+   "l20": [
+    3,
+    4
+   ],
+   "gameDate": "2026-11-26",
+   "opp": "BUF",
+   "pModel": 0.607
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4431611",
+   "name": "Caleb Williams",
+   "team": "CHI",
+   "key": "rushingYards",
+   "stat": "Rush Yds",
+   "dir": "Under",
+   "line": 22.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    5,
+    7
+   ],
+   "l20": [
+    5,
+    7
+   ],
+   "gameDate": "2026-11-26",
+   "opp": "DET",
+   "pModel": 0.578
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4431611",
+   "name": "Caleb Williams",
+   "team": "CHI",
+   "key": "passingYards",
+   "stat": "Pass Yds",
+   "dir": "Over",
+   "line": 246.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    5,
+    7
+   ],
+   "l20": [
+    5,
+    7
+   ],
+   "gameDate": "2026-11-26",
+   "opp": "DET",
+   "pModel": 0.535
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3126486",
+   "name": "Deebo Samuel Sr.",
+   "team": "SF",
+   "key": "receivingYards",
+   "stat": "Rec Yds",
+   "dir": "Under",
+   "line": 36.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    5,
+    7
+   ],
+   "l20": [
+    5,
+    7
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "SEA",
+   "pModel": 0.511
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3126486",
+   "name": "Deebo Samuel Sr.",
+   "team": "SF",
+   "key": "receptions",
+   "stat": "Receptions",
+   "dir": "Under",
+   "line": 3.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    5,
+    7
+   ],
+   "l20": [
+    5,
+    7
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "SEA",
+   "pModel": 0.492
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "14880",
+   "name": "Kirk Cousins",
+   "team": "MIN",
+   "key": "passingYards",
+   "stat": "Pass Yds",
+   "dir": "Under",
+   "line": 262.5,
    "l5": [
     4,
     5
@@ -2047,20 +1918,20 @@
    ],
    "l20": [
     8,
-    20
+    11
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.467
+   "gameDate": "2026-11-29",
+   "opp": "ATL",
+   "pModel": 0.642
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "5545",
-   "name": "Mark Stone",
-   "team": "VGK",
-   "key": "points",
-   "stat": "Points",
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4361579",
+   "name": "Javonte Williams",
+   "team": "DAL",
+   "key": "rushingTouchdowns",
+   "stat": "Rush TD",
    "dir": "Over",
    "line": 0.5,
    "l5": [
@@ -2068,51 +1939,805 @@
     5
    ],
    "l10": [
-    6,
+    7,
+    10
+   ],
+   "l20": [
+    8,
+    11
+   ],
+   "gameDate": "2026-11-26",
+   "opp": "PHI",
+   "pModel": 0.618
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "14880",
+   "name": "Kirk Cousins",
+   "team": "MIN",
+   "key": "passingTouchdowns",
+   "stat": "Pass TD",
+   "dir": "Over",
+   "line": 1.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    8,
+    11
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "ATL",
+   "pModel": 0.549
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4426388",
+   "name": "Jameson Williams",
+   "team": "DET",
+   "key": "receptions",
+   "stat": "Receptions",
+   "dir": "Over",
+   "line": 3.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    7,
+    10
+   ],
+   "gameDate": "2026-11-26",
+   "opp": "CHI",
+   "pModel": 0.588
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4569173",
+   "name": "Rhamondre Stevenson",
+   "team": "NE",
+   "key": "receptions",
+   "stat": "Receptions",
+   "dir": "Over",
+   "line": 2.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    7,
+    10
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "LAC",
+   "pModel": 0.569
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4428718",
+   "name": "Tre Tucker",
+   "team": "LV",
+   "key": "receptions",
+   "stat": "Receptions",
+   "dir": "Over",
+   "line": 3.5,
+   "l5": [
+    2,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    7,
+    11
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "CLE",
+   "pModel": 0.407
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4887558",
+   "name": "Emanuel Wilson",
+   "team": "SEA",
+   "key": "rushingYards",
+   "stat": "Rush Yds",
+   "dir": "Over",
+   "line": 50.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    5,
+    8
+   ],
+   "l20": [
+    5,
+    8
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "SF",
+   "pModel": 0.429
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4428331",
+   "name": "Rashee Rice",
+   "team": "KC",
+   "key": "receptions",
+   "stat": "Receptions",
+   "dir": "Over",
+   "line": 4.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    5,
+    8
+   ],
+   "l20": [
+    5,
+    8
+   ],
+   "gameDate": "2026-11-26",
+   "opp": "BUF",
+   "pModel": 0.549
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3915416",
+   "name": "DJ Moore",
+   "team": "BUF",
+   "key": "receivingYards",
+   "stat": "Rec Yds",
+   "dir": "Over",
+   "line": 58.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    5,
+    8
+   ],
+   "l20": [
+    5,
+    8
+   ],
+   "gameDate": "2026-11-26",
+   "opp": "KC",
+   "pModel": 0.478
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3915416",
+   "name": "DJ Moore",
+   "team": "BUF",
+   "key": "receptions",
+   "stat": "Receptions",
+   "dir": "Over",
+   "line": 3.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    5,
+    8
+   ],
+   "l20": [
+    5,
+    8
+   ],
+   "gameDate": "2026-11-26",
+   "opp": "KC",
+   "pModel": 0.605
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4567750",
+   "name": "Emeka Egbuka",
+   "team": "TB",
+   "key": "receivingYards",
+   "stat": "Rec Yds",
+   "dir": "Over",
+   "line": 37.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    5,
+    8
+   ],
+   "l20": [
+    5,
+    8
+   ],
+   "gameDate": "2026-11-30",
+   "opp": "CAR",
+   "pModel": 0.497
+  },
+  {
+   "league": "NFL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4258173",
+   "name": "Nico Collins",
+   "team": "HOU",
+   "key": "receivingTouchdowns",
+   "stat": "Rec TD",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    3,
+    5
+   ],
+   "l10": [
+    5,
+    8
+   ],
+   "l20": [
+    5,
+    8
+   ],
+   "gameDate": "2026-11-29",
+   "opp": "BAL",
+   "pModel": 0.499
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3120307",
+   "name": "Viktor Arvidsson",
+   "team": "DET",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    10,
+    10
+   ],
+   "l20": [
+    16,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "VAN",
+   "pModel": 0.65
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4874730",
+   "name": "Matt Coronato",
+   "team": "CGY",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    10,
+    10
+   ],
+   "l20": [
+    15,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "PIT",
+   "pModel": 0.634
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4915855",
+   "name": "Arseny Gritsyuk",
+   "team": "NJ",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    10,
     10
    ],
    "l20": [
     13,
     20
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.608
+   "gameDate": "2026-11-25",
+   "opp": "CBJ",
+   "pModel": 0.641
   },
   {
    "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3114727",
-   "name": "Leon Draisaitl",
-   "team": "EDM",
+   "snapshotDate": "2026-11-25",
+   "pid": "4588205",
+   "name": "Pontus Holmberg",
+   "team": "TB",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    16,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "CAR",
+   "pModel": 0.681
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4565228",
+   "name": "Dylan Cozens",
+   "team": "OTT",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    16,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "FLA",
+   "pModel": 0.669
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "5103645",
+   "name": "Jackson Blake",
+   "team": "CAR",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    16,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "TB",
+   "pModel": 0.665
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4874741",
+   "name": "Mackie Samoskevich",
+   "team": "SEA",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    15,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "CHI",
+   "pModel": 0.681
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "5216897",
+   "name": "Matvei Gridin",
+   "team": "CGY",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    15,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "PIT",
+   "pModel": 0.709
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4565230",
+   "name": "Trevor Zegras",
+   "team": "PHI",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    15,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "WSH",
+   "pModel": 0.642
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3120307",
+   "name": "Viktor Arvidsson",
+   "team": "DET",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    15,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "VAN",
+   "pModel": 0.662
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3120307",
+   "name": "Viktor Arvidsson",
+   "team": "DET",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    13,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "VAN",
+   "pModel": 0.528
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4697382",
+   "name": "Alexis Lafreniere",
+   "team": "NYR",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    13,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "BUF",
+   "pModel": 0.59
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "5149170",
+   "name": "Matvei Michkov",
+   "team": "PHI",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    13,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "WSH",
+   "pModel": 0.593
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "5208",
+   "name": "Ryan O'Reilly",
+   "team": "NSH",
+   "key": "goals",
+   "stat": "Goals",
+   "dir": "Under",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    9,
+    10
+   ],
+   "l20": [
+    13,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "DAL",
+   "pModel": 0.6
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3025540",
+   "name": "Casey DeSmith",
+   "team": "DAL",
+   "key": "saves",
+   "stat": "Saves",
+   "dir": "Over",
+   "line": 21.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    5,
+    6
+   ],
+   "l20": [
+    5,
+    6
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "NSH",
+   "pModel": 0.423
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "5037",
+   "name": "Steven Stamkos",
+   "team": "NSH",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    5,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    15,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "DAL",
+   "pModel": 0.67
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4781553",
+   "name": "Kent Johnson",
+   "team": "CBJ",
+   "key": "assists",
+   "stat": "Assists",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    8,
+    10
+   ],
+   "l20": [
+    11,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "NJ",
+   "pModel": 0.565
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3899952",
+   "name": "Kyle Connor",
+   "team": "WPG",
    "key": "points",
    "stat": "Points",
    "dir": "Over",
    "line": 1.5,
    "l5": [
-    3,
+    4,
     5
    ],
    "l10": [
-    6,
+    8,
     10
    ],
    "l20": [
-    12,
+    10,
     20
    ],
-   "gameDate": "2026-11-24",
-   "opp": "VGK",
-   "pModel": 0.549
+   "gameDate": "2026-11-25",
+   "opp": "BOS",
+   "pModel": 0.43
   },
   {
    "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3151096",
-   "name": "Victor Olofsson",
-   "team": "VGK",
-   "key": "goals",
-   "stat": "Goals",
+   "snapshotDate": "2026-11-25",
+   "pid": "4270247",
+   "name": "Michael Eyssimont",
+   "team": "BOS",
+   "key": "shotsTotal",
+   "stat": "Shots",
+   "dir": "Over",
+   "line": 2.5,
+   "l5": [
+    3,
+    4
+   ],
+   "l10": [
+    3,
+    4
+   ],
+   "l20": [
+    3,
+    4
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "WPG",
+   "pModel": 0.427
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "5149170",
+   "name": "Matvei Michkov",
+   "team": "PHI",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    14,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "WSH",
+   "pModel": 0.676
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "4319858",
+   "name": "Brady Tkachuk",
+   "team": "FLA",
+   "key": "points",
+   "stat": "Points",
    "dir": "Over",
    "line": 0.5,
    "l5": [
@@ -2120,94 +2745,120 @@
     5
    ],
    "l10": [
-    6,
-    10
-   ],
-   "l20": [
     7,
-    12
-   ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.477
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3895074",
-   "name": "Connor McDavid",
-   "team": "EDM",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Over",
-   "line": 1.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    5,
     10
    ],
    "l20": [
-    11,
+    14,
     20
    ],
-   "gameDate": "2026-11-24",
-   "opp": "VGK",
-   "pModel": 0.55
+   "gameDate": "2026-11-25",
+   "opp": "OTT",
+   "pModel": 0.653
   },
   {
    "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "3895074",
-   "name": "Connor McDavid",
-   "team": "EDM",
+   "snapshotDate": "2026-11-25",
+   "pid": "4874899",
+   "name": "Logan Stankoven",
+   "team": "CAR",
    "key": "shotsTotal",
    "stat": "Shots",
    "dir": "Over",
    "line": 2.5,
    "l5": [
-    1,
+    3,
     5
    ],
    "l10": [
-    5,
+    7,
     10
    ],
    "l20": [
-    11,
+    14,
     20
    ],
-   "gameDate": "2026-11-24",
-   "opp": "VGK",
-   "pModel": 0.492
+   "gameDate": "2026-11-25",
+   "opp": "TB",
+   "pModel": 0.63
   },
   {
    "league": "NHL",
-   "snapshotDate": "2026-11-24",
-   "pid": "5545",
-   "name": "Mark Stone",
-   "team": "VGK",
+   "snapshotDate": "2026-11-25",
+   "pid": "4781556",
+   "name": "Owen Power",
+   "team": "BUF",
    "key": "shotsTotal",
    "stat": "Shots",
    "dir": "Over",
-   "line": 1.5,
+   "line": 0.5,
    "l5": [
     2,
     5
    ],
    "l10": [
-    5,
+    7,
     10
    ],
    "l20": [
-    10,
+    14,
     20
    ],
-   "gameDate": "2026-11-24",
-   "opp": "EDM",
-   "pModel": 0.486
+   "gameDate": "2026-11-25",
+   "opp": "NYR",
+   "pModel": 0.687
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "3115032",
+   "name": "Brandon Montour",
+   "team": "SEA",
+   "key": "shotsTotal",
+   "stat": "Shots",
+   "dir": "Over",
+   "line": 1.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    13,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "CHI",
+   "pModel": 0.615
+  },
+  {
+   "league": "NHL",
+   "snapshotDate": "2026-11-25",
+   "pid": "5349",
+   "name": "Nazem Kadri",
+   "team": "COL",
+   "key": "points",
+   "stat": "Points",
+   "dir": "Over",
+   "line": 0.5,
+   "l5": [
+    4,
+    5
+   ],
+   "l10": [
+    7,
+    10
+   ],
+   "l20": [
+    13,
+    20
+   ],
+   "gameDate": "2026-11-25",
+   "opp": "MTL",
+   "pModel": 0.643
   }
  ],
  "graded": {
@@ -8995,6 +9646,1408 @@
     "opp": "CIN",
     "value": 0,
     "result": "HIT"
+   }
+  ],
+  "2026-11-24": [
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "5142718",
+    "name": "AJ Dybantsa",
+    "team": "WSH",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 3.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     11,
+     14
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "BOS",
+    "pModel": 0.64,
+    "value": 7,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "5142718",
+    "name": "AJ Dybantsa",
+    "team": "WSH",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     10,
+     14
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "BOS",
+    "pModel": 0.659,
+    "value": 2,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "3064290",
+    "name": "Aaron Gordon",
+    "team": "DEN",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     11,
+     15
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DAL",
+    "pModel": 0.644,
+    "value": 0,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "5160992",
+    "name": "Alex Sarr",
+    "team": "WSH",
+    "key": "totalRebounds",
+    "stat": "Rebounds",
+    "dir": "Over",
+    "line": 7.5,
+    "l5": [
+     2,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     10,
+     17
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "BOS",
+    "pModel": 0.42,
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4712849",
+    "name": "Anthony Black",
+    "team": "ORL",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Over",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     9,
+     13
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DET",
+    "pModel": 0.538,
+    "value": 0,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "6583",
+    "name": "Anthony Davis",
+    "team": "WSH",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "BOS",
+    "pModel": 0.708,
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4684742",
+    "name": "Ausar Thompson",
+    "team": "DET",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 5.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     11,
+     15
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "ORL",
+    "pModel": 0.607,
+    "value": 7,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4431767",
+    "name": "Christian Braun",
+    "team": "DEN",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Over",
+    "line": 2.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     9,
+     15
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DAL",
+    "pModel": 0.551,
+    "value": 4,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "3978",
+    "name": "DeMar DeRozan",
+    "team": "DEN",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     14
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DAL",
+    "pModel": 0.523,
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "3078576",
+    "name": "Derrick White",
+    "team": "BOS",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     12,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "WSH",
+    "pModel": 0.689,
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "3078576",
+    "name": "Derrick White",
+    "team": "BOS",
+    "key": "totalRebounds",
+    "stat": "Rebounds",
+    "dir": "Over",
+    "line": 2.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     10,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "WSH",
+    "pModel": 0.585,
+    "value": 7,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4066320",
+    "name": "Desmond Bane",
+    "team": "ORL",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     15
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DET",
+    "pModel": 0.59,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4066320",
+    "name": "Desmond Bane",
+    "team": "ORL",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Over",
+    "line": 2.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     9,
+     15
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DET",
+    "pModel": 0.51,
+    "value": 5,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "3908845",
+    "name": "John Collins",
+    "team": "DET",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     10,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "ORL",
+    "pModel": 0.626,
+    "value": 2,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4066372",
+    "name": "Kevin Huerter",
+    "team": "DET",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "ORL",
+    "pModel": 0.721,
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4066372",
+    "name": "Kevin Huerter",
+    "team": "DET",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "ORL",
+    "pModel": 0.713,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4066372",
+    "name": "Kevin Huerter",
+    "team": "DET",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 12.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "ORL",
+    "pModel": 0.684,
+    "value": 13,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4066372",
+    "name": "Kevin Huerter",
+    "team": "DET",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 3.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "ORL",
+    "pModel": 0.654,
+    "value": 5,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "6442",
+    "name": "Kyrie Irving",
+    "team": "DAL",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 5.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     11,
+     14
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DEN",
+    "pModel": 0.641,
+    "value": 6,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "6442",
+    "name": "Kyrie Irving",
+    "team": "DAL",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     14
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DEN",
+    "pModel": 0.607,
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4397424",
+    "name": "Neemias Queta",
+    "team": "BOS",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "WSH",
+    "pModel": 0.597,
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "3112335",
+    "name": "Nikola Jokic",
+    "team": "DEN",
+    "key": "blocks",
+    "stat": "Blocks",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     10,
+     15
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DAL",
+    "pModel": 0.662,
+    "value": 0,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4251",
+    "name": "Paul George",
+    "team": "BOS",
+    "key": "combo",
+    "stat": "Pts+Reb+Ast",
+    "dir": "Over",
+    "line": 28.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     9,
+     14
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "WSH",
+    "pModel": 0.591,
+    "value": 41,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4278562",
+    "name": "Paul Reed",
+    "team": "DET",
+    "key": "threePointersMade",
+    "stat": "3PM",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     10,
+     10
+    ],
+    "l20": [
+     13,
+     16
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "ORL",
+    "pModel": 0.667,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-24",
+    "pid": "4702382",
+    "name": "Tristan da Silva",
+    "team": "ORL",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     14
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "DET",
+    "pModel": 0.581,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3895074",
+    "name": "Connor McDavid",
+    "team": "EDM",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Over",
+    "line": 1.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     5,
+     10
+    ],
+    "l20": [
+     11,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "VGK",
+    "pModel": 0.55,
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3895074",
+    "name": "Connor McDavid",
+    "team": "EDM",
+    "key": "shotsTotal",
+    "stat": "Shots",
+    "dir": "Over",
+    "line": 2.5,
+    "l5": [
+     1,
+     5
+    ],
+    "l10": [
+     5,
+     10
+    ],
+    "l20": [
+     11,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "VGK",
+    "pModel": 0.492,
+    "value": 4,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "4352722",
+    "name": "Evan Bouchard",
+    "team": "EDM",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     16,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "VGK",
+    "pModel": 0.664,
+    "value": 2,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "4352722",
+    "name": "Evan Bouchard",
+    "team": "EDM",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     14,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "VGK",
+    "pModel": 0.621,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3114985",
+    "name": "Ivan Barbashev",
+    "team": "VGK",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.615,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3648002",
+    "name": "Jack Eichel",
+    "team": "VGK",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     14,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.651,
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3648002",
+    "name": "Jack Eichel",
+    "team": "VGK",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.657,
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3648002",
+    "name": "Jack Eichel",
+    "team": "VGK",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     9,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.551,
+    "value": 0,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3042062",
+    "name": "Jason Dickinson",
+    "team": "EDM",
+    "key": "shotsTotal",
+    "stat": "Shots",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     13,
+     17
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "VGK",
+    "pModel": 0.709,
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3114727",
+    "name": "Leon Draisaitl",
+    "team": "EDM",
+    "key": "shotsTotal",
+    "stat": "Shots",
+    "dir": "Under",
+    "line": 4.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     16,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "VGK",
+    "pModel": 0.714,
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3114727",
+    "name": "Leon Draisaitl",
+    "team": "EDM",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     14,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "VGK",
+    "pModel": 0.701,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3114727",
+    "name": "Leon Draisaitl",
+    "team": "EDM",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     12,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "VGK",
+    "pModel": 0.572,
+    "value": 0,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3114727",
+    "name": "Leon Draisaitl",
+    "team": "EDM",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Over",
+    "line": 1.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     6,
+     10
+    ],
+    "l20": [
+     12,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "VGK",
+    "pModel": 0.549,
+    "value": 0,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "5545",
+    "name": "Mark Stone",
+    "team": "VGK",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     14,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.611,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "5545",
+    "name": "Mark Stone",
+    "team": "VGK",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     6,
+     10
+    ],
+    "l20": [
+     13,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.608,
+    "value": 0,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "5545",
+    "name": "Mark Stone",
+    "team": "VGK",
+    "key": "shotsTotal",
+    "stat": "Shots",
+    "dir": "Over",
+    "line": 1.5,
+    "l5": [
+     2,
+     5
+    ],
+    "l10": [
+     5,
+     10
+    ],
+    "l20": [
+     10,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.486,
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3899937",
+    "name": "Mitch Marner",
+    "team": "VGK",
+    "key": "shotsTotal",
+    "stat": "Shots",
+    "dir": "Over",
+    "line": 2.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     11,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.508,
+    "value": 4,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3899937",
+    "name": "Mitch Marner",
+    "team": "VGK",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     14,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.706,
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "2976844",
+    "name": "Tomas Hertl",
+    "team": "VGK",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     17,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.725,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "2976844",
+    "name": "Tomas Hertl",
+    "team": "VGK",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.598,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "2976844",
+    "name": "Tomas Hertl",
+    "team": "VGK",
+    "key": "shotsTotal",
+    "stat": "Shots",
+    "dir": "Over",
+    "line": 2.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     9,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.461,
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "2976844",
+    "name": "Tomas Hertl",
+    "team": "VGK",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     8,
+     20
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.467,
+    "value": 0,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3151096",
+    "name": "Victor Olofsson",
+    "team": "VGK",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     10,
+     12
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.8,
+    "value": 1,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3151096",
+    "name": "Victor Olofsson",
+    "team": "VGK",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     9,
+     12
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.672,
+    "value": 1,
+    "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-24",
+    "pid": "3151096",
+    "name": "Victor Olofsson",
+    "team": "VGK",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     6,
+     10
+    ],
+    "l20": [
+     7,
+     12
+    ],
+    "gameDate": "2026-11-24",
+    "opp": "EDM",
+    "pModel": 0.477,
+    "value": 0,
+    "result": "MISS"
    }
   ]
  }
