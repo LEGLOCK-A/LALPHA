@@ -5990,6 +5990,7 @@ runCheck(false);
 
   /* ---------- hub open/close ---------- */
   var current = "hub";
+  var wizDepth = 0;
   function openWiz(name){
     current = name || "hub";
     Object.keys(MOUNTS).forEach(function(k){
@@ -6006,7 +6007,87 @@ runCheck(false);
       if (barTitle) barTitle.textContent = current === "hub" ? "" : (TITLES[current] || "");
     }
     if (current !== "hub") window.scrollTo({ top: 0, behavior: "smooth" });
+    if (current !== "hub"){
+      try { history.pushState({ llwiz: current }, ""); } catch (e) {}
+      wizDepth = 1;
+    } else wizDepth = 0;
   }
+
+  /* ---------- browser back = previous wizard step ----------
+     Each forward step pushes a history entry; a back press pops
+     one and steps the open wizard back instead of leaving the
+     page. The on-screen back arrows route through history too,
+     so both stay in sync. */
+  var backClickSeen = false, programmaticBack = false;
+  function wizSig(){
+    var ids = MOUNTS[current] || [];
+    for (var i = 0; i < ids.length; i++){
+      var el = $(ids[i]);
+      if (el && !el.classList.contains("wizoff") && !el.hidden){
+        var t = el.querySelector(".cstitle"), st = el.querySelector(".csstepn");
+        return (t ? t.textContent : "") + "|" + (st ? st.textContent : "");
+      }
+    }
+    return current;
+  }
+  function clickBackBtn(b){
+    programmaticBack = true;
+    try { b.click(); } catch (e) {}
+    programmaticBack = false;
+  }
+  function stepBackActive(){
+    if (current === "cheatsheet"){
+      var resEl2 = document.getElementById("csResults");
+      if (resEl2 && !resEl2.hidden){
+        var sel = document.querySelector('#csWizard [data-cs="dir"].on') || document.querySelector('#csWizard [data-cs="dir"]');
+        if (sel){ clickBackBtn(sel); return; }
+      }
+      var b = document.querySelector('#csWizard [data-cs="back"]');
+      if (b){ clickBackBtn(b); return; }
+      openWiz("hub");
+      return;
+    }
+    var rootId = { smart: "ssRoot", matchup: "mhRoot", edge: "efRoot", nextman: "nmRoot" }[current];
+    var root = rootId ? $(rootId) : null;
+    var bb = root ? root.querySelector("[data-back]") : null;
+    if (bb){ clickBackBtn(bb); return; }
+    if (current === "smart" && SS.step === 4){ SS.step = 3; ssRender(); return; }
+    if (current === "matchup" && MH.step === 3){ MH.step = 2; mhRender(); return; }
+    if (current === "edge" && EF.step === 3){ EF.step = 2; EF.verdict = ""; efRender(); return; }
+    if (current === "nextman" && NM.step === 2){ NM.step = 1; nmRender(); return; }
+    openWiz("hub");
+  }
+  window.addEventListener("popstate", function(){
+    if (current === "hub") return;
+    if (wizDepth > 0) wizDepth--;
+    stepBackActive();
+  });
+  document.addEventListener("click", function(e){
+    if (programmaticBack) return;
+    var t = e.target && e.target.closest ? e.target.closest('[data-cs="back"], [data-back]') : null;
+    if (!t) return;
+    backClickSeen = true;
+    if (current !== "hub" && wizDepth > 0){
+      e.preventDefault();
+      e.stopPropagation();
+      history.back();
+    }
+  }, true);
+  document.addEventListener("click", function(e){
+    if (programmaticBack) return;
+    if (backClickSeen){ backClickSeen = false; return; }
+    if (current === "hub") return;
+    var inside = e.target && e.target.closest ? e.target.closest("#csWizard, #csResults, #ssRoot, #mhRoot, #efRoot, #nmRoot") : null;
+    if (!inside) return;
+    if (wizSig() !== clickSigBefore){
+      try { history.pushState({ llwiz: current }, ""); } catch (err) {}
+      wizDepth++;
+    }
+  });
+  var clickSigBefore = "";
+  document.addEventListener("click", function(){
+    if (!programmaticBack) clickSigBefore = wizSig();
+  }, true);
   hub.innerHTML = '<div class="cswiz"><h2 class="cstitle">Wizards</h2>'
     + '<p class="cssub">Guided builders — answer a few questions, get a sheet built from the game logs.</p>'
     + '<div class="hubgrid">'
