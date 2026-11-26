@@ -1664,6 +1664,7 @@ SITEMAP_FALLBACK_URLS = [
     "https://leglock.online/shuffle/",
     "https://leglock.online/game-logs/",
     "https://leglock.online/injuries/",
+    "https://leglock.online/cheatsheet/",
     "https://leglock.online/donation/",
     "https://leglock.online/our-picks/",
     "https://leglock.online/about/",
