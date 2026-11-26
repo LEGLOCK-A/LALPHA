@@ -912,84 +912,6 @@
    "pModel": 0.499
   },
   {
-   "league": "NBA",
-   "snapshotDate": "2026-11-25",
-   "pid": "4065732",
-   "name": "De'Andre Hunter",
-   "team": "SAC",
-   "key": "assists",
-   "stat": "Assists",
-   "dir": "Under",
-   "line": 2.5,
-   "l5": [
-    3,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    13,
-    15
-   ],
-   "gameDate": "2026-11-25",
-   "opp": "GS",
-   "pModel": 0.634
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-25",
-   "pid": "6589",
-   "name": "Draymond Green",
-   "team": "GS",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    12,
-    14
-   ],
-   "gameDate": "2026-11-25",
-   "opp": "SAC",
-   "pModel": 0.735
-  },
-  {
-   "league": "NBA",
-   "snapshotDate": "2026-11-25",
-   "pid": "4683021",
-   "name": "Deni Avdija",
-   "team": "POR",
-   "key": "steals",
-   "stat": "Steals",
-   "dir": "Under",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    8,
-    10
-   ],
-   "l20": [
-    12,
-    15
-   ],
-   "gameDate": "2026-11-25",
-   "opp": "SA",
-   "pModel": 0.73
-  },
-  {
    "league": "NFL",
    "snapshotDate": "2026-11-25",
    "pid": "4379399",
@@ -1642,32 +1564,6 @@
   {
    "league": "NHL",
    "snapshotDate": "2026-11-25",
-   "pid": "4874741",
-   "name": "Mackie Samoskevich",
-   "team": "SEA",
-   "key": "goals",
-   "stat": "Goals",
-   "dir": "Under",
-   "line": 0.5,
-   "l5": [
-    5,
-    5
-   ],
-   "l10": [
-    9,
-    10
-   ],
-   "l20": [
-    15,
-    20
-   ],
-   "gameDate": "2026-11-25",
-   "opp": "CHI",
-   "pModel": 0.681
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-25",
    "pid": "3025540",
    "name": "Casey DeSmith",
    "team": "DAL",
@@ -1716,58 +1612,6 @@
    "gameDate": "2026-11-25",
    "opp": "WPG",
    "pModel": 0.427
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-25",
-   "pid": "3115032",
-   "name": "Brandon Montour",
-   "team": "SEA",
-   "key": "shotsTotal",
-   "stat": "Shots",
-   "dir": "Over",
-   "line": 1.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    13,
-    20
-   ],
-   "gameDate": "2026-11-25",
-   "opp": "CHI",
-   "pModel": 0.615
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-25",
-   "pid": "5349",
-   "name": "Nazem Kadri",
-   "team": "COL",
-   "key": "points",
-   "stat": "Points",
-   "dir": "Over",
-   "line": 0.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    7,
-    10
-   ],
-   "l20": [
-    13,
-    20
-   ],
-   "gameDate": "2026-11-25",
-   "opp": "MTL",
-   "pModel": 0.643
   },
   {
    "league": "NFL",
@@ -11784,6 +11628,174 @@
     "opp": "VAN",
     "pModel": 0.528,
     "value": 3,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-25",
+    "pid": "4065732",
+    "name": "De'Andre Hunter",
+    "team": "SAC",
+    "key": "assists",
+    "stat": "Assists",
+    "dir": "Under",
+    "line": 2.5,
+    "l5": [
+     3,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     13,
+     15
+    ],
+    "gameDate": "2026-11-25",
+    "opp": "GS",
+    "pModel": 0.634,
+    "value": 3,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-25",
+    "pid": "4683021",
+    "name": "Deni Avdija",
+    "team": "POR",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     15
+    ],
+    "gameDate": "2026-11-25",
+    "opp": "SA",
+    "pModel": 0.73,
+    "value": 2,
+    "result": "MISS"
+   },
+   {
+    "league": "NBA",
+    "snapshotDate": "2026-11-25",
+    "pid": "6589",
+    "name": "Draymond Green",
+    "team": "GS",
+    "key": "steals",
+    "stat": "Steals",
+    "dir": "Under",
+    "line": 1.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     8,
+     10
+    ],
+    "l20": [
+     12,
+     14
+    ],
+    "gameDate": "2026-11-25",
+    "opp": "SAC",
+    "pModel": 0.735,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-25",
+    "pid": "3115032",
+    "name": "Brandon Montour",
+    "team": "SEA",
+    "key": "shotsTotal",
+    "stat": "Shots",
+    "dir": "Over",
+    "line": 1.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     13,
+     20
+    ],
+    "gameDate": "2026-11-25",
+    "opp": "CHI",
+    "pModel": 0.615,
+    "value": 3,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-25",
+    "pid": "4874741",
+    "name": "Mackie Samoskevich",
+    "team": "SEA",
+    "key": "goals",
+    "stat": "Goals",
+    "dir": "Under",
+    "line": 0.5,
+    "l5": [
+     5,
+     5
+    ],
+    "l10": [
+     9,
+     10
+    ],
+    "l20": [
+     15,
+     20
+    ],
+    "gameDate": "2026-11-25",
+    "opp": "CHI",
+    "pModel": 0.681,
+    "value": 0,
+    "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-25",
+    "pid": "5349",
+    "name": "Nazem Kadri",
+    "team": "COL",
+    "key": "points",
+    "stat": "Points",
+    "dir": "Over",
+    "line": 0.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     7,
+     10
+    ],
+    "l20": [
+     13,
+     20
+    ],
+    "gameDate": "2026-11-25",
+    "opp": "MTL",
+    "pModel": 0.643,
+    "value": 0,
     "result": "MISS"
    }
   ]
