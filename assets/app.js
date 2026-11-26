@@ -5456,3 +5456,378 @@ runCheck(false);
   attach("teamModal", function(){ if (window.__LL && window.__LL.closeTeamPop) window.__LL.closeTeamPop(); });
   attach("myBoardModal", function(){ if (window.__LL && window.__LL.closeMyBoard) window.__LL.closeMyBoard(); });
 })();
+
+/* ================= Cheatsheet generator (wizard) =================
+   A step-by-step builder in the style Jay picked: league(s), player
+   or team props, which stats, which games, what to base it on, main
+   or alternate lines, over or under — then a ranked cheatsheet
+   computed from the same logs the board uses. Lines are always
+   proper half lines like a book posts: a whole line becomes 4.5
+   for Overs and 3.5 for Unders. Lives only on pages carrying
+   #csWizard (the Cheatsheet view). */
+(function(){
+  var wiz = document.getElementById("csWizard");
+  if (!wiz) return;
+  var resEl = document.getElementById("csResults");
+
+  var CS = { step: 1, leagues: ["NBA"], kind: "player", stats: "ALL", games: "ALL",
+             basis: "recent", lines: "main", dir: "Over", out: [] };
+  var CODES = { points: "PTS", totalRebounds: "REB", assists: "AST", threePointersMade: "3PM",
+    steals: "STL", blocks: "BLK", passingYards: "PYD", passingTouchdowns: "PTD",
+    rushingYards: "RUYD", rushingTouchdowns: "RUTD", receivingYards: "REYD",
+    receivingTouchdowns: "RETD", receptions: "REC", goals: "G", shotsTotal: "SOG",
+    saves: "SV", combo: "PRA", total: "TOT", oppTotal: "OPP", winBy: "WIN",
+    firstHalf: "1H", firstPeriod: "P1", teamThrees: "3PM", teamShots: "SOG" };
+  var TSTEP = { total: 3, oppTotal: 3, winBy: 2, firstHalf: 2, firstPeriod: 1, teamThrees: 2, teamShots: 2 };
+  var BASIS_LABEL = { recent: "Recent form", vs: "Versus opponent", venue: "Home/Away split" };
+
+  function DL(lg){ return window["__DL_" + lg] || {}; }
+  function esc(t){ return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function fv(v){ if (v == null || isNaN(v)) return "—"; var n = Math.round(v * 10) / 10; return (n % 1 === 0) ? String(n) : n.toFixed(1); }
+  function injuredNames(lg){
+    var s = new Set();
+    (DL(lg).injuries || []).forEach(function(i){ if (i && i.name) s.add(i.name); });
+    return s;
+  }
+  function valOf(row, key){
+    var s = row.s || {};
+    if (key === "combo"){
+      if (s.points == null || s.totalRebounds == null || s.assists == null) return null;
+      return s.points + s.totalRebounds + s.assists;
+    }
+    return s[key] != null ? s[key] : null;
+  }
+  function tVal(stat, row){
+    if (!row) return null;
+    switch (stat){
+      case "total": return row.pf != null ? row.pf : null;
+      case "oppTotal": return row.pa != null ? row.pa : null;
+      case "winBy": return (row.pf != null && row.pa != null) ? row.pf - row.pa : null;
+      case "firstHalf": return row.fh != null ? row.fh : null;
+      case "firstPeriod": return row.p1 != null ? row.p1 : null;
+      case "teamThrees": return row.threes != null ? row.threes : null;
+      case "teamShots": return row.shots != null ? row.shots : null;
+    }
+    return null;
+  }
+  function oppAbbr(row){ return String(row.opp || "").replace(/^(vs|@)\s*/, ""); }
+  function isHomeRow(row){ return String(row.opp || "").indexOf("@") !== 0; }
+  function gameKey(g){ return [g.home.abbr, g.away.abbr].sort().join("@"); }
+  function gamesList(lg){
+    return (DL(lg).games || []).filter(function(g){ return g.state !== "post"; })
+      .slice().sort(function(a, b){ return String(a.date).localeCompare(String(b.date)); });
+  }
+  function nextGame(lg, team){
+    var gs = gamesList(lg).filter(function(g){ return g.home.abbr === team || g.away.abbr === team; });
+    return gs[0] || null;
+  }
+  function stepFor(key){
+    if (/Yards$/.test(key)) return 5;
+    if (key === "saves") return 2;
+    return 1;
+  }
+  function shiftLine(line, dir, step){
+    var v = dir === "Over" ? line - step : line + step;
+    return Math.round(v * 10) / 10;
+  }
+  /* Proper half lines only: a whole line rounds to the .5 on the
+     bettor's side of the number — Over 4 becomes 4.5, Under 4
+     becomes 3.5. */
+  function csLine(raw){
+    var l = raw;
+    if (Math.round(l) === l) l = (CS.dir === "Over") ? l + 0.5 : l - 0.5;
+    return (CS.dir === "Over" && l < 0.5) ? 0.5 : l;
+  }
+  function rateOf(vals, line, dir){
+    var hits = vals.filter(function(v){ return dir === "Over" ? v > line : v < line; }).length;
+    return { rate: vals.length ? Math.round(100 * hits / vals.length) : 0, hits: hits, n: vals.length };
+  }
+  function logoUrl(lg, abbr){
+    return "https://a.espncdn.com/i/teamlogos/" + lg.toLowerCase() + "/500/" + String(abbr).toLowerCase() + ".png";
+  }
+  function gameLabel(g){
+    var d = new Date(g.date);
+    var when = isNaN(d) ? "" : d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })
+      + " · " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    return { title: g.away.abbr + " @ " + g.home.abbr, when: when };
+  }
+
+  /* ---------- option lists ---------- */
+  function statOptions(){
+    var seen = {}, out = [];
+    CS.leagues.forEach(function(lg){
+      if (CS.kind === "player"){
+        (DL(lg).props || []).forEach(function(p){
+          if (!seen[p.key]){ seen[p.key] = 1; out.push({ k: p.key, label: p.stat }); }
+        });
+      } else {
+        (((window.TEAMS_DATA || {}).leagues || {})[lg] || []).forEach(function(e){
+          if (!seen[e.stat]){ seen[e.stat] = 1; out.push({ k: e.stat, label: e.statLabel }); }
+        });
+      }
+    });
+    return out;
+  }
+
+  /* ---------- generation ---------- */
+  function basisPlayerVals(rows, nx, team, key){
+    var opp = nx.home.abbr === team ? nx.away.abbr : nx.home.abbr;
+    var home = nx.home.abbr === team;
+    var pick = rows;
+    if (CS.basis === "vs") pick = rows.filter(function(r){ return oppAbbr(r) === opp; });
+    else if (CS.basis === "venue") pick = rows.filter(function(r){ return isHomeRow(r) === home; });
+    else pick = rows.slice(0, 10);
+    return pick.map(function(r){ return valOf(r, key); }).filter(function(v){ return v != null; });
+  }
+  function genPlayer(){
+    var out = [];
+    CS.leagues.forEach(function(lg){
+      var D = DL(lg), inj = injuredNames(lg);
+      (D.props || []).forEach(function(p){
+        if (inj.has(p.name)) return;
+        if (CS.stats !== "ALL" && !CS.stats.has(p.key)) return;
+        var nx = nextGame(lg, p.team); if (!nx) return;
+        if (CS.games !== "ALL" && !CS.games.has(lg + "|" + gameKey(nx))) return;
+        var vals = basisPlayerVals((D.logs || {})[p.pid] || [], nx, p.team, p.key);
+        if (!vals.length) return;
+        var line = csLine(CS.lines === "alt" ? shiftLine(p.line, CS.dir, stepFor(p.key)) : p.line);
+        var rec = rateOf(vals, line, CS.dir);
+        var pl = (D.players || {})[p.pid] || {};
+        out.push({ kind: "player", lg: lg, name: p.name, team: p.team, pid: p.pid, key: p.key, stat: p.stat,
+                   line: line, dir: CS.dir, rate: rec.rate, hits: rec.hits, n: rec.n,
+                   nx: nx, img: pl.img || "" });
+      });
+    });
+    out.sort(function(a, b){ return b.rate - a.rate || b.n - a.n; });
+    return out.slice(0, 40);
+  }
+  function genTeam(){
+    var TD = window.TEAMS_DATA || { leagues: {}, logs: {} }, out = [];
+    CS.leagues.forEach(function(lg){
+      ((TD.leagues || {})[lg] || []).forEach(function(e){
+        if (CS.stats !== "ALL" && !CS.stats.has(e.stat)) return;
+        var gk = lg + "|" + [e.team, e.opp].sort().join("@");
+        if (CS.games !== "ALL" && !CS.games.has(gk)) return;
+        var rows = (((TD.logs || {})[lg] || {})[e.team] || {}).rows || [];
+        var pick = rows;
+        if (CS.basis === "vs") pick = rows.filter(function(r){ return r.opp === e.opp; });
+        else if (CS.basis === "venue") pick = rows.filter(function(r){ return !!r.home === !!e.home; });
+        else pick = rows.slice(0, 10);
+        var vals = pick.map(function(r){ return tVal(e.stat, r); }).filter(function(v){ return v != null; });
+        if (!vals.length) return;
+        var line = csLine(CS.lines === "alt" ? shiftLine(e.line, CS.dir, TSTEP[e.stat] || 2) : e.line);
+        var rec = rateOf(vals, line, CS.dir);
+        out.push({ kind: "team", lg: lg, name: e.teamName, team: e.team, abbr: e.team, key: e.stat, stat: e.statLabel,
+                   line: line, dir: CS.dir, rate: rec.rate, hits: rec.hits, n: rec.n,
+                   nxLabel: (e.home ? "vs " : "@ ") + e.opp, date: e.gameDate });
+      });
+    });
+    out.sort(function(a, b){ return b.rate - a.rate || b.n - a.n; });
+    return out.slice(0, 40);
+  }
+  function generate(){
+    CS.out = CS.kind === "player" ? genPlayer() : genTeam();
+    renderResults();
+  }
+
+  /* ---------- wizard rendering ---------- */
+  var TITLES = [
+    null,
+    ["Which league?", "Choose one or more leagues for this cheatsheet."],
+    ["What do you prefer?", "Choose player or team props."],
+    ["Which props do you want?", "Choose the bet types you want to include."],
+    ["Which games to include?", "Include every game or pick the ones you want."],
+    ["What should we base it on?", "Choose which timeframe to base it on."],
+    ["Which lines do you want?", "Choose Main or Alternate."],
+    ["What are you looking for?", "Choose Over or Under."]
+  ];
+  function optRow(action, v, label, on){
+    return '<button type="button" class="csrowopt' + (on ? " on" : "") + '" data-cs="' + action + '" data-v="' + esc(v) + '">'
+      + '<span>' + esc(label) + '</span>' + (on ? '<span class="cscheck">✓</span>' : '') + '</button>';
+  }
+  function render(){
+    if (resEl) resEl.hidden = true;
+    wiz.hidden = false;
+    var step = CS.step, t = TITLES[step], body = "";
+    if (step === 1){
+      body = '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){
+        return optRow("league", lg, lg, CS.leagues.indexOf(lg) !== -1);
+      }).join("") + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-cs="next">Next</button></div>';
+    } else if (step === 2){
+      body = '<div class="csrows">'
+        + optRow("kind", "player", "Player Props", CS.kind === "player")
+        + optRow("kind", "team", "Team Props", CS.kind === "team") + '</div>';
+    } else if (step === 3){
+      var opts = statOptions();
+      body = '<div class="csgrid">'
+        + '<button type="button" class="cstile' + (CS.stats === "ALL" ? " on" : "") + '" data-cs="stat" data-v="ALL"><span class="cscode">ALL</span><span class="cslabel">All</span></button>'
+        + opts.map(function(o){
+            var on = CS.stats !== "ALL" && CS.stats.has(o.k);
+            return '<button type="button" class="cstile' + (on ? " on" : "") + '" data-cs="stat" data-v="' + esc(o.k) + '"><span class="cscode">' + esc(CODES[o.k] || o.label.slice(0, 3).toUpperCase()) + '</span><span class="cslabel">' + esc(o.label) + '</span></button>';
+          }).join("") + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-cs="next">Next</button></div>';
+    } else if (step === 4){
+      var tiles = "";
+      CS.leagues.forEach(function(lg){
+        gamesList(lg).forEach(function(g){
+          var k = lg + "|" + gameKey(g), on = CS.games !== "ALL" && CS.games.has(k), gl = gameLabel(g);
+          tiles += '<button type="button" class="cstile' + (on ? " on" : "") + '" data-cs="game" data-v="' + esc(k) + '">'
+            + '<span class="cslogos"><img src="' + logoUrl(lg, g.away.abbr) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'"><img src="' + logoUrl(lg, g.home.abbr) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'"></span>'
+            + '<span class="cslabel">' + esc(gl.title) + '</span><span class="cscode">' + esc(lg + " · " + gl.when) + '</span></button>';
+        });
+      });
+      body = '<div class="csgrid">'
+        + '<button type="button" class="cstile' + (CS.games === "ALL" ? " on" : "") + '" data-cs="game" data-v="ALL"><span class="cslabel">All games</span></button>'
+        + tiles + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-cs="next">Next</button></div>';
+    } else if (step === 5){
+      body = '<div class="csrows">'
+        + optRow("basis", "recent", "Recent Form", CS.basis === "recent")
+        + optRow("basis", "vs", "Versus Opponent", CS.basis === "vs")
+        + optRow("basis", "venue", "Home/Away Splits", CS.basis === "venue") + '</div>';
+    } else if (step === 6){
+      body = '<div class="csrows">'
+        + optRow("lines", "main", "Main Lines", CS.lines === "main")
+        + optRow("lines", "alt", "Alternate Lines", CS.lines === "alt") + '</div>'
+        + '<p class="csnote">Alternate shifts the line one step in your favour — lower for Overs, higher for Unders — and re-rates it from the logs.</p>';
+    } else if (step === 7){
+      body = '<div class="csrows">'
+        + optRow("dir", "Over", "Over", CS.dir === "Over")
+        + optRow("dir", "Under", "Under", CS.dir === "Under") + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext csgen" data-cs="gen">Generate Cheatsheet</button></div>';
+    }
+    wiz.innerHTML = '<div class="cswiz">'
+      + '<div class="csprog"><span class="csbar"><i style="width:' + Math.round(step / 7 * 100) + '%"></i></span><span class="csstepn">Step ' + step + ' of 7</span></div>'
+      + (step > 1 ? '<button type="button" class="csback" data-cs="back" aria-label="Back">←</button>' : '')
+      + '<h2 class="cstitle">' + esc(t[0]) + '</h2><p class="cssub">' + esc(t[1]) + '</p>'
+      + body + '</div>';
+  }
+
+  /* ---------- results ---------- */
+  function summaryText(){
+    var statsTxt = CS.stats === "ALL" ? "All stats" : CS.stats.size + " stat" + (CS.stats.size === 1 ? "" : "s");
+    var gamesTxt = CS.games === "ALL" ? "All games" : CS.games.size + " game" + (CS.games.size === 1 ? "" : "s");
+    return CS.leagues.join(" + ") + " · " + (CS.kind === "player" ? "Player props" : "Team props") + " · " + statsTxt + " · " + gamesTxt
+      + " · " + BASIS_LABEL[CS.basis] + " · " + (CS.lines === "alt" ? "Alternate lines" : "Main lines") + " · " + CS.dir;
+  }
+  function renderResults(){
+    wiz.hidden = true;
+    if (!resEl) return;
+    resEl.hidden = false;
+    var rows = CS.out.map(function(r, i){
+      var nxTxt = r.kind === "player" ? (function(){
+        var home = r.nx.home.abbr === r.team;
+        var opp = home ? r.nx.away.abbr : r.nx.home.abbr;
+        var d = new Date(r.nx.date);
+        return (home ? "vs " : "@ ") + opp + (isNaN(d) ? "" : " · " + d.toLocaleDateString(undefined, { weekday: "short" }));
+      })() : r.nxLabel + (r.date ? " · " + r.date : "");
+      var attrs = r.kind === "player"
+        ? ' data-open-logs="' + esc(r.pid) + '" data-stat-key="' + esc(r.key) + '" data-lg="' + esc(r.lg) + '"'
+        : ' data-teampop="' + esc(r.abbr) + '" data-csteam="' + esc(r.lg) + '"';
+      var avatar = r.kind === "player" && r.img
+        ? '<img class="csav" src="' + esc(r.img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
+        : '<img class="csav" src="' + logoUrl(r.lg, r.team) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
+      return '<article class="csres" role="button" tabindex="0"' + attrs + '>'
+        + '<span class="csrank">' + (i + 1) + '</span>' + avatar
+        + '<span class="csmain"><span class="csname">' + esc(r.name) + '</span>'
+        + '<span class="csmeta">' + esc(r.stat) + ' · <b class="csdir ' + (r.dir === "Over" ? "over" : "under") + '">' + r.dir + ' ' + fv(r.line) + '</b></span>'
+        + '<span class="csmeta">' + esc(r.lg) + ' · ' + esc(nxTxt) + (r.n < 5 ? ' · thin history' : '') + '</span></span>'
+        + '<span class="csrate"><b>' + r.rate + '%</b><span>' + r.hits + '/' + r.n + '</span></span></article>';
+    }).join("");
+    resEl.innerHTML = '<div class="csreshead"><h2 class="cstitle">Your cheatsheet</h2>'
+      + '<p class="cssub">' + esc(summaryText()) + '</p>'
+      + '<p class="csnote">Rated on ' + esc(BASIS_LABEL[CS.basis].toLowerCase()) + ' from game logs at research lines — not sportsbook prices. Tap a row for the full breakdown.</p>'
+      + '<div class="csactions"><button type="button" class="csact" data-cs="edit">Edit selections</button>'
+      + '<button type="button" class="csact" data-cs="csv">Download CSV</button>'
+      + '<button type="button" class="csact" data-cs="txt">Download TXT</button></div></div>'
+      + (rows || '<div class="emptybox">Nothing matched those selections. Loosen the stats or games and generate again.</div>');
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function download(name, text, type){
+    var blob = new Blob([text], { type: type });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+  }
+  function exportSheet(fmt){
+    var head = "LegLock Cheatsheet — " + summaryText();
+    if (fmt === "csv"){
+      var lines = ["Rank,League,Name,Team,Stat,Line,Direction,Basis,Basis Rate,Record"];
+      CS.out.forEach(function(r, i){
+        lines.push([i + 1, r.lg, '"' + r.name.replace(/"/g, '""') + '"', r.team, '"' + r.stat + '"', fv(r.line), r.dir,
+                    BASIS_LABEL[CS.basis], r.rate + "%", r.hits + "/" + r.n].join(","));
+      });
+      download("leglock-cheatsheet.csv", lines.join("\n"), "text/csv");
+    } else {
+      var txt = [head, ""];
+      CS.out.forEach(function(r, i){
+        txt.push((i + 1) + ". [" + r.lg + "] " + r.name + " (" + r.team + ") — " + r.stat + " " + r.dir + " " + fv(r.line)
+          + " · " + r.rate + "% (" + r.hits + "/" + r.n + ", " + BASIS_LABEL[CS.basis].toLowerCase() + ")");
+      });
+      txt.push("", "Research lines from game logs — not sportsbook prices.");
+      download("leglock-cheatsheet.txt", txt.join("\n"), "text/plain");
+    }
+  }
+
+  /* ---------- events ---------- */
+  function onClick(e){
+    /* Team rows: sync the app league first so the team popup (which
+       reads the current league) opens the right team. This listener
+       sits on the container, so it runs before the document-level
+       popup handler. */
+    var tr = e.target && e.target.closest ? e.target.closest("[data-csteam]") : null;
+    if (tr) {
+      try { if (window.__LL && window.__LL.setLeague) window.__LL.setLeague(tr.getAttribute("data-csteam")); } catch (err) {}
+    }
+    var b = e.target && e.target.closest ? e.target.closest("[data-cs]") : null;
+    if (!b) return;
+    var act = b.getAttribute("data-cs"), v = b.getAttribute("data-v");
+    if (act === "back"){ CS.step = Math.max(1, CS.step - 1); render(); }
+    else if (act === "league"){
+      var ix = CS.leagues.indexOf(v);
+      if (ix !== -1 && CS.leagues.length > 1) CS.leagues.splice(ix, 1);
+      else if (ix === -1) CS.leagues.push(v);
+      CS.stats = "ALL"; CS.games = "ALL";
+      render();
+    }
+    else if (act === "kind"){ if (CS.kind !== v){ CS.kind = v; CS.stats = "ALL"; } CS.step = 3; render(); }
+    else if (act === "stat"){
+      if (v === "ALL") CS.stats = "ALL";
+      else {
+        if (CS.stats === "ALL") CS.stats = new Set();
+        if (CS.stats.has(v)) CS.stats.delete(v); else CS.stats.add(v);
+        if (!CS.stats.size) CS.stats = "ALL";
+      }
+      render();
+    }
+    else if (act === "game"){
+      if (v === "ALL") CS.games = "ALL";
+      else {
+        if (CS.games === "ALL") CS.games = new Set();
+        if (CS.games.has(v)) CS.games.delete(v); else CS.games.add(v);
+        if (!CS.games.size) CS.games = "ALL";
+      }
+      render();
+    }
+    else if (act === "next"){
+      if (CS.step === 1) {
+        try { if (window.__LL && window.__LL.setLeague) window.__LL.setLeague(CS.leagues[0]); } catch (err) {}
+      }
+      CS.step = Math.min(7, CS.step + 1); render();
+    }
+    else if (act === "basis"){ CS.basis = v; CS.step = 6; render(); }
+    else if (act === "lines"){ CS.lines = v; CS.step = 7; render(); }
+    else if (act === "dir"){ CS.dir = v; render(); }
+    else if (act === "gen"){ generate(); }
+    else if (act === "edit"){ CS.step = 1; render(); }
+    else if (act === "csv"){ exportSheet("csv"); }
+    else if (act === "txt"){ exportSheet("txt"); }
+  }
+  wiz.addEventListener("click", onClick);
+  if (resEl) resEl.addEventListener("click", onClick);
+  render();
+})();

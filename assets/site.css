@@ -1125,3 +1125,41 @@ tr.dim{opacity:.35}
 .pinbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:9px 15px;min-height:38px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .pinbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
 .pinbtn.wspin{margin-left:auto;align-self:center}
+
+/* Cheatsheet wizard */
+.cswiz{max-width:640px;margin:0 auto;padding:6px 2px 20px}
+.csprog{display:flex;align-items:center;gap:10px;margin:8px 0 14px}
+.csbar{flex:1;height:5px;border-radius:99px;background:var(--line);overflow:hidden}
+.csbar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .25s ease}
+.csstepn{font-size:12px;color:var(--namesub);white-space:nowrap}
+.csback{background:none;border:0;font-size:20px;color:var(--ink);cursor:pointer;padding:4px 8px 4px 0;line-height:1}
+.cstitle{font-size:24px;line-height:1.15;margin:2px 0 4px}
+.cssub{color:var(--namesub);font-size:14px;margin:0 0 16px}
+.csgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cstile{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;min-height:74px;font:inherit;color:var(--ink);cursor:pointer}
+.cstile.on{border-color:var(--accent);background:var(--accent-soft)}
+.cscode{font-size:11px;letter-spacing:.06em;color:var(--namesub);font-weight:600}
+.cslabel{font-size:16px;font-weight:600}
+.cslogos{display:flex}
+.cslogos img{width:24px;height:24px;border-radius:50%;background:var(--surface);margin-right:-6px}
+.csrows{display:flex;flex-direction:column;gap:10px}
+.csrowopt{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:16px;font:inherit;font-size:16px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left}
+.csrowopt.on{border-color:var(--accent);background:var(--accent-soft)}
+.cscheck{color:var(--accent);font-weight:700}
+.csfoot{margin-top:16px}
+.csnext{width:100%;background:var(--accent);color:#fff;border:0;border-radius:12px;padding:14px;font:inherit;font-size:16px;font-weight:700;cursor:pointer}
+.csnote{font-size:12.5px;color:var(--namesub);margin:10px 0 0}
+.csreshead{max-width:640px;margin:0 auto 12px}
+.csactions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.csact{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:9px 13px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.csres{display:flex;align-items:center;gap:10px;max-width:640px;margin:0 auto 8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer}
+.csrank{font-weight:700;color:var(--namesub);width:20px;text-align:center;flex:none}
+.csav{width:38px;height:38px;border-radius:50%;object-fit:cover;flex:none;background:var(--surface2)}
+.csmain{flex:1;display:flex;flex-direction:column;gap:1px;min-width:0}
+.csname{font-weight:700;font-size:15px}
+.csmeta{font-size:12.5px;color:var(--namesub)}
+.csdir.over{color:var(--accent)}
+.csdir.under{color:#d97706}
+.csrate{text-align:right;flex:none}
+.csrate b{display:block;font-size:19px;color:var(--accent)}
+.csrate span{font-size:12px;color:var(--namesub)}

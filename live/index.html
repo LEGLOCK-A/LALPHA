@@ -33,7 +33,7 @@
 <title>Live Scores & In-Game Props — LegLock</title>
 <meta name="description" content="Live scores, game clocks and in-game player stats for NBA, NFL and NHL games, with prop progress tracked as games play out." />
 <link rel="canonical" href="https://leglock.online/live/" />
-<link rel="stylesheet" href="/assets/site.css?v=15" />
+<link rel="stylesheet" href="/assets/site.css?v=17" />
 </head>
 <body>
 <div class="wrap">
@@ -136,6 +136,7 @@
     <a class="tab" role="tab" aria-selected="false" data-view="randomizer" href="/shuffle/">Shuffle</a>
     <a class="tab" role="tab" aria-selected="false" data-view="logs" href="/game-logs/">Game Logs</a>
     <a class="tab" role="tab" aria-selected="false" data-view="injuries" href="/injuries/">Injuries</a>
+    <a class="tab" role="tab" aria-selected="false" data-view="cheatsheet" href="/cheatsheet/">Cheatsheet</a>
   </nav>
 <!-- Adsterra banner (320x50 mobile / 728x90 desktop) -->
 <div class="ll-ad-banner" style="display:flex;justify-content:center;margin:12px auto 4px;max-width:100%;overflow:hidden" aria-label="Advertisement"><div class="ll-ad-m"><script>
@@ -354,6 +355,10 @@
   </section>
 
   <!-- ======= PRIVACY POLICY (static text) ======= -->
+  <section class="view" id="view-cheatsheet">
+    <div id="csWizard"></div>
+    <div id="csResults" hidden></div>
+  </section>
   <section class="view doc" id="view-privacy">
     <div class="docnav"><button class="backbtn" data-back>&larr; Back to board</button></div>
     <h2>Privacy Policy</h2>
@@ -726,7 +731,7 @@
   var g=document.querySelector("img.deal-glow"); if(g) g.src=window.__IMG.dealGlow;
 })();
 </script>
-<script src="/assets/app.js?v=14"></script>
+<script src="/assets/app.js?v=19"></script>
 <script>if (window.showView) showView("live");</script>
 <script src="/assets/consent.js" defer></script>
 </body>
