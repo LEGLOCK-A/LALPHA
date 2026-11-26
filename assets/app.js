@@ -6138,43 +6138,47 @@ runCheck(false);
 
   /* ================= Matchup Hunter ================= */
   var mhRoot = $("mhRoot");
-  var MH = { step: 0, league: "NBA", key: null, dir: "Over", out: [] };
+  var MH = { step: 0, leagues: ["NBA"], key: null, dir: "Over", out: [] };
   function mhStatOptions(){
     var seen = {}, out = [];
-    (DL(MH.league).props || []).forEach(function(p){
-      if (!seen[p.key]){ seen[p.key] = 1; out.push({ k: p.key, label: p.stat }); }
+    MH.leagues.forEach(function(lg){
+      (DL(lg).props || []).forEach(function(p){
+        if (!seen[p.key]){ seen[p.key] = 1; out.push({ k: p.key, label: p.stat }); }
+      });
     });
     return out;
   }
   function mhRun(){
-    var lg = MH.league, D = DL(lg), inj = injuredNames(lg);
-    var agg = {}, totS = 0, totN = 0;
-    Object.keys(D.logs || {}).forEach(function(pid){
-      (D.logs[pid] || []).forEach(function(row){
-        var v = valOf(row, MH.key);
-        if (v == null) return;
-        var o = oppAbbr(row);
-        if (!agg[o]) agg[o] = { s: 0, n: 0 };
-        agg[o].s += v; agg[o].n++;
-        totS += v; totN++;
-      });
-    });
-    var leagueMean = totN ? totS / totN : 0;
-    var factor = {};
-    Object.keys(agg).forEach(function(o){
-      if (agg[o].n >= 25 && leagueMean > 0) factor[o] = (agg[o].s / agg[o].n) / leagueMean;
-    });
     var out = [];
-    (D.props || []).forEach(function(p){
-      if (p.key !== MH.key || inj.has(p.name)) return;
-      var nx = nextGame(lg, p.team); if (!nx) return;
-      var opp = nx.home.abbr === p.team ? nx.away.abbr : nx.home.abbr;
-      var f = factor[opp];
-      if (f == null) return;
-      var vals = ((D.logs || {})[p.pid] || []).slice(0, 20).map(function(r){ return valOf(r, MH.key); }).filter(function(v){ return v != null; });
-      var rec = rateOf(vals, p.line, MH.dir);
-      var pl = (D.players || {})[p.pid] || {};
-      out.push({ p: p, f: f, opp: opp, rec: rec, img: pl.img || "", nx: nx });
+    MH.leagues.forEach(function(lg){
+      var D = DL(lg), inj = injuredNames(lg);
+      var agg = {}, totS = 0, totN = 0;
+      Object.keys(D.logs || {}).forEach(function(pid){
+        (D.logs[pid] || []).forEach(function(row){
+          var v = valOf(row, MH.key);
+          if (v == null) return;
+          var o = oppAbbr(row);
+          if (!agg[o]) agg[o] = { s: 0, n: 0 };
+          agg[o].s += v; agg[o].n++;
+          totS += v; totN++;
+        });
+      });
+      var leagueMean = totN ? totS / totN : 0;
+      var factor = {};
+      Object.keys(agg).forEach(function(o){
+        if (agg[o].n >= 25 && leagueMean > 0) factor[o] = (agg[o].s / agg[o].n) / leagueMean;
+      });
+      (D.props || []).forEach(function(p){
+        if (p.key !== MH.key || inj.has(p.name)) return;
+        var nx = nextGame(lg, p.team); if (!nx) return;
+        var opp = nx.home.abbr === p.team ? nx.away.abbr : nx.home.abbr;
+        var f = factor[opp];
+        if (f == null) return;
+        var vals = ((D.logs || {})[p.pid] || []).slice(0, 20).map(function(r){ return valOf(r, MH.key); }).filter(function(v){ return v != null; });
+        var rec = rateOf(vals, p.line, MH.dir);
+        var pl = (D.players || {})[p.pid] || {};
+        out.push({ p: p, f: f, opp: opp, rec: rec, img: pl.img || "", nx: nx, lg: lg });
+      });
     });
     out.sort(function(a, b){ return MH.dir === "Over" ? b.f - a.f : a.f - b.f; });
     MH.out = out.slice(0, 12);
@@ -6185,8 +6189,9 @@ runCheck(false);
     if (!mhRoot) return;
     var body = "";
     if (MH.step === 0){
-      body = head(0, 3, "Which league?", "Defences are league-specific.")
-        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){ return optRow("mh-lg", lg, lg, MH.league === lg); }).join("") + '</div>';
+      body = head(0, 3, "Which leagues?", "Pick one or more — each defence is rated against its own league's average.")
+        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){ return optRow("mh-lg", lg, lg, MH.leagues.indexOf(lg) !== -1); }).join("") + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-mh="next">Next</button></div>';
     } else if (MH.step === 1){
       body = head(1, 3, "Which stat?", "The stat you want to hunt.")
         + '<div class="csgrid">' + mhStatOptions().map(function(o){
@@ -6198,16 +6203,16 @@ runCheck(false);
     } else {
       var rows = MH.out.map(function(x, i){
         var p = x.p, chip = (x.f >= 1 ? "+" : "") + Math.round((x.f - 1) * 100) + "% allowed";
-        return '<article class="csres" data-open-logs="' + esc(p.pid) + '" data-stat-key="' + esc(p.key) + '" data-lg="' + esc(MH.league) + '" role="button" tabindex="0">'
+        return '<article class="csres" data-open-logs="' + esc(p.pid) + '" data-stat-key="' + esc(p.key) + '" data-lg="' + esc(x.lg) + '" role="button" tabindex="0">'
           + '<span class="csrank">' + (i + 1) + '</span>'
           + (x.img ? '<img class="csav" src="' + esc(x.img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '')
           + '<span class="csmain"><span class="csname">' + esc(p.name) + '</span>'
-          + '<span class="csmeta">' + esc(p.stat) + ' ' + MH.dir + ' ' + fv(p.line) + ' · vs ' + esc(x.opp) + '</span>'
+          + '<span class="csmeta">' + esc(x.lg) + ' · ' + esc(p.stat) + ' ' + MH.dir + ' ' + fv(p.line) + ' · vs ' + esc(x.opp) + '</span>'
           + '<span class="csmeta">' + esc(x.opp) + ' allows ' + chip + ' on this stat</span></span>'
           + '<span class="csrate"><b>' + x.rec.rate + '%</b><span>L20 ' + x.rec.hits + '/' + x.rec.n + '</span></span></article>';
       }).join("");
       body = '<div class="csreshead"><h2 class="cstitle">Matchups to hunt</h2>'
-        + '<p class="cssub">' + esc(MH.league) + ' · ' + esc((mhStatOptions().filter(function(o){ return o.k === MH.key; })[0] || {}).label || MH.key) + ' · ' + MH.dir + '</p>'
+        + '<p class="cssub">' + esc(MH.leagues.join(" + ")) + ' · ' + esc((mhStatOptions().filter(function(o){ return o.k === MH.key; })[0] || {}).label || MH.key) + ' · ' + MH.dir + '</p>'
         + '<p class="csnote">Ranked by how much each defence gives up on this stat versus the league average (last 25+ logged games per defence). Rates are the player\'s L20 at the research line.</p>'
         + '<div class="csactions"><button type="button" class="csact" data-mh="edit">Start over</button></div></div>'
         + (rows || '<div class="emptybox">No matchups had enough defensive history. Try another stat.</div>');
@@ -6218,7 +6223,13 @@ runCheck(false);
     if (e.target.closest && e.target.closest("[data-back]")){ MH.step = Math.max(0, MH.step - 1); mhRender(); return; }
     var b = e.target.closest ? e.target.closest("[data-mh],[data-mh-lg],[data-mh-stat],[data-mh-dir]") : null;
     if (!b) return;
-    if (b.hasAttribute("data-mh-lg")){ MH.league = b.getAttribute("data-mh-lg"); MH.step = 1; mhRender(); }
+    if (b.hasAttribute("data-mh-lg")){
+      var mlg = b.getAttribute("data-mh-lg"), mix = MH.leagues.indexOf(mlg);
+      if (mix !== -1 && MH.leagues.length > 1) MH.leagues.splice(mix, 1);
+      else if (mix === -1) MH.leagues.push(mlg);
+      mhRender();
+    }
+    else if (b.getAttribute("data-mh") === "next"){ MH.step = 1; mhRender(); }
     else if (b.hasAttribute("data-mh-stat")){ MH.key = b.getAttribute("data-mh-stat"); MH.step = 2; mhRender(); }
     else if (b.hasAttribute("data-mh-dir")){ MH.dir = b.getAttribute("data-mh-dir"); mhRun(); }
     else if (b.getAttribute("data-mh") === "edit"){ MH.step = 0; mhRender(); }
@@ -6226,28 +6237,35 @@ runCheck(false);
 
   /* ================= Edge Finder ================= */
   var efRoot = $("efRoot");
-  var EF = { step: 0, league: "NBA", key: null, prop: null, dir: "Over", verdict: "" };
+  var EF = { step: 0, league: "NBA", leagues: ["NBA"], key: null, prop: null, dir: "Over", verdict: "" };
   function efStatOptions(){
     var seen = {}, out = [];
-    (DL(EF.league).props || []).forEach(function(p){
-      if (!seen[p.key]){ seen[p.key] = 1; out.push({ k: p.key, label: p.stat }); }
+    EF.leagues.forEach(function(lg){
+      (DL(lg).props || []).forEach(function(p){
+        if (!seen[p.key]){ seen[p.key] = 1; out.push({ k: p.key, label: p.stat }); }
+      });
     });
     return out;
   }
   function efPlayers(){
-    var inj = injuredNames(EF.league);
-    return (DL(EF.league).props || []).filter(function(p){ return p.key === EF.key && !inj.has(p.name); })
-      .map(function(p){
-        var r = p.rates && p.rates.L10 ? (p.dir === "Over" ? p.rates.L10.o : p.rates.L10.u) / Math.max(1, p.rates.L10.n) : 0;
-        return { p: p, r: r };
-      }).sort(function(a, b){ return b.r - a.r; }).slice(0, 25);
+    var out = [];
+    EF.leagues.forEach(function(lg){
+      var inj = injuredNames(lg);
+      (DL(lg).props || []).filter(function(p){ return p.key === EF.key && !inj.has(p.name); })
+        .forEach(function(p){
+          var r = p.rates && p.rates.L10 ? (p.dir === "Over" ? p.rates.L10.o : p.rates.L10.u) / Math.max(1, p.rates.L10.n) : 0;
+          out.push({ p: p, r: r, lg: lg });
+        });
+    });
+    return out.sort(function(a, b){ return b.r - a.r; }).slice(0, 25);
   }
   function efRender(){
     if (!efRoot) return;
     var body = "";
     if (EF.step === 0){
-      body = head(0, 4, "Which league?", "Start with the league.")
-        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){ return optRow("ef-lg", lg, lg, EF.league === lg); }).join("") + '</div>';
+      body = head(0, 4, "Which leagues?", "Pick one or more — the player list pools them.")
+        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){ return optRow("ef-lg", lg, lg, EF.leagues.indexOf(lg) !== -1); }).join("") + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-ef="next">Next</button></div>';
     } else if (EF.step === 1){
       body = head(1, 4, "Which stat?", "The market you\'re pricing.")
         + '<div class="csgrid">' + efStatOptions().map(function(o){
@@ -6257,7 +6275,7 @@ runCheck(false);
       body = head(2, 4, "Which player?", "Top hit rates first.")
         + '<div class="csrows">' + efPlayers().map(function(x){
             var p = x.p;
-            return '<button type="button" class="csrowopt" data-ef-player="' + esc(p.pid) + '"><span>' + esc(p.name) + ' · ' + esc(p.team) + '</span><span class="csmeta">' + p.dir + ' ' + fv(p.line) + ' · L10 ' + Math.round(x.r * 100) + '%</span></button>';
+            return '<button type="button" class="csrowopt" data-ef-player="' + esc(p.pid) + '" data-ef-plg="' + esc(x.lg) + '"><span>' + esc(p.name) + ' · ' + esc(p.team) + '</span><span class="csmeta">' + esc(x.lg) + ' · ' + p.dir + ' ' + fv(p.line) + ' · L10 ' + Math.round(x.r * 100) + '%</span></button>';
           }).join("") + '</div>';
     } else {
       var p = EF.prop;
@@ -6311,10 +6329,17 @@ runCheck(false);
     if (e.target.closest && e.target.closest("[data-back]")){ EF.step = Math.max(0, EF.step - 1); EF.verdict = ""; efRender(); return; }
     var b = e.target.closest ? e.target.closest("[data-ef],[data-ef-lg],[data-ef-stat],[data-ef-player],[data-ef-dir]") : null;
     if (!b) return;
-    if (b.hasAttribute("data-ef-lg")){ EF.league = b.getAttribute("data-ef-lg"); EF.step = 1; efRender(); }
+    if (b.hasAttribute("data-ef-lg")){
+      var elg = b.getAttribute("data-ef-lg"), eix = EF.leagues.indexOf(elg);
+      if (eix !== -1 && EF.leagues.length > 1) EF.leagues.splice(eix, 1);
+      else if (eix === -1) EF.leagues.push(elg);
+      efRender();
+    }
+    else if (b.getAttribute("data-ef") === "next"){ EF.step = 1; efRender(); }
     else if (b.hasAttribute("data-ef-stat")){ EF.key = b.getAttribute("data-ef-stat"); EF.step = 2; efRender(); }
     else if (b.hasAttribute("data-ef-player")){
       var pid = b.getAttribute("data-ef-player");
+      if (b.getAttribute("data-ef-plg")) EF.league = b.getAttribute("data-ef-plg");
       EF.prop = (DL(EF.league).props || []).filter(function(p){ return String(p.pid) === String(pid) && p.key === EF.key; })[0] || null;
       if (EF.prop){ EF.dir = EF.prop.dir; EF.verdict = ""; EF.step = 3; efRender(); }
     }
@@ -6325,9 +6350,9 @@ runCheck(false);
 
   /* ================= Next Man Up ================= */
   var nmRoot = $("nmRoot");
-  var NM = { step: 0, league: "NBA", team: null, teamName: "", out: [] };
-  function nmTeams(){
-    var D = DL(NM.league), byTeam = {};
+  var NM = { step: 0, league: "NBA", leagues: ["NBA"], team: null, teamName: "", out: [] };
+  function nmTeams(lg){
+    var D = DL(lg || NM.league), byTeam = {};
     var abbrByName = {};
     Object.keys(D.players || {}).forEach(function(pid){
       var pl = D.players[pid];
@@ -6336,7 +6361,7 @@ runCheck(false);
     (D.injuries || []).forEach(function(i){
       var ab = abbrByName[i.team];
       if (!ab) return;
-      if (!byTeam[ab]) byTeam[ab] = { abbr: ab, name: i.team, outs: [] };
+      if (!byTeam[ab]) byTeam[ab] = { abbr: ab, name: i.team, outs: [], lg: lg || NM.league };
       byTeam[ab].outs.push(i);
     });
     return Object.keys(byTeam).map(function(k){ return byTeam[k]; })
@@ -6401,13 +6426,16 @@ runCheck(false);
     if (!nmRoot) return;
     var body = "";
     if (NM.step === 0){
-      body = head(0, 2, "Which league?", "Start with the league.")
-        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){ return optRow("nm-lg", lg, lg, NM.league === lg); }).join("") + '</div>';
+      body = head(0, 2, "Which leagues?", "Pick one or more — the team list pools them.")
+        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){ return optRow("nm-lg", lg, lg, NM.leagues.indexOf(lg) !== -1); }).join("") + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-nm="next">Next</button></div>';
     } else if (NM.step === 1){
-      var teams = nmTeams();
+      var teams = [];
+      NM.leagues.forEach(function(lg){ nmTeams(lg).forEach(function(t){ teams.push(t); }); });
+      teams.sort(function(a, b){ return b.outs.length - a.outs.length || a.name.localeCompare(b.name); });
       body = head(1, 2, "Which team?", "Teams with players on the injury report.")
         + '<div class="csrows">' + teams.map(function(t){
-            return '<button type="button" class="csrowopt" data-nm-team="' + esc(t.abbr) + '"><span>' + esc(t.name) + '</span><span class="csmeta">' + t.outs.length + ' out</span></button>';
+            return '<button type="button" class="csrowopt" data-nm-team="' + esc(t.abbr) + '" data-nm-tlg="' + esc(t.lg) + '"><span>' + esc(t.name) + '</span><span class="csmeta">' + esc(t.lg) + ' · ' + t.outs.length + ' out</span></button>';
           }).join("") + '</div>'
         + (teams.length ? "" : '<div class="emptybox">No injuries listed for this league right now.</div>');
     } else {
@@ -6438,8 +6466,14 @@ runCheck(false);
     if (e.target.closest && e.target.closest("[data-back]")){ NM.step = Math.max(0, NM.step - 1); nmRender(); return; }
     var b = e.target.closest ? e.target.closest("[data-nm],[data-nm-lg],[data-nm-team]") : null;
     if (!b) return;
-    if (b.hasAttribute("data-nm-lg")){ NM.league = b.getAttribute("data-nm-lg"); NM.step = 1; nmRender(); }
-    else if (b.hasAttribute("data-nm-team")){ NM.team = b.getAttribute("data-nm-team"); nmRun(); }
+    if (b.hasAttribute("data-nm-lg")){
+      var nlg = b.getAttribute("data-nm-lg"), nix = NM.leagues.indexOf(nlg);
+      if (nix !== -1 && NM.leagues.length > 1) NM.leagues.splice(nix, 1);
+      else if (nix === -1) NM.leagues.push(nlg);
+      nmRender();
+    }
+    else if (b.getAttribute("data-nm") === "next"){ NM.step = 1; nmRender(); }
+    else if (b.hasAttribute("data-nm-team")){ if (b.getAttribute("data-nm-tlg")) NM.league = b.getAttribute("data-nm-tlg"); NM.team = b.getAttribute("data-nm-team"); nmRun(); }
     else if (b.getAttribute("data-nm") === "edit"){ NM.step = 1; nmRender(); }
   });
 
@@ -6448,11 +6482,13 @@ runCheck(false);
     if (!pr) return;
     if (name === "edge" && pr.pid && pr.key){
       EF.league = pr.lg || "NBA";
+      EF.leagues = [EF.league];
       EF.key = pr.key;
       EF.prop = (DL(EF.league).props || []).filter(function(p){ return String(p.pid) === String(pr.pid) && p.key === pr.key; })[0] || null;
       if (EF.prop){ EF.dir = EF.prop.dir; EF.verdict = ""; EF.step = 3; efRender(); }
     } else if (name === "nextman" && pr.team){
       NM.league = pr.lg || "NBA";
+      NM.leagues = [NM.league];
       NM.team = pr.team;
       nmRun();
     }
