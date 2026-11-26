@@ -5995,7 +5995,9 @@ runCheck(false);
     Object.keys(MOUNTS).forEach(function(k){
       MOUNTS[k].forEach(function(id){
         var el = $(id);
-        if (el) el.classList.toggle("wizoff", current !== k);
+        if (!el) return;
+        el.classList.toggle("wizoff", current !== k);
+        if (id !== "csWizard" && id !== "csResults") el.hidden = current !== k;
       });
     });
     hub.classList.toggle("wizoff", current !== "hub");
