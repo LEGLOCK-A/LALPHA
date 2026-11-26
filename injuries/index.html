@@ -33,7 +33,7 @@
 <title>Injury Report — LegLock</title>
 <meta name="description" content="Current NBA, NFL and NHL injury reports — who's out, who's questionable, and whose minutes are dropping." />
 <link rel="canonical" href="https://leglock.online/injuries/" />
-<link rel="stylesheet" href="/assets/site.css?v=17" />
+<link rel="stylesheet" href="/assets/site.css?v=18" />
 </head>
 <body>
 <div class="wrap">
@@ -82,6 +82,7 @@
     <div class="filters" id="filtersPanel">
       <h3>Filters</h3>
       <p>Props board only.</p>
+      <p><button type="button" class="wizlaunchbtn" data-wizlaunch="matchup">Matchup Hunter wizard &rarr;</button></p>
       <div class="frow">
         <div class="fgroup">
           <label>Stat type</label>
@@ -268,6 +269,7 @@
     <div class="sechead">
       <h2>Shuffle Picks</h2>
       <span class="sub">Random picks from the highest hit-rate props.</span>
+      <button type="button" class="wizlaunchbtn" data-wizlaunch="smart">Smart Shuffle wizard &rarr;</button>
     </div>
     <div class="randbar">
       <div class="rrow">
@@ -345,6 +347,7 @@
       <h2>Injuries</h2>
       <span class="sub">Injury report · newest first.</span>
     </div>
+    <p class="injwizrow"><button type="button" class="wizlaunchbtn" data-wizlaunch="nextman">Next Man Up wizard &rarr; who gains with these players out?</button></p>
     <div class="injteamrow">
       <label for="injTeamSel">Team</label>
       <select class="sel" id="injTeamSel" aria-label="Filter injuries by team"></select>
@@ -356,8 +359,14 @@
 
   <!-- ======= PRIVACY POLICY (static text) ======= -->
   <section class="view" id="view-cheatsheet">
+    <div id="wizBar" hidden><button type="button" class="wizback" data-hub="hub" aria-label="Back to all wizards">&larr; Wizards</button><span id="wizTitle"></span></div>
+    <div id="csHub"></div>
     <div id="csWizard"></div>
     <div id="csResults" hidden></div>
+    <div id="ssRoot" hidden></div>
+    <div id="mhRoot" hidden></div>
+    <div id="efRoot" hidden></div>
+    <div id="nmRoot" hidden></div>
   </section>
   <section class="view doc" id="view-privacy">
     <div class="docnav"><button class="backbtn" data-back>&larr; Back to board</button></div>
@@ -731,7 +740,7 @@
   var g=document.querySelector("img.deal-glow"); if(g) g.src=window.__IMG.dealGlow;
 })();
 </script>
-<script src="/assets/app.js?v=19"></script>
+<script src="/assets/app.js?v=20"></script>
 <script>if (window.showView) showView("injuries");</script>
 <script src="/assets/consent.js" defer></script>
 </body>

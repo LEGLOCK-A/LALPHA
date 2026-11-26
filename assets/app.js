@@ -772,6 +772,7 @@ window.__LL.modelBlock = function(lg, pid, key, line, dir){
     + '</div>'
     + '<div class="edgebar"><label>Your book&rsquo;s odds <input id="edgeOdds" type="text" inputmode="numeric" value="' + esc(_edgeOdds) + '" aria-label="Your book odds in American format"></label>'
     + '<span id="edgeVerdict">' + verdict + '</span></div>'
+    + '<div class="edgebar"><button type="button" class="wizlaunchbtn" data-wizlaunch="edge" data-lg="' + esc(lg) + '" data-pid="' + esc(pid) + '" data-key="' + esc(key) + '">Open in Edge Finder wizard</button></div>'
     + '<div class="sumnote">Model probability, not a hit rate: a recency-blended projection (NBA: minutes &times; per-minute rate) adjusted for opponent, venue, pace and rest, judged on games that did not set the line. A few points of edge is realistic; treat a huge edge as likely model error.</div>';
 };
 function winRowHtml(p, lg){
@@ -5458,20 +5459,22 @@ runCheck(false);
 })();
 
 /* ================= Cheatsheet generator (wizard) =================
-   A step-by-step builder in the style Jay picked: league(s), player
-   or team props, which stats, which games, what to base it on, main
-   or alternate lines, over or under — then a ranked cheatsheet
+   A step-by-step builder: league(s), player or team props, which
+   stats, which games, what to base it on, a form window, a minimum
+   hit rate, rank by hit rate or model probability, safety filters,
+   main or alternate lines, over or under — then a ranked cheatsheet
    computed from the same logs the board uses. Lines are always
-   proper half lines like a book posts: a whole line becomes 4.5
-   for Overs and 3.5 for Unders. Lives only on pages carrying
-   #csWizard (the Cheatsheet view). */
+   proper half lines: a whole line becomes 4.5 for Overs and 3.5
+   for Unders. Lives only on pages carrying #csWizard (the
+   Cheatsheet view, inside the wizards hub). */
 (function(){
   var wiz = document.getElementById("csWizard");
   if (!wiz) return;
   var resEl = document.getElementById("csResults");
 
-  var CS = { step: 1, leagues: ["NBA"], kind: "player", stats: "ALL", games: "ALL",
-             basis: "recent", lines: "main", dir: "Over", out: [] };
+  var CS = { step: 0, leagues: ["NBA"], kind: "player", stats: "ALL", games: "ALL",
+             basis: "recent", win: 10, minRate: 0, rank: "rate", safety: {},
+             lines: "main", dir: "Over", out: [] };
   var CODES = { points: "PTS", totalRebounds: "REB", assists: "AST", threePointersMade: "3PM",
     steals: "STL", blocks: "BLK", passingYards: "PYD", passingTouchdowns: "PTD",
     rushingYards: "RUYD", rushingTouchdowns: "RUTD", receivingYards: "REYD",
@@ -5480,7 +5483,14 @@ runCheck(false);
     firstHalf: "1H", firstPeriod: "P1", teamThrees: "3PM", teamShots: "SOG" };
   var TSTEP = { total: 3, oppTotal: 3, winBy: 2, firstHalf: 2, firstPeriod: 1, teamThrees: 2, teamShots: 2 };
   var BASIS_LABEL = { recent: "Recent form", vs: "Versus opponent", venue: "Home/Away split" };
+  var WIN_LABEL = { 5: "Last 5", 10: "Last 10", 20: "Last 20", 999: "Season" };
 
+  function stepList(){
+    var s = ["leagues", "kind", "stats", "games", "basis", "window", "minrate"];
+    if (CS.kind === "player") s.push("rank");
+    s.push("safety", "lines", "dir");
+    return s;
+  }
   function DL(lg){ return window["__DL_" + lg] || {}; }
   function esc(t){ return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function fv(v){ if (v == null || isNaN(v)) return "—"; var n = Math.round(v * 10) / 10; return (n % 1 === 0) ? String(n) : n.toFixed(1); }
@@ -5530,9 +5540,6 @@ runCheck(false);
     var v = dir === "Over" ? line - step : line + step;
     return Math.round(v * 10) / 10;
   }
-  /* Proper half lines only: a whole line rounds to the .5 on the
-     bettor's side of the number — Over 4 becomes 4.5, Under 4
-     becomes 3.5. */
   function csLine(raw){
     var l = raw;
     if (Math.round(l) === l) l = (CS.dir === "Over") ? l + 0.5 : l - 0.5;
@@ -5550,6 +5557,27 @@ runCheck(false);
     var when = isNaN(d) ? "" : d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })
       + " · " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
     return { title: g.away.abbr + " @ " + g.home.abbr, when: when };
+  }
+  function spreadAbs(g){
+    var m = String((g && g.spread) || "").match(/(-?\d+(?:\.\d+)?)\s*$/);
+    return m ? Math.abs(parseFloat(m[1])) : null;
+  }
+  function isB2B(lg, team, nx){
+    var gs = (DL(lg).games || []).filter(function(g){ return g.home.abbr === team || g.away.abbr === team; })
+      .slice().sort(function(a, b){ return String(a.date).localeCompare(String(b.date)); });
+    for (var i = 1; i < gs.length; i++){
+      if (gs[i].id === nx.id){
+        var gap = (new Date(gs[i].date) - new Date(gs[i - 1].date)) / 86400000;
+        return gap <= 1.2;
+      }
+    }
+    return false;
+  }
+  function modelPct(lg, pid, key, line, dir){
+    try {
+      var m = window.__LL && window.__LL.modelFor ? window.__LL.modelFor(lg, pid, key) : null;
+      return m && m.pDir ? Math.round(100 * m.pDir(line, dir)) : null;
+    } catch (e) { return null; }
   }
 
   /* ---------- option lists ---------- */
@@ -5576,7 +5604,7 @@ runCheck(false);
     var pick = rows;
     if (CS.basis === "vs") pick = rows.filter(function(r){ return oppAbbr(r) === opp; });
     else if (CS.basis === "venue") pick = rows.filter(function(r){ return isHomeRow(r) === home; });
-    else pick = rows.slice(0, 10);
+    pick = pick.slice(0, CS.win);
     return pick.map(function(r){ return valOf(r, key); }).filter(function(v){ return v != null; });
   }
   function genPlayer(){
@@ -5588,18 +5616,34 @@ runCheck(false);
         if (CS.stats !== "ALL" && !CS.stats.has(p.key)) return;
         var nx = nextGame(lg, p.team); if (!nx) return;
         if (CS.games !== "ALL" && !CS.games.has(lg + "|" + gameKey(nx))) return;
+        if (CS.safety.blowout){ var sa = spreadAbs(nx); if (sa != null && sa >= 13) return; }
+        if (CS.safety.b2b && isB2B(lg, p.team, nx)) return;
+        if (CS.safety.streak && !(p.streak >= 3 && p.dir === CS.dir)) return;
         var vals = basisPlayerVals((D.logs || {})[p.pid] || [], nx, p.team, p.key);
         if (!vals.length) return;
         var line = csLine(CS.lines === "alt" ? shiftLine(p.line, CS.dir, stepFor(p.key)) : p.line);
         var rec = rateOf(vals, line, CS.dir);
+        if (rec.rate < CS.minRate) return;
         var pl = (D.players || {})[p.pid] || {};
+        var mp = CS.rank === "model" ? modelPct(lg, p.pid, p.key, line, CS.dir) : null;
         out.push({ kind: "player", lg: lg, name: p.name, team: p.team, pid: p.pid, key: p.key, stat: p.stat,
-                   line: line, dir: CS.dir, rate: rec.rate, hits: rec.hits, n: rec.n,
+                   line: line, dir: CS.dir, rate: rec.rate, hits: rec.hits, n: rec.n, mp: mp,
                    nx: nx, img: pl.img || "" });
       });
     });
-    out.sort(function(a, b){ return b.rate - a.rate || b.n - a.n; });
+    if (CS.rank === "model") out.sort(function(a, b){ return ((b.mp == null ? -1 : b.mp) - (a.mp == null ? -1 : a.mp)) || b.rate - a.rate || b.n - a.n; });
+    else out.sort(function(a, b){ return b.rate - a.rate || b.n - a.n; });
     return out.slice(0, 40);
+  }
+  function teamStreak(rows, stat, line, dir){
+    var n = 0;
+    for (var i = 0; i < rows.length; i++){
+      var v = tVal(stat, rows[i]);
+      if (v == null) continue;
+      if (dir === "Over" ? v > line : v < line) n++;
+      else break;
+    }
+    return n;
   }
   function genTeam(){
     var TD = window.TEAMS_DATA || { leagues: {}, logs: {} }, out = [];
@@ -5609,16 +5653,24 @@ runCheck(false);
         var gk = lg + "|" + [e.team, e.opp].sort().join("@");
         if (CS.games !== "ALL" && !CS.games.has(gk)) return;
         var rows = (((TD.logs || {})[lg] || {})[e.team] || {}).rows || [];
+        if (CS.safety.b2b && e.b2b) return;
+        if (CS.safety.blowout){
+          var g = gamesList(lg).filter(function(x){ return gameKey(x) === [e.team, e.opp].sort().join("@"); })[0];
+          var sa = spreadAbs(g);
+          if (sa != null && sa >= 13) return;
+        }
+        if (CS.safety.streak && teamStreak(rows, e.stat, e.line, CS.dir) < 3) return;
         var pick = rows;
         if (CS.basis === "vs") pick = rows.filter(function(r){ return r.opp === e.opp; });
         else if (CS.basis === "venue") pick = rows.filter(function(r){ return !!r.home === !!e.home; });
-        else pick = rows.slice(0, 10);
+        pick = pick.slice(0, CS.win);
         var vals = pick.map(function(r){ return tVal(e.stat, r); }).filter(function(v){ return v != null; });
         if (!vals.length) return;
         var line = csLine(CS.lines === "alt" ? shiftLine(e.line, CS.dir, TSTEP[e.stat] || 2) : e.line);
         var rec = rateOf(vals, line, CS.dir);
+        if (rec.rate < CS.minRate) return;
         out.push({ kind: "team", lg: lg, name: e.teamName, team: e.team, abbr: e.team, key: e.stat, stat: e.statLabel,
-                   line: line, dir: CS.dir, rate: rec.rate, hits: rec.hits, n: rec.n,
+                   line: line, dir: CS.dir, rate: rec.rate, hits: rec.hits, n: rec.n, mp: null,
                    nxLabel: (e.home ? "vs " : "@ ") + e.opp, date: e.gameDate });
       });
     });
@@ -5631,16 +5683,19 @@ runCheck(false);
   }
 
   /* ---------- wizard rendering ---------- */
-  var TITLES = [
-    null,
-    ["Which league?", "Choose one or more leagues for this cheatsheet."],
-    ["What do you prefer?", "Choose player or team props."],
-    ["Which props do you want?", "Choose the bet types you want to include."],
-    ["Which games to include?", "Include every game or pick the ones you want."],
-    ["What should we base it on?", "Choose which timeframe to base it on."],
-    ["Which lines do you want?", "Choose Main or Alternate."],
-    ["What are you looking for?", "Choose Over or Under."]
-  ];
+  var TITLES = {
+    leagues: ["Which league?", "Choose one or more leagues for this cheatsheet."],
+    kind: ["What do you prefer?", "Choose player or team props."],
+    stats: ["Which props do you want?", "Choose the bet types you want to include."],
+    games: ["Which games to include?", "Include every game or pick the ones you want."],
+    basis: ["What should we base it on?", "Choose which timeframe to base it on."],
+    window: ["Which form window?", "How many games back should count?"],
+    minrate: ["Minimum hit rate?", "Only show props at or above this rate."],
+    rank: ["Rank the sheet by?", "Hit rate is the raw record. Model probability adjusts for opponent, venue, pace and rest."],
+    safety: ["Safety filters", "Optional — leave them all off if you want everything."],
+    lines: ["Which lines do you want?", "Choose Main or Alternate."],
+    dir: ["What are you looking for?", "Choose Over or Under."]
+  };
   function optRow(action, v, label, on){
     return '<button type="button" class="csrowopt' + (on ? " on" : "") + '" data-cs="' + action + '" data-v="' + esc(v) + '">'
       + '<span>' + esc(label) + '</span>' + (on ? '<span class="cscheck">✓</span>' : '') + '</button>';
@@ -5648,17 +5703,19 @@ runCheck(false);
   function render(){
     if (resEl) resEl.hidden = true;
     wiz.hidden = false;
-    var step = CS.step, t = TITLES[step], body = "";
-    if (step === 1){
+    var steps = stepList();
+    if (CS.step > steps.length - 1) CS.step = steps.length - 1;
+    var key = steps[CS.step], t = TITLES[key], body = "";
+    if (key === "leagues"){
       body = '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){
         return optRow("league", lg, lg, CS.leagues.indexOf(lg) !== -1);
       }).join("") + '</div>'
         + '<div class="csfoot"><button type="button" class="csnext" data-cs="next">Next</button></div>';
-    } else if (step === 2){
+    } else if (key === "kind"){
       body = '<div class="csrows">'
         + optRow("kind", "player", "Player Props", CS.kind === "player")
         + optRow("kind", "team", "Team Props", CS.kind === "team") + '</div>';
-    } else if (step === 3){
+    } else if (key === "stats"){
       var opts = statOptions();
       body = '<div class="csgrid">'
         + '<button type="button" class="cstile' + (CS.stats === "ALL" ? " on" : "") + '" data-cs="stat" data-v="ALL"><span class="cscode">ALL</span><span class="cslabel">All</span></button>'
@@ -5667,7 +5724,7 @@ runCheck(false);
             return '<button type="button" class="cstile' + (on ? " on" : "") + '" data-cs="stat" data-v="' + esc(o.k) + '"><span class="cscode">' + esc(CODES[o.k] || o.label.slice(0, 3).toUpperCase()) + '</span><span class="cslabel">' + esc(o.label) + '</span></button>';
           }).join("") + '</div>'
         + '<div class="csfoot"><button type="button" class="csnext" data-cs="next">Next</button></div>';
-    } else if (step === 4){
+    } else if (key === "games"){
       var tiles = "";
       CS.leagues.forEach(function(lg){
         gamesList(lg).forEach(function(g){
@@ -5681,25 +5738,43 @@ runCheck(false);
         + '<button type="button" class="cstile' + (CS.games === "ALL" ? " on" : "") + '" data-cs="game" data-v="ALL"><span class="cslabel">All games</span></button>'
         + tiles + '</div>'
         + '<div class="csfoot"><button type="button" class="csnext" data-cs="next">Next</button></div>';
-    } else if (step === 5){
+    } else if (key === "basis"){
       body = '<div class="csrows">'
         + optRow("basis", "recent", "Recent Form", CS.basis === "recent")
         + optRow("basis", "vs", "Versus Opponent", CS.basis === "vs")
         + optRow("basis", "venue", "Home/Away Splits", CS.basis === "venue") + '</div>';
-    } else if (step === 6){
+    } else if (key === "window"){
+      body = '<div class="csrows">' + [5, 10, 20, 999].map(function(n){
+        return optRow("win", String(n), WIN_LABEL[n], CS.win === n);
+      }).join("") + '</div>';
+    } else if (key === "minrate"){
+      body = '<div class="csrows">' + [0, 50, 60, 70, 80].map(function(n){
+        return optRow("minrate", String(n), n === 0 ? "Any rate" : n + "% or higher", CS.minRate === n);
+      }).join("") + '</div>';
+    } else if (key === "rank"){
+      body = '<div class="csrows">'
+        + optRow("rank", "rate", "Hit rate", CS.rank === "rate")
+        + optRow("rank", "model", "Model probability", CS.rank === "model") + '</div>';
+    } else if (key === "safety"){
+      body = '<div class="csrows">'
+        + optRow("safety", "blowout", "Exclude blowout-risk games (spread 13+)", !!CS.safety.blowout)
+        + optRow("safety", "b2b", "Exclude back-to-backs", !!CS.safety.b2b)
+        + optRow("safety", "streak", "Hit streaks only (3+)", !!CS.safety.streak) + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-cs="next">Next</button></div>';
+    } else if (key === "lines"){
       body = '<div class="csrows">'
         + optRow("lines", "main", "Main Lines", CS.lines === "main")
         + optRow("lines", "alt", "Alternate Lines", CS.lines === "alt") + '</div>'
         + '<p class="csnote">Alternate shifts the line one step in your favour — lower for Overs, higher for Unders — and re-rates it from the logs.</p>';
-    } else if (step === 7){
+    } else if (key === "dir"){
       body = '<div class="csrows">'
         + optRow("dir", "Over", "Over", CS.dir === "Over")
         + optRow("dir", "Under", "Under", CS.dir === "Under") + '</div>'
         + '<div class="csfoot"><button type="button" class="csnext csgen" data-cs="gen">Generate Cheatsheet</button></div>';
     }
     wiz.innerHTML = '<div class="cswiz">'
-      + '<div class="csprog"><span class="csbar"><i style="width:' + Math.round(step / 7 * 100) + '%"></i></span><span class="csstepn">Step ' + step + ' of 7</span></div>'
-      + (step > 1 ? '<button type="button" class="csback" data-cs="back" aria-label="Back">←</button>' : '')
+      + '<div class="csprog"><span class="csbar"><i style="width:' + Math.round((CS.step + 1) / steps.length * 100) + '%"></i></span><span class="csstepn">Step ' + (CS.step + 1) + ' of ' + steps.length + '</span></div>'
+      + (CS.step > 0 ? '<button type="button" class="csback" data-cs="back" aria-label="Back">←</button>' : '')
       + '<h2 class="cstitle">' + esc(t[0]) + '</h2><p class="cssub">' + esc(t[1]) + '</p>'
       + body + '</div>';
   }
@@ -5708,8 +5783,16 @@ runCheck(false);
   function summaryText(){
     var statsTxt = CS.stats === "ALL" ? "All stats" : CS.stats.size + " stat" + (CS.stats.size === 1 ? "" : "s");
     var gamesTxt = CS.games === "ALL" ? "All games" : CS.games.size + " game" + (CS.games.size === 1 ? "" : "s");
+    var safe = [];
+    if (CS.safety.blowout) safe.push("no blowout risk");
+    if (CS.safety.b2b) safe.push("no back-to-backs");
+    if (CS.safety.streak) safe.push("streaks only");
     return CS.leagues.join(" + ") + " · " + (CS.kind === "player" ? "Player props" : "Team props") + " · " + statsTxt + " · " + gamesTxt
-      + " · " + BASIS_LABEL[CS.basis] + " · " + (CS.lines === "alt" ? "Alternate lines" : "Main lines") + " · " + CS.dir;
+      + " · " + BASIS_LABEL[CS.basis] + " · " + WIN_LABEL[CS.win]
+      + (CS.minRate ? " · " + CS.minRate + "%+" : "")
+      + (CS.kind === "player" ? " · Ranked by " + (CS.rank === "model" ? "model" : "hit rate") : "")
+      + (safe.length ? " · " + safe.join(", ") : "")
+      + " · " + (CS.lines === "alt" ? "Alternate lines" : "Main lines") + " · " + CS.dir;
   }
   function renderResults(){
     wiz.hidden = true;
@@ -5728,20 +5811,23 @@ runCheck(false);
       var avatar = r.kind === "player" && r.img
         ? '<img class="csav" src="' + esc(r.img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
         : '<img class="csav" src="' + logoUrl(r.lg, r.team) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
+      var big = (CS.rank === "model" && r.mp != null)
+        ? '<span class="csrate"><b>' + r.mp + '%</b><span>model · ' + r.hits + '/' + r.n + '</span></span>'
+        : '<span class="csrate"><b>' + r.rate + '%</b><span>' + r.hits + '/' + r.n + (r.mp != null ? ' · model ' + r.mp + '%' : '') + '</span></span>';
       return '<article class="csres" role="button" tabindex="0"' + attrs + '>'
         + '<span class="csrank">' + (i + 1) + '</span>' + avatar
         + '<span class="csmain"><span class="csname">' + esc(r.name) + '</span>'
         + '<span class="csmeta">' + esc(r.stat) + ' · <b class="csdir ' + (r.dir === "Over" ? "over" : "under") + '">' + r.dir + ' ' + fv(r.line) + '</b></span>'
         + '<span class="csmeta">' + esc(r.lg) + ' · ' + esc(nxTxt) + (r.n < 5 ? ' · thin history' : '') + '</span></span>'
-        + '<span class="csrate"><b>' + r.rate + '%</b><span>' + r.hits + '/' + r.n + '</span></span></article>';
+        + big + '</article>';
     }).join("");
     resEl.innerHTML = '<div class="csreshead"><h2 class="cstitle">Your cheatsheet</h2>'
       + '<p class="cssub">' + esc(summaryText()) + '</p>'
-      + '<p class="csnote">Rated on ' + esc(BASIS_LABEL[CS.basis].toLowerCase()) + ' from game logs at research lines — not sportsbook prices. Tap a row for the full breakdown.</p>'
+      + '<p class="csnote">Rated on ' + esc(BASIS_LABEL[CS.basis].toLowerCase()) + ' (' + esc(WIN_LABEL[CS.win].toLowerCase()) + ') from game logs at research lines — not sportsbook prices. Tap a row for the full breakdown.</p>'
       + '<div class="csactions"><button type="button" class="csact" data-cs="edit">Edit selections</button>'
       + '<button type="button" class="csact" data-cs="csv">Download CSV</button>'
       + '<button type="button" class="csact" data-cs="txt">Download TXT</button></div></div>'
-      + (rows || '<div class="emptybox">Nothing matched those selections. Loosen the stats or games and generate again.</div>');
+      + (rows || '<div class="emptybox">Nothing matched those selections. Loosen the filters and generate again.</div>');
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function download(name, text, type){
@@ -5756,17 +5842,18 @@ runCheck(false);
   function exportSheet(fmt){
     var head = "LegLock Cheatsheet — " + summaryText();
     if (fmt === "csv"){
-      var lines = ["Rank,League,Name,Team,Stat,Line,Direction,Basis,Basis Rate,Record"];
+      var lines = ["Rank,League,Name,Team,Stat,Line,Direction,Basis,Window,Rate,Record,Model %"];
       CS.out.forEach(function(r, i){
         lines.push([i + 1, r.lg, '"' + r.name.replace(/"/g, '""') + '"', r.team, '"' + r.stat + '"', fv(r.line), r.dir,
-                    BASIS_LABEL[CS.basis], r.rate + "%", r.hits + "/" + r.n].join(","));
+                    BASIS_LABEL[CS.basis], WIN_LABEL[CS.win], r.rate + "%", r.hits + "/" + r.n, r.mp == null ? "" : r.mp + "%"].join(","));
       });
       download("leglock-cheatsheet.csv", lines.join("\n"), "text/csv");
     } else {
       var txt = [head, ""];
       CS.out.forEach(function(r, i){
         txt.push((i + 1) + ". [" + r.lg + "] " + r.name + " (" + r.team + ") — " + r.stat + " " + r.dir + " " + fv(r.line)
-          + " · " + r.rate + "% (" + r.hits + "/" + r.n + ", " + BASIS_LABEL[CS.basis].toLowerCase() + ")");
+          + " · " + r.rate + "% (" + r.hits + "/" + r.n + ", " + BASIS_LABEL[CS.basis].toLowerCase() + ")"
+          + (r.mp != null ? " · model " + r.mp + "%" : ""));
       });
       txt.push("", "Research lines from game logs — not sportsbook prices.");
       download("leglock-cheatsheet.txt", txt.join("\n"), "text/plain");
@@ -5775,10 +5862,6 @@ runCheck(false);
 
   /* ---------- events ---------- */
   function onClick(e){
-    /* Team rows: sync the app league first so the team popup (which
-       reads the current league) opens the right team. This listener
-       sits on the container, so it runs before the document-level
-       popup handler. */
     var tr = e.target && e.target.closest ? e.target.closest("[data-csteam]") : null;
     if (tr) {
       try { if (window.__LL && window.__LL.setLeague) window.__LL.setLeague(tr.getAttribute("data-csteam")); } catch (err) {}
@@ -5786,7 +5869,9 @@ runCheck(false);
     var b = e.target && e.target.closest ? e.target.closest("[data-cs]") : null;
     if (!b) return;
     var act = b.getAttribute("data-cs"), v = b.getAttribute("data-v");
-    if (act === "back"){ CS.step = Math.max(1, CS.step - 1); render(); }
+    var steps = stepList();
+    function adv(){ CS.step = Math.min(steps.length - 1, CS.step + 1); render(); }
+    if (act === "back"){ CS.step = Math.max(0, CS.step - 1); render(); }
     else if (act === "league"){
       var ix = CS.leagues.indexOf(v);
       if (ix !== -1 && CS.leagues.length > 1) CS.leagues.splice(ix, 1);
@@ -5794,7 +5879,7 @@ runCheck(false);
       CS.stats = "ALL"; CS.games = "ALL";
       render();
     }
-    else if (act === "kind"){ if (CS.kind !== v){ CS.kind = v; CS.stats = "ALL"; } CS.step = 3; render(); }
+    else if (act === "kind"){ if (CS.kind !== v){ CS.kind = v; CS.stats = "ALL"; } adv(); }
     else if (act === "stat"){
       if (v === "ALL") CS.stats = "ALL";
       else {
@@ -5814,20 +5899,599 @@ runCheck(false);
       render();
     }
     else if (act === "next"){
-      if (CS.step === 1) {
+      if (steps[CS.step] === "leagues") {
         try { if (window.__LL && window.__LL.setLeague) window.__LL.setLeague(CS.leagues[0]); } catch (err) {}
       }
-      CS.step = Math.min(7, CS.step + 1); render();
+      adv();
     }
-    else if (act === "basis"){ CS.basis = v; CS.step = 6; render(); }
-    else if (act === "lines"){ CS.lines = v; CS.step = 7; render(); }
+    else if (act === "basis"){ CS.basis = v; adv(); }
+    else if (act === "win"){ CS.win = parseInt(v, 10); adv(); }
+    else if (act === "minrate"){ CS.minRate = parseInt(v, 10); adv(); }
+    else if (act === "rank"){ CS.rank = v; adv(); }
+    else if (act === "safety"){ CS.safety[v] = !CS.safety[v]; render(); }
+    else if (act === "lines"){ CS.lines = v; adv(); }
     else if (act === "dir"){ CS.dir = v; render(); }
     else if (act === "gen"){ generate(); }
-    else if (act === "edit"){ CS.step = 1; render(); }
+    else if (act === "edit"){ CS.step = 0; render(); }
     else if (act === "csv"){ exportSheet("csv"); }
     else if (act === "txt"){ exportSheet("txt"); }
   }
   wiz.addEventListener("click", onClick);
   if (resEl) resEl.addEventListener("click", onClick);
   render();
+})();
+
+/* ================= Wizards hub + Smart Shuffle, Matchup Hunter,
+   Edge Finder, Next Man Up =================
+   The Cheatsheet view hosts a hub: five wizard cards, one wizard
+   open at a time. Launchers elsewhere on the site (Shuffle page,
+   Filters, Injuries header, the player popup's Edge Finder button)
+   carry data-wizlaunch and land here via a sessionStorage flag. */
+(function(){
+  var hub = document.getElementById("csHub");
+  if (!hub) return;
+  var bar = document.getElementById("wizBar");
+  var barTitle = document.getElementById("wizTitle");
+  var TITLES = { cheatsheet: "Cheatsheet", smart: "Smart Shuffle", matchup: "Matchup Hunter", edge: "Edge Finder", nextman: "Next Man Up" };
+  var MOUNTS = {
+    cheatsheet: ["csWizard", "csResults"],
+    smart: ["ssRoot"], matchup: ["mhRoot"], edge: ["efRoot"], nextman: ["nmRoot"]
+  };
+  function $(id){ return document.getElementById(id); }
+  function esc(t){ return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function fv(v){ if (v == null || isNaN(v)) return "—"; var n = Math.round(v * 10) / 10; return (n % 1 === 0) ? String(n) : n.toFixed(1); }
+  function DL(lg){ return window["__DL_" + lg] || {}; }
+  function injuredNames(lg){
+    var s = new Set();
+    (DL(lg).injuries || []).forEach(function(i){ if (i && i.name) s.add(i.name); });
+    return s;
+  }
+  function valOf(row, key){
+    var s = row.s || {};
+    if (key === "combo"){
+      if (s.points == null || s.totalRebounds == null || s.assists == null) return null;
+      return s.points + s.totalRebounds + s.assists;
+    }
+    return s[key] != null ? s[key] : null;
+  }
+  function oppAbbr(row){ return String(row.opp || "").replace(/^(vs|@)\s*/, ""); }
+  function gameKey(g){ return [g.home.abbr, g.away.abbr].sort().join("@"); }
+  function gamesList(lg){
+    return (DL(lg).games || []).filter(function(g){ return g.state !== "post"; })
+      .slice().sort(function(a, b){ return String(a.date).localeCompare(String(b.date)); });
+  }
+  function nextGame(lg, team){
+    var gs = gamesList(lg).filter(function(g){ return g.home.abbr === team || g.away.abbr === team; });
+    return gs[0] || null;
+  }
+  function logoUrl(lg, abbr){
+    return "https://a.espncdn.com/i/teamlogos/" + lg.toLowerCase() + "/500/" + String(abbr).toLowerCase() + ".png";
+  }
+  function rateOf(vals, line, dir){
+    var hits = vals.filter(function(v){ return dir === "Over" ? v > line : v < line; }).length;
+    return { rate: vals.length ? Math.round(100 * hits / vals.length) : 0, hits: hits, n: vals.length };
+  }
+  function modelFor(lg, pid, key){
+    try { return (window.__LL && window.__LL.modelFor) ? window.__LL.modelFor(lg, pid, key) : null; }
+    catch (e) { return null; }
+  }
+  function prog(step, total){
+    return '<div class="csprog"><span class="csbar"><i style="width:' + Math.round((step + 1) / total * 100) + '%"></i></span><span class="csstepn">Step ' + (step + 1) + ' of ' + total + '</span></div>';
+  }
+  function head(step, total, title, sub){
+    return prog(step, total)
+      + (step > 0 ? '<button type="button" class="csback" data-back aria-label="Back">←</button>' : '')
+      + '<h2 class="cstitle">' + esc(title) + '</h2><p class="cssub">' + esc(sub) + '</p>';
+  }
+  function optRow(attr, v, label, on){
+    return '<button type="button" class="csrowopt' + (on ? " on" : "") + '" data-' + attr + '="' + esc(v) + '">'
+      + '<span>' + esc(label) + '</span>' + (on ? '<span class="cscheck">✓</span>' : '') + '</button>';
+  }
+
+  /* ---------- hub open/close ---------- */
+  var current = "hub";
+  function openWiz(name){
+    current = name || "hub";
+    Object.keys(MOUNTS).forEach(function(k){
+      MOUNTS[k].forEach(function(id){
+        var el = $(id);
+        if (el) el.classList.toggle("wizoff", current !== k);
+      });
+    });
+    hub.classList.toggle("wizoff", current !== "hub");
+    if (bar){
+      bar.hidden = current === "hub";
+      if (barTitle) barTitle.textContent = current === "hub" ? "" : (TITLES[current] || "");
+    }
+    if (current !== "hub") window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  hub.innerHTML = '<div class="cswiz"><h2 class="cstitle">Wizards</h2>'
+    + '<p class="cssub">Guided builders — answer a few questions, get a sheet built from the game logs.</p>'
+    + '<div class="hubgrid">'
+    + [["cheatsheet", "Cheatsheet", "The full builder: leagues, stats, games, basis, form window, model ranking and safety filters."],
+       ["smart", "Smart Shuffle", "A dealt set with a steering wheel — pick the leagues, leg count, risk level and lean."],
+       ["matchup", "Matchup Hunter", "Tonight's players ranked against the defences that give up the most of a stat."],
+       ["edge", "Edge Finder", "Your book's line and price against the model — edge in points, fair odds."],
+       ["nextman", "Next Man Up", "Who gains when a player is out: minutes, usage and with/without splits."]]
+      .map(function(c){
+        return '<button type="button" class="hubcard" data-hub="' + c[0] + '"><span class="hubt">' + esc(c[1]) + '</span><span class="hubd">' + esc(c[2]) + '</span></button>';
+      }).join("")
+    + '</div></div>';
+
+  /* ================= Smart Shuffle ================= */
+  var ssRoot = $("ssRoot");
+  var SS = { step: 0, leagues: ["NBA"], legs: 4, risk: "balanced", lean: "Mixed", deal: [], combined: null };
+  var RISK = { safe: 65, balanced: 55, longshot: 40 };
+  function ssPool(){
+    var th = RISK[SS.risk], pool = [];
+    SS.leagues.forEach(function(lg){
+      var D = DL(lg), inj = injuredNames(lg);
+      (D.props || []).forEach(function(p){
+        if (inj.has(p.name)) return;
+        if (SS.lean !== "Mixed" && p.dir !== SS.lean) return;
+        var m = modelFor(lg, p.pid, p.key);
+        if (!m || !m.pDir) return;
+        var mp = Math.round(100 * m.pDir(p.line, p.dir));
+        if (mp < th) return;
+        var nx = nextGame(lg, p.team);
+        if (!nx) return;
+        pool.push({ lg: lg, p: p, mp: mp, nx: nx, gk: gameKey(nx) });
+      });
+    });
+    return pool;
+  }
+  function ssDeal(){
+    var pool = ssPool(), picked = [], perStat = {}, perGame = {}, used = {};
+    var guard = 0;
+    while (picked.length < SS.legs && pool.length && guard++ < 400){
+      var totalW = 0;
+      pool.forEach(function(x){ totalW += x.mp * x.mp; });
+      var r = Math.random() * totalW, idx = 0;
+      for (var i = 0; i < pool.length; i++){ r -= pool[i].mp * pool[i].mp; if (r <= 0){ idx = i; break; } }
+      var cand = pool.splice(idx, 1)[0];
+      var sk = cand.lg + "|" + cand.p.key;
+      if (used[cand.p.pid]) continue;
+      if ((perStat[sk] || 0) >= 2) continue;
+      if ((perGame[cand.gk] || 0) >= 2) continue;
+      used[cand.p.pid] = 1;
+      perStat[sk] = (perStat[sk] || 0) + 1;
+      perGame[cand.gk] = (perGame[cand.gk] || 0) + 1;
+      picked.push(cand);
+    }
+    SS.deal = picked;
+    SS.combined = picked.length ? picked.reduce(function(a, x){ return a * x.mp / 100; }, 1) : null;
+    SS.step = 4;
+    ssRender();
+  }
+  function ssRender(){
+    if (!ssRoot) return;
+    var body = "";
+    if (SS.step === 0){
+      body = head(0, 4, "Which leagues?", "Choose one or more.")
+        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){
+            return optRow("ss-lg", lg, lg, SS.leagues.indexOf(lg) !== -1);
+          }).join("") + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-ss="next">Next</button></div>';
+    } else if (SS.step === 1){
+      body = head(1, 4, "How many legs?", "9 is the Jordan Parlay.")
+        + '<div class="csgrid">' + [2, 3, 4, 5, 6, 9].map(function(n){
+            return '<button type="button" class="cstile' + (SS.legs === n ? " on" : "") + '" data-ss-legs="' + n + '"><span class="cslabel">' + n + (n === 9 ? " · Jordan Parlay" : "") + '</span></button>';
+          }).join("") + '</div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-ss="next">Next</button></div>';
+    } else if (SS.step === 2){
+      body = head(2, 4, "How risky?", "By the model's probability for each leg.")
+        + '<div class="csrows">'
+        + optRow("ss-risk", "safe", "Safe — model 65%+", SS.risk === "safe")
+        + optRow("ss-risk", "balanced", "Balanced — model 55%+", SS.risk === "balanced")
+        + optRow("ss-risk", "longshot", "Longshot — model 40%+", SS.risk === "longshot") + '</div>';
+    } else if (SS.step === 3){
+      body = head(3, 4, "Overs, Unders, or mixed?", "The lean for every leg.")
+        + '<div class="csrows">'
+        + optRow("ss-lean", "Over", "Overs", SS.lean === "Over")
+        + optRow("ss-lean", "Under", "Unders", SS.lean === "Under")
+        + optRow("ss-lean", "Mixed", "Mixed", SS.lean === "Mixed") + '</div>';
+    } else {
+      var cards = SS.deal.map(function(x){
+        var p = x.p, r10 = p.rates && p.rates.L10 ? (p.dir === "Over" ? p.rates.L10.o : p.rates.L10.u) + "/" + p.rates.L10.n : "";
+        var pl = (DL(x.lg).players || {})[p.pid] || {};
+        var pinned = false;
+        try { pinned = !!(window.__LL && window.__LL.pins && window.__LL.pins.is(x.lg, p.pid, p.key)); } catch (e) {}
+        return '<article class="csres" data-open-logs="' + esc(p.pid) + '" data-stat-key="' + esc(p.key) + '" data-lg="' + esc(x.lg) + '" role="button" tabindex="0">'
+          + (pl.img ? '<img class="csav" src="' + esc(pl.img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '')
+          + '<span class="csmain"><span class="csname">' + esc(p.name) + '</span>'
+          + '<span class="csmeta">' + esc(p.stat) + ' · <b class="csdir ' + (p.dir === "Over" ? "over" : "under") + '">' + p.dir + ' ' + fv(p.line) + '</b></span>'
+          + '<span class="csmeta">' + esc(x.lg) + ' · L10 ' + esc(r10) + '</span></span>'
+          + '<span class="csrate"><b>' + x.mp + '%</b><span>model</span></span>'
+          + '<button type="button" class="pinbtn" data-pin aria-pressed="' + (pinned ? "true" : "false") + '">' + (pinned ? "Pinned" : "Pin") + '</button></article>';
+      }).join("");
+      body = '<div class="csreshead"><h2 class="cstitle">Your set</h2>'
+        + '<p class="cssub">' + esc(SS.leagues.join(" + ")) + ' · ' + SS.deal.length + ' legs · ' + esc(SS.risk) + ' · ' + esc(SS.lean) + '</p>'
+        + (SS.combined != null
+            ? '<p class="csnote">Model chance all ' + SS.deal.length + ' legs hit: <b>' + Math.max(1, Math.round(SS.combined * 100)) + '%</b> · fair odds <b>' + (1 / SS.combined).toFixed(2) + '</b> — legs aren\'t truly independent, so treat it as a guide. Research lines, not book prices.</p>'
+            : '<p class="csnote">The pool was too thin for those settings — loosen the risk level or add a league.</p>')
+        + '<div class="csactions"><button type="button" class="csact" data-ss="redeal">Deal again</button>'
+        + '<button type="button" class="csact" data-ss="edit">Edit selections</button></div></div>'
+        + (cards || '<div class="emptybox">No legs matched. Try Longshot or Mixed.</div>');
+      ssRoot.innerHTML = '<div class="cswiz">' + body + '</div>';
+      return;
+    }
+    ssRoot.innerHTML = '<div class="cswiz">' + body + '</div>';
+  }
+  if (ssRoot) ssRoot.addEventListener("click", function(e){
+    if (e.target.closest && e.target.closest("[data-back]")){ SS.step = Math.max(0, SS.step - 1); ssRender(); return; }
+    var b = e.target.closest ? e.target.closest("[data-ss],[data-ss-lg],[data-ss-legs],[data-ss-risk],[data-ss-lean]") : null;
+    if (!b) return;
+    if (b.hasAttribute("data-ss-lg")){
+      var lg = b.getAttribute("data-ss-lg"), ix = SS.leagues.indexOf(lg);
+      if (ix !== -1 && SS.leagues.length > 1) SS.leagues.splice(ix, 1);
+      else if (ix === -1) SS.leagues.push(lg);
+      ssRender();
+    } else if (b.hasAttribute("data-ss-legs")){ SS.legs = parseInt(b.getAttribute("data-ss-legs"), 10); ssRender(); }
+    else if (b.hasAttribute("data-ss-risk")){ SS.risk = b.getAttribute("data-ss-risk"); SS.step = 3; ssRender(); }
+    else if (b.hasAttribute("data-ss-lean")){ SS.lean = b.getAttribute("data-ss-lean"); ssDeal(); }
+    else if (b.getAttribute("data-ss") === "next"){ SS.step = Math.min(3, SS.step + 1); ssRender(); }
+    else if (b.getAttribute("data-ss") === "redeal"){ ssDeal(); }
+    else if (b.getAttribute("data-ss") === "edit"){ SS.step = 0; ssRender(); }
+  });
+
+  /* ================= Matchup Hunter ================= */
+  var mhRoot = $("mhRoot");
+  var MH = { step: 0, league: "NBA", key: null, dir: "Over", out: [] };
+  function mhStatOptions(){
+    var seen = {}, out = [];
+    (DL(MH.league).props || []).forEach(function(p){
+      if (!seen[p.key]){ seen[p.key] = 1; out.push({ k: p.key, label: p.stat }); }
+    });
+    return out;
+  }
+  function mhRun(){
+    var lg = MH.league, D = DL(lg), inj = injuredNames(lg);
+    var agg = {}, totS = 0, totN = 0;
+    Object.keys(D.logs || {}).forEach(function(pid){
+      (D.logs[pid] || []).forEach(function(row){
+        var v = valOf(row, MH.key);
+        if (v == null) return;
+        var o = oppAbbr(row);
+        if (!agg[o]) agg[o] = { s: 0, n: 0 };
+        agg[o].s += v; agg[o].n++;
+        totS += v; totN++;
+      });
+    });
+    var leagueMean = totN ? totS / totN : 0;
+    var factor = {};
+    Object.keys(agg).forEach(function(o){
+      if (agg[o].n >= 25 && leagueMean > 0) factor[o] = (agg[o].s / agg[o].n) / leagueMean;
+    });
+    var out = [];
+    (D.props || []).forEach(function(p){
+      if (p.key !== MH.key || inj.has(p.name)) return;
+      var nx = nextGame(lg, p.team); if (!nx) return;
+      var opp = nx.home.abbr === p.team ? nx.away.abbr : nx.home.abbr;
+      var f = factor[opp];
+      if (f == null) return;
+      var vals = ((D.logs || {})[p.pid] || []).slice(0, 20).map(function(r){ return valOf(r, MH.key); }).filter(function(v){ return v != null; });
+      var rec = rateOf(vals, p.line, MH.dir);
+      var pl = (D.players || {})[p.pid] || {};
+      out.push({ p: p, f: f, opp: opp, rec: rec, img: pl.img || "", nx: nx });
+    });
+    out.sort(function(a, b){ return MH.dir === "Over" ? b.f - a.f : a.f - b.f; });
+    MH.out = out.slice(0, 12);
+    MH.step = 3;
+    mhRender();
+  }
+  function mhRender(){
+    if (!mhRoot) return;
+    var body = "";
+    if (MH.step === 0){
+      body = head(0, 3, "Which league?", "Defences are league-specific.")
+        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){ return optRow("mh-lg", lg, lg, MH.league === lg); }).join("") + '</div>';
+    } else if (MH.step === 1){
+      body = head(1, 3, "Which stat?", "The stat you want to hunt.")
+        + '<div class="csgrid">' + mhStatOptions().map(function(o){
+            return '<button type="button" class="cstile" data-mh-stat="' + esc(o.k) + '"><span class="cslabel">' + esc(o.label) + '</span></button>';
+          }).join("") + '</div>';
+    } else if (MH.step === 2){
+      body = head(2, 3, "Overs or Unders?", "Overs hunt the leakiest defences. Unders hunt the stingiest.")
+        + '<div class="csrows">' + optRow("mh-dir", "Over", "Over", MH.dir === "Over") + optRow("mh-dir", "Under", "Under", MH.dir === "Under") + '</div>';
+    } else {
+      var rows = MH.out.map(function(x, i){
+        var p = x.p, chip = (x.f >= 1 ? "+" : "") + Math.round((x.f - 1) * 100) + "% allowed";
+        return '<article class="csres" data-open-logs="' + esc(p.pid) + '" data-stat-key="' + esc(p.key) + '" data-lg="' + esc(MH.league) + '" role="button" tabindex="0">'
+          + '<span class="csrank">' + (i + 1) + '</span>'
+          + (x.img ? '<img class="csav" src="' + esc(x.img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '')
+          + '<span class="csmain"><span class="csname">' + esc(p.name) + '</span>'
+          + '<span class="csmeta">' + esc(p.stat) + ' ' + MH.dir + ' ' + fv(p.line) + ' · vs ' + esc(x.opp) + '</span>'
+          + '<span class="csmeta">' + esc(x.opp) + ' allows ' + chip + ' on this stat</span></span>'
+          + '<span class="csrate"><b>' + x.rec.rate + '%</b><span>L20 ' + x.rec.hits + '/' + x.rec.n + '</span></span></article>';
+      }).join("");
+      body = '<div class="csreshead"><h2 class="cstitle">Matchups to hunt</h2>'
+        + '<p class="cssub">' + esc(MH.league) + ' · ' + esc((mhStatOptions().filter(function(o){ return o.k === MH.key; })[0] || {}).label || MH.key) + ' · ' + MH.dir + '</p>'
+        + '<p class="csnote">Ranked by how much each defence gives up on this stat versus the league average (last 25+ logged games per defence). Rates are the player\'s L20 at the research line.</p>'
+        + '<div class="csactions"><button type="button" class="csact" data-mh="edit">Start over</button></div></div>'
+        + (rows || '<div class="emptybox">No matchups had enough defensive history. Try another stat.</div>');
+    }
+    mhRoot.innerHTML = '<div class="cswiz">' + body + '</div>';
+  }
+  if (mhRoot) mhRoot.addEventListener("click", function(e){
+    if (e.target.closest && e.target.closest("[data-back]")){ MH.step = Math.max(0, MH.step - 1); mhRender(); return; }
+    var b = e.target.closest ? e.target.closest("[data-mh],[data-mh-lg],[data-mh-stat],[data-mh-dir]") : null;
+    if (!b) return;
+    if (b.hasAttribute("data-mh-lg")){ MH.league = b.getAttribute("data-mh-lg"); MH.step = 1; mhRender(); }
+    else if (b.hasAttribute("data-mh-stat")){ MH.key = b.getAttribute("data-mh-stat"); MH.step = 2; mhRender(); }
+    else if (b.hasAttribute("data-mh-dir")){ MH.dir = b.getAttribute("data-mh-dir"); mhRun(); }
+    else if (b.getAttribute("data-mh") === "edit"){ MH.step = 0; mhRender(); }
+  });
+
+  /* ================= Edge Finder ================= */
+  var efRoot = $("efRoot");
+  var EF = { step: 0, league: "NBA", key: null, prop: null, dir: "Over", verdict: "" };
+  function efStatOptions(){
+    var seen = {}, out = [];
+    (DL(EF.league).props || []).forEach(function(p){
+      if (!seen[p.key]){ seen[p.key] = 1; out.push({ k: p.key, label: p.stat }); }
+    });
+    return out;
+  }
+  function efPlayers(){
+    var inj = injuredNames(EF.league);
+    return (DL(EF.league).props || []).filter(function(p){ return p.key === EF.key && !inj.has(p.name); })
+      .map(function(p){
+        var r = p.rates && p.rates.L10 ? (p.dir === "Over" ? p.rates.L10.o : p.rates.L10.u) / Math.max(1, p.rates.L10.n) : 0;
+        return { p: p, r: r };
+      }).sort(function(a, b){ return b.r - a.r; }).slice(0, 25);
+  }
+  function efRender(){
+    if (!efRoot) return;
+    var body = "";
+    if (EF.step === 0){
+      body = head(0, 4, "Which league?", "Start with the league.")
+        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){ return optRow("ef-lg", lg, lg, EF.league === lg); }).join("") + '</div>';
+    } else if (EF.step === 1){
+      body = head(1, 4, "Which stat?", "The market you\'re pricing.")
+        + '<div class="csgrid">' + efStatOptions().map(function(o){
+            return '<button type="button" class="cstile" data-ef-stat="' + esc(o.k) + '"><span class="cslabel">' + esc(o.label) + '</span></button>';
+          }).join("") + '</div>';
+    } else if (EF.step === 2){
+      body = head(2, 4, "Which player?", "Top hit rates first.")
+        + '<div class="csrows">' + efPlayers().map(function(x){
+            var p = x.p;
+            return '<button type="button" class="csrowopt" data-ef-player="' + esc(p.pid) + '"><span>' + esc(p.name) + ' · ' + esc(p.team) + '</span><span class="csmeta">' + p.dir + ' ' + fv(p.line) + ' · L10 ' + Math.round(x.r * 100) + '%</span></button>';
+          }).join("") + '</div>';
+    } else {
+      var p = EF.prop;
+      body = head(3, 4, "Your book\'s price", "Enter the line and decimal odds your book offers.")
+        + '<div class="csres" style="cursor:default"><span class="csmain"><span class="csname">' + esc(p.name) + '</span>'
+        + '<span class="csmeta">' + esc(p.stat) + ' · research line ' + fv(p.line) + ' · ' + esc(EF.league) + '</span></span></div>'
+        + '<div class="csrows">'
+        + optRow("ef-dir", "Over", "Over", EF.dir === "Over")
+        + optRow("ef-dir", "Under", "Under", EF.dir === "Under") + '</div>'
+        + '<div class="effields"><label>Line <input id="efLine" type="number" step="0.5" value="' + fv(p.line) + '"></label>'
+        + '<label>Decimal odds <input id="efOdds" type="number" step="0.01" min="1.01" value="1.91"></label></div>'
+        + '<div class="csfoot"><button type="button" class="csnext" data-ef="verdict">Get verdict</button></div>'
+        + '<div id="efVerdict">' + EF.verdict + '</div>'
+        + '<div class="csactions"><button type="button" class="csact" data-ef="edit">Start over</button></div>';
+    }
+    efRoot.innerHTML = '<div class="cswiz">' + body + '</div>';
+  }
+  function efVerdict(){
+    var p = EF.prop;
+    var lineEl = efRoot.querySelector("#efLine"), oddsEl = efRoot.querySelector("#efOdds");
+    var line = parseFloat(lineEl && lineEl.value), odds = parseFloat(oddsEl && oddsEl.value);
+    if (isNaN(line) || isNaN(odds) || odds <= 1){
+      EF.verdict = '<p class="csnote">Enter a line and decimal odds above 1.00.</p>';
+      var v = efRoot.querySelector("#efVerdict"); if (v) v.innerHTML = EF.verdict;
+      return;
+    }
+    var m = modelFor(EF.league, p.pid, p.key);
+    if (!m || !m.pDir){
+      EF.verdict = '<p class="csnote">Not enough logged games to model this prop.</p>';
+      var v2 = efRoot.querySelector("#efVerdict"); if (v2) v2.innerHTML = EF.verdict;
+      return;
+    }
+    var mp = m.pDir(line, EF.dir);
+    var implied = 1 / odds;
+    var edge = (mp - implied) * 100;
+    var word = edge >= 5 ? "a real edge, if the model is right"
+      : edge >= 1.5 ? "a small edge"
+      : edge > -1.5 ? "no edge at this price"
+      : "the price is against you";
+    var vals = ((DL(EF.league).logs || {})[p.pid] || []).slice(0, 20).map(function(r){ return valOf(r, p.key); }).filter(function(v){ return v != null; });
+    var rec = rateOf(vals, line, EF.dir);
+    EF.verdict = '<div class="efverdict"><div class="efnums">'
+      + '<span>Model <b>' + Math.round(mp * 100) + '%</b></span>'
+      + '<span>Book implies <b>' + Math.round(implied * 100) + '%</b></span>'
+      + '<span>Edge <b>' + (edge > 0 ? "+" : "") + edge.toFixed(1) + ' pts</b></span></div>'
+      + '<p class="efword">' + esc(word) + '.</p>'
+      + '<p class="csnote">Fair odds at the model: <b>' + (1 / mp).toFixed(2) + '</b> · At your line, the player hit ' + rec.hits + '/' + rec.n + ' (' + rec.rate + '%) of the last 20. Model probability is a projection, not a promise.</p></div>';
+    var v3 = efRoot.querySelector("#efVerdict"); if (v3) v3.innerHTML = EF.verdict;
+  }
+  if (efRoot) efRoot.addEventListener("click", function(e){
+    if (e.target.closest && e.target.closest("[data-back]")){ EF.step = Math.max(0, EF.step - 1); EF.verdict = ""; efRender(); return; }
+    var b = e.target.closest ? e.target.closest("[data-ef],[data-ef-lg],[data-ef-stat],[data-ef-player],[data-ef-dir]") : null;
+    if (!b) return;
+    if (b.hasAttribute("data-ef-lg")){ EF.league = b.getAttribute("data-ef-lg"); EF.step = 1; efRender(); }
+    else if (b.hasAttribute("data-ef-stat")){ EF.key = b.getAttribute("data-ef-stat"); EF.step = 2; efRender(); }
+    else if (b.hasAttribute("data-ef-player")){
+      var pid = b.getAttribute("data-ef-player");
+      EF.prop = (DL(EF.league).props || []).filter(function(p){ return String(p.pid) === String(pid) && p.key === EF.key; })[0] || null;
+      if (EF.prop){ EF.dir = EF.prop.dir; EF.verdict = ""; EF.step = 3; efRender(); }
+    }
+    else if (b.hasAttribute("data-ef-dir")){ EF.dir = b.getAttribute("data-ef-dir"); EF.verdict = ""; efRender(); }
+    else if (b.getAttribute("data-ef") === "verdict"){ efVerdict(); }
+    else if (b.getAttribute("data-ef") === "edit"){ EF.step = 0; EF.verdict = ""; efRender(); }
+  });
+
+  /* ================= Next Man Up ================= */
+  var nmRoot = $("nmRoot");
+  var NM = { step: 0, league: "NBA", team: null, teamName: "", out: [] };
+  function nmTeams(){
+    var D = DL(NM.league), byTeam = {};
+    var abbrByName = {};
+    Object.keys(D.players || {}).forEach(function(pid){
+      var pl = D.players[pid];
+      if (pl && pl.teamName) abbrByName[pl.teamName] = pl.team;
+    });
+    (D.injuries || []).forEach(function(i){
+      var ab = abbrByName[i.team];
+      if (!ab) return;
+      if (!byTeam[ab]) byTeam[ab] = { abbr: ab, name: i.team, outs: [] };
+      byTeam[ab].outs.push(i);
+    });
+    return Object.keys(byTeam).map(function(k){ return byTeam[k]; })
+      .sort(function(a, b){ return b.outs.length - a.outs.length || a.name.localeCompare(b.name); });
+  }
+  function nmRun(){
+    var D = DL(NM.league), inj = injuredNames(NM.league);
+    var team = nmTeams().filter(function(t){ return t.abbr === NM.team; })[0];
+    if (!team) { NM.out = []; NM.step = 2; nmRender(); return; }
+    NM.teamName = team.name;
+    /* the biggest absence: the out player with the most minutes
+       (NBA) or simply the first with logged games */
+    var star = null, starDates = null;
+    team.outs.forEach(function(o){
+      var pid = null;
+      Object.keys(D.players || {}).forEach(function(k){ if (D.players[k].name === o.name) pid = k; });
+      if (!pid || !(D.logs || {})[pid]) return;
+      var rows = D.logs[pid];
+      var mins = rows.reduce(function(a, r){ return a + ((r.s && r.s.minutes) || 0); }, 0) / Math.max(1, rows.length);
+      if (!star || mins > star.mins){ star = { name: o.name, pid: pid, mins: mins }; starDates = new Set(rows.map(function(r){ return r.d; })); }
+    });
+    var mates = [];
+    Object.keys(D.players || {}).forEach(function(pid){
+      var pl = D.players[pid];
+      if (!pl || pl.team !== NM.team || inj.has(pl.name)) return;
+      var props = (D.props || []).filter(function(p){ return String(p.pid) === String(pid); });
+      if (!props.length) return;
+      var lead = props.slice().sort(function(a, b){
+        var ra = a.rates && a.rates.L10 ? a.rates.L10.o + a.rates.L10.u : 0, rb = b.rates && b.rates.L10 ? b.rates.L10.o + b.rates.L10.u : 0;
+        var na = a.rates && a.rates.L10 ? Math.max(1, a.rates.L10.n) : 1, nb = b.rates && b.rates.L10 ? Math.max(1, b.rates.L10.n) : 1;
+        return (rb / nb) - (ra / na);
+      })[0];
+      var rows = (D.logs || {})[pid] || [];
+      /* trend: minutes when the league logs them, else the lead stat */
+      var useMin = NM.league === "NBA" && rows.length && rows[0].s && rows[0].s.minutes != null;
+      var series = rows.map(function(r){ return useMin ? (r.s ? r.s.minutes : null) : valOf(r, lead.key); }).filter(function(v){ return v != null; });
+      var l5 = series.slice(0, 5), prior = series.slice(5, 20);
+      var avg = function(a){ return a.length ? a.reduce(function(x, y){ return x + y; }, 0) / a.length : null; };
+      var a5 = avg(l5), aP = avg(prior);
+      var trend = (a5 != null && aP) ? Math.round((a5 / aP - 1) * 100) : 0;
+      /* with / without the star */
+      var split = null;
+      if (star && starDates){
+        var wV = [], woV = [];
+        rows.forEach(function(r){
+          var v = valOf(r, lead.key);
+          if (v == null) return;
+          (starDates.has(r.d) ? wV : woV).push(v);
+        });
+        if (wV.length >= 3 && woV.length >= 3) split = { withA: avg(wV), withoutA: avg(woV), star: star.name };
+      }
+      var score = trend + (split && split.withoutA > split.withA ? 10 : 0);
+      mates.push({ pl: pl, pid: pid, lead: lead, trend: trend, useMin: useMin, split: split, score: score });
+    });
+    mates.sort(function(a, b){ return b.score - a.score; });
+    NM.out = mates.slice(0, 8);
+    NM.outs = team.outs;
+    NM.step = 2;
+    nmRender();
+  }
+  function nmRender(){
+    if (!nmRoot) return;
+    var body = "";
+    if (NM.step === 0){
+      body = head(0, 2, "Which league?", "Start with the league.")
+        + '<div class="csrows">' + ["NBA", "NFL", "NHL"].map(function(lg){ return optRow("nm-lg", lg, lg, NM.league === lg); }).join("") + '</div>';
+    } else if (NM.step === 1){
+      var teams = nmTeams();
+      body = head(1, 2, "Which team?", "Teams with players on the injury report.")
+        + '<div class="csrows">' + teams.map(function(t){
+            return '<button type="button" class="csrowopt" data-nm-team="' + esc(t.abbr) + '"><span>' + esc(t.name) + '</span><span class="csmeta">' + t.outs.length + ' out</span></button>';
+          }).join("") + '</div>'
+        + (teams.length ? "" : '<div class="emptybox">No injuries listed for this league right now.</div>');
+    } else {
+      var outs = (NM.outs || []).map(function(o){
+        return '<span class="nmout">' + esc(o.name) + ' · ' + esc(o.status || "Out") + '</span>';
+      }).join(" ");
+      var cards = NM.out.map(function(x){
+        var lead = x.lead;
+        var r10 = lead.rates && lead.rates.L10 ? Math.round(100 * (lead.dir === "Over" ? lead.rates.L10.o : lead.rates.L10.u) / Math.max(1, lead.rates.L10.n)) : null;
+        var chips = "";
+        if (x.trend >= 5) chips += '<span class="csmeta">' + (x.useMin ? "Minutes" : esc(lead.stat)) + ' trending +' + x.trend + '% (L5 vs before)</span>';
+        if (x.split) chips += '<span class="csmeta">Without ' + esc(x.split.star.split(" ").slice(-1)[0]) + ': ' + fv(Math.round(x.split.withoutA * 10) / 10) + ' vs ' + fv(Math.round(x.split.withA * 10) / 10) + ' with</span>';
+        return '<article class="csres" data-open-logs="' + esc(x.pid) + '" data-stat-key="' + esc(lead.key) + '" data-lg="' + esc(NM.league) + '" role="button" tabindex="0">'
+          + (x.pl.img ? '<img class="csav" src="' + esc(x.pl.img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '')
+          + '<span class="csmain"><span class="csname">' + esc(x.pl.name) + '</span>'
+          + '<span class="csmeta">' + esc(lead.stat) + ' ' + lead.dir + ' ' + fv(lead.line) + (r10 != null ? ' · L10 ' + r10 + '%' : '') + '</span>'
+          + chips + '</span></article>';
+      }).join("");
+      body = '<div class="csreshead"><h2 class="cstitle">' + esc(NM.teamName) + ' — next man up</h2>'
+        + '<p class="cssub">On the report: ' + outs + '</p>'
+        + '<p class="csnote">Teammates ranked by role trend and how their lead stat moves when the biggest absence sits. Tap a card for the full breakdown.</p>'
+        + '<div class="csactions"><button type="button" class="csact" data-nm="edit">Pick another team</button></div></div>'
+        + (cards || '<div class="emptybox">No teammates with props to show.</div>');
+    }
+    nmRoot.innerHTML = '<div class="cswiz">' + body + '</div>';
+  }
+  if (nmRoot) nmRoot.addEventListener("click", function(e){
+    if (e.target.closest && e.target.closest("[data-back]")){ NM.step = Math.max(0, NM.step - 1); nmRender(); return; }
+    var b = e.target.closest ? e.target.closest("[data-nm],[data-nm-lg],[data-nm-team]") : null;
+    if (!b) return;
+    if (b.hasAttribute("data-nm-lg")){ NM.league = b.getAttribute("data-nm-lg"); NM.step = 1; nmRender(); }
+    else if (b.hasAttribute("data-nm-team")){ NM.team = b.getAttribute("data-nm-team"); nmRun(); }
+    else if (b.getAttribute("data-nm") === "edit"){ NM.step = 1; nmRender(); }
+  });
+
+  /* ---------- presets + launchers ---------- */
+  function applyPreset(name, pr){
+    if (!pr) return;
+    if (name === "edge" && pr.pid && pr.key){
+      EF.league = pr.lg || "NBA";
+      EF.key = pr.key;
+      EF.prop = (DL(EF.league).props || []).filter(function(p){ return String(p.pid) === String(pr.pid) && p.key === pr.key; })[0] || null;
+      if (EF.prop){ EF.dir = EF.prop.dir; EF.verdict = ""; EF.step = 3; efRender(); }
+    } else if (name === "nextman" && pr.team){
+      NM.league = pr.lg || "NBA";
+      NM.team = pr.team;
+      nmRun();
+    }
+  }
+  window.__LL = window.__LL || {};
+  window.__LL.openWizard = function(name, preset){
+    openWiz(name);
+    if (preset) applyPreset(name, preset);
+  };
+  document.addEventListener("click", function(e){
+    var h = e.target && e.target.closest ? e.target.closest("[data-hub]") : null;
+    if (h){ openWiz(h.getAttribute("data-hub")); return; }
+    var b = e.target && e.target.closest ? e.target.closest("[data-wizlaunch]") : null;
+    if (!b) return;
+    var name = b.getAttribute("data-wizlaunch");
+    var preset = {};
+    if (b.getAttribute("data-lg")) preset.lg = b.getAttribute("data-lg");
+    if (b.getAttribute("data-pid")) preset.pid = b.getAttribute("data-pid");
+    if (b.getAttribute("data-key")) preset.key = b.getAttribute("data-key");
+    if (b.getAttribute("data-team")) preset.team = b.getAttribute("data-team");
+    if (window.location.pathname.indexOf("/cheatsheet") === 0){
+      e.preventDefault();
+      openWiz(name);
+      applyPreset(name, preset);
+    } else {
+      try { sessionStorage.setItem("leglock.wiz", JSON.stringify({ name: name, preset: preset })); } catch (err) {}
+      window.location.href = "/cheatsheet/";
+    }
+  });
+
+  /* ---------- init ---------- */
+  ssRender(); mhRender(); efRender(); nmRender();
+  var intake = null;
+  try {
+    var raw = sessionStorage.getItem("leglock.wiz");
+    if (raw){ intake = JSON.parse(raw); sessionStorage.removeItem("leglock.wiz"); }
+  } catch (err) {}
+  if (intake && intake.name && MOUNTS[intake.name]){
+    openWiz(intake.name);
+    applyPreset(intake.name, intake.preset || {});
+  } else {
+    openWiz("hub");
+  }
 })();

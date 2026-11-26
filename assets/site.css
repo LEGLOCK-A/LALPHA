@@ -1163,3 +1163,24 @@ tr.dim{opacity:.35}
 .csrate{text-align:right;flex:none}
 .csrate b{display:block;font-size:19px;color:var(--accent)}
 .csrate span{font-size:12px;color:var(--namesub)}
+
+/* ================= Wizards hub ================= */
+.wizoff{display:none!important}
+#wizBar{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+.wizback{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer}
+#wizTitle{font-weight:700;font-size:17px}
+.hubgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hubcard{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:16px;padding:16px;text-align:left;cursor:pointer}
+.hubcard:active{transform:scale(.99)}
+.hubt{display:block;font-weight:700;font-size:16px}
+.hubd{display:block;color:var(--namesub);font-size:13px;margin-top:5px;line-height:1.45}
+.wizlaunchbtn{border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:600;cursor:pointer;margin-top:8px}
+.injwizrow{margin:8px 0 4px}
+.effields{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+.effields label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--namesub);font-weight:600}
+.effields input{width:130px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:16px}
+.efverdict{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--surface)}
+.efnums{display:flex;gap:18px;flex-wrap:wrap;font-size:15px}
+.efword{font-weight:700;margin:10px 0 0;font-size:15.5px}
+.nmout{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin:0 4px 4px 0;font-size:12.5px}
+@media (max-width:700px){.hubgrid{grid-template-columns:1fr}}
