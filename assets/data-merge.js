@@ -1,4 +1,4 @@
-var DATA = {leagues: {}, fetchedAt: "2026-11-27T05:51:32+00:00"};
+var DATA = {leagues: {}, fetchedAt: "2026-11-27T06:56:25+00:00"};
 DATA.leagues.NBA = window.__DL_NBA; DATA.leagues.NBA.logsPrev = window.__DL_NBA_PREV;
 DATA.leagues.NFL = window.__DL_NFL; DATA.leagues.NFL.logsPrev = window.__DL_NFL_PREV;
 DATA.leagues.NHL = window.__DL_NHL; DATA.leagues.NHL.logsPrev = window.__DL_NHL_PREV;
