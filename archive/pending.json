@@ -63,31 +63,6 @@
    "opp": "MIN"
   },
   {
-   "league": "NHL",
-   "snapshotDate": "2026-11-19",
-   "pid": "3025540",
-   "name": "Casey DeSmith",
-   "team": "DAL",
-   "key": "saves",
-   "stat": "Saves",
-   "dir": "Over",
-   "line": 21.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    5,
-    6
-   ],
-   "l20": [
-    5,
-    6
-   ],
-   "gameDate": "2026-11-19",
-   "opp": "VGK"
-  },
-  {
    "league": "NFL",
    "snapshotDate": "2026-11-20",
    "pid": "4362921",
@@ -236,31 +211,6 @@
    ],
    "gameDate": "2026-11-22",
    "opp": "ARI"
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-22",
-   "pid": "3025540",
-   "name": "Casey DeSmith",
-   "team": "DAL",
-   "key": "saves",
-   "stat": "Saves",
-   "dir": "Over",
-   "line": 21.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    5,
-    6
-   ],
-   "l20": [
-    5,
-    6
-   ],
-   "gameDate": "2026-11-22",
-   "opp": "PIT"
   },
   {
    "league": "NFL",
@@ -1145,32 +1095,6 @@
    "gameDate": "2026-11-29",
    "opp": "BAL",
    "pModel": 0.499
-  },
-  {
-   "league": "NHL",
-   "snapshotDate": "2026-11-25",
-   "pid": "3025540",
-   "name": "Casey DeSmith",
-   "team": "DAL",
-   "key": "saves",
-   "stat": "Saves",
-   "dir": "Over",
-   "line": 21.5,
-   "l5": [
-    4,
-    5
-   ],
-   "l10": [
-    5,
-    6
-   ],
-   "l20": [
-    5,
-    6
-   ],
-   "gameDate": "2026-11-25",
-   "opp": "NSH",
-   "pModel": 0.423
   },
   {
    "league": "NHL",
@@ -4653,6 +4577,33 @@
     ],
     "gameDate": "2026-11-19",
     "opp": "MEM",
+    "value": null,
+    "result": "DNP"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-19",
+    "pid": "3025540",
+    "name": "Casey DeSmith",
+    "team": "DAL",
+    "key": "saves",
+    "stat": "Saves",
+    "dir": "Over",
+    "line": 21.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     5,
+     6
+    ],
+    "l20": [
+     5,
+     6
+    ],
+    "gameDate": "2026-11-19",
+    "opp": "VGK",
     "value": null,
     "result": "DNP"
    }
@@ -8603,6 +8554,33 @@
     "opp": "CAR",
     "value": 0,
     "result": "HIT"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-22",
+    "pid": "3025540",
+    "name": "Casey DeSmith",
+    "team": "DAL",
+    "key": "saves",
+    "stat": "Saves",
+    "dir": "Over",
+    "line": 21.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     5,
+     6
+    ],
+    "l20": [
+     5,
+     6
+    ],
+    "gameDate": "2026-11-22",
+    "opp": "PIT",
+    "value": null,
+    "result": "DNP"
    }
   ],
   "2026-11-23": [
@@ -12864,6 +12842,34 @@
     "pModel": 0.643,
     "value": 0,
     "result": "MISS"
+   },
+   {
+    "league": "NHL",
+    "snapshotDate": "2026-11-25",
+    "pid": "3025540",
+    "name": "Casey DeSmith",
+    "team": "DAL",
+    "key": "saves",
+    "stat": "Saves",
+    "dir": "Over",
+    "line": 21.5,
+    "l5": [
+     4,
+     5
+    ],
+    "l10": [
+     5,
+     6
+    ],
+    "l20": [
+     5,
+     6
+    ],
+    "gameDate": "2026-11-25",
+    "opp": "NSH",
+    "pModel": 0.423,
+    "value": null,
+    "result": "DNP"
    }
   ],
   "2026-11-26": [
